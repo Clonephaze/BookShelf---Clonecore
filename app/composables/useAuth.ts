@@ -1,11 +1,20 @@
 import { createAuthClient } from 'better-auth/vue'
 
-export const authClient = createAuthClient({
-  baseURL: import.meta.env.BETTER_AUTH_URL || 'http://localhost:3000',
-})
+let _client: ReturnType<typeof createAuthClient> | null = null
+
+function getAuthClient() {
+  if (!_client) {
+    const config = useRuntimeConfig()
+    _client = createAuthClient({
+      baseURL: config.public.betterAuthUrl as string,
+    })
+  }
+  return _client
+}
 
 export const useAuth = () => {
-  const session = authClient.useSession()
+  const client = getAuthClient()
+  const session = client.useSession()
 
   return {
     session,
@@ -13,8 +22,10 @@ export const useAuth = () => {
     isAuthenticated: computed(() => !!session.value?.data?.user),
     isLoading: computed(() => session.value?.isPending ?? true),
 
-    signUp: authClient.signUp.email,
-    signIn: authClient.signIn.email,
-    signOut: authClient.signOut,
+    signUp: client.signUp.email,
+    signIn: client.signIn.email,
+    signOut: client.signOut,
+    requestPasswordReset: client.requestPasswordReset,
+    resetPassword: client.resetPassword,
   }
 }

@@ -2,41 +2,43 @@
 
 Phased build plan. Each phase builds on the previous and results in a working, deployable state.
 
-## Phase 0 — Project Scaffolding
+## Phase 0 — Project Scaffolding ✅
 **Goal:** Empty Nuxt app running locally with all tooling configured.
 
-- [ ] Initialize Nuxt 4 project with TypeScript strict
-- [ ] Set up SCSS pipeline: `_tokens.scss`, `_themes.scss`, `_mixins.scss`, `_reset.scss`, `main.scss`
-- [ ] Port `tokens.css` values into SCSS variables + CSS custom properties
-- [ ] Configure theme system: light, dark, sepia, high-contrast via `[data-theme]`
-- [ ] Install and configure Drizzle ORM + Neon serverless driver
-- [ ] Write Drizzle schema (all tables from `docs/DATABASE.md`)
-- [ ] Run initial migration against Neon
-- [ ] Set up Better Auth (server + client plugin)
-- [ ] Create layouts: `default`, `auth`, `landing`
-- [ ] Set up Lucide Vue icons
-- [ ] Configure Vercel deployment (first deploy: empty shell)
-- [ ] Set up environment variables (`.env.example`, Vercel env vars)
-- [ ] Configure ESLint + Prettier (Vue + TS rules)
+- [x] Initialize Nuxt 4 project with TypeScript strict
+- [x] Set up SCSS pipeline: `_variables.scss`, `_themes.scss`, `_mixins.scss`, `_reset.scss`, `main.scss`
+- [x] Port `tokens.css` values into SCSS variables + CSS custom properties
+- [x] Configure theme system: light, dark, sepia, high-contrast via `:root.{theme}-mode` classes
+- [x] Install and configure Drizzle ORM + Neon serverless driver
+- [x] Write Drizzle schema (all 11 tables from `docs/DATABASE.md`)
+- [x] Run initial migration against Neon
+- [x] Set up Better Auth (server + client composable)
+- [x] Create layouts: `default`, `auth`, `landing`
+- [x] Set up Lucide Vue icons
+- [x] Configure Vercel deployment (first deploy: empty shell)
+- [x] Set up environment variables (`.env`, Vercel env vars)
+- [x] Configure ESLint (Prettier skipped — not needed)
+- [x] Set up Vitest + @nuxt/test-utils testing pipeline
 
 **Deliverable:** Deployed empty app with auth working, DB connected, themes toggling.
 
 ---
 
-## Phase 1 — Auth & Core Shell
+## Phase 1 — Auth & Core Shell ✅
 **Goal:** Users can sign up, log in, and see the app shell with sidebar navigation.
 
-- [ ] Sign up flow (email + password)
-- [ ] Sign in flow
-- [ ] Sign out
-- [ ] Password reset flow
-- [ ] Session persistence across refreshes
-- [ ] Protected route middleware (redirect to login)
-- [ ] App shell: sidebar navigation with shelves list
-- [ ] Create default shelves on account creation (Want to Read, Currently Reading, Read)
-- [ ] Theme switcher component (header)
-- [ ] Responsive sidebar (collapsible on desktop, bottom nav or hamburger on mobile)
-- [ ] Basic page routing: library, search, goals, stats, settings
+- [x] Sign up flow (email + password)
+- [x] Sign in flow
+- [x] Sign out
+- [x] Password reset flow (forgot-password + reset-password pages, console-logged reset links for now)
+- [x] Session persistence across refreshes (cookie-based sessions + client-side auth watcher plugin)
+- [x] Protected route middleware (redirect to login)
+- [x] App shell: sidebar navigation with shelves list
+- [x] Create default shelves on account creation (Want to Read, Currently Reading, Read)
+- [x] Theme switcher component (header)
+- [x] Responsive sidebar (desktop sidebar + mobile bottom nav)
+- [x] Basic page routing: library, search, goals, stats, settings
+- [x] Unit tests: useTheme, auth middleware, session helpers, database singleton
 
 **Deliverable:** Full auth flow, app shell with navigation, responsive layout.
 

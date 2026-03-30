@@ -4,6 +4,21 @@ Log of significant decisions. Newest first.
 
 ---
 
+## ADR-006: Vitest Testing Strategy
+
+**Date:** 2026-03-30
+**Status:** Accepted
+
+Using **Vitest** with **@nuxt/test-utils** and **@vue/test-utils** (happy-dom) for testing. Tests live in `tests/` mirroring the source structure (`composables/`, `middleware/`, `server/`).
+
+**What gets tested:** Composables with logic, route middleware, server utilities, API handlers, and anything where a silent failure would break core functionality (auth redirects, session enforcement, env var validation, theme persistence).
+
+**What doesn't get tested:** Static layouts, pass-through components, third-party library internals.
+
+**Convention:** New non-trivial composables, middleware, and server handlers ship with tests. Run `npm run test:run` before pushing. Tests are part of the roadmap deliverable for each phase.
+
+---
+
 ## ADR-005: All Six Differentiators
 
 **Date:** 2026-03-30

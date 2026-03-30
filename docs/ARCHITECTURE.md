@@ -21,9 +21,10 @@ bookshelf/
 ├── app/                          # Nuxt app directory (Nuxt 4 default)
 │   ├── assets/
 │   │   └── scss/
-│   │       ├── _tokens.scss      # Design tokens as SCSS variables + CSS custom props
-│   │       ├── _themes.scss      # Theme definitions (light, dark, sepia, high-contrast)
-│   │       ├── _mixins.scss      # Responsive, typography, component mixins
+│   │       ├── _variables.scss   # SCSS variables + $themes map
+│   │       ├── _themes.scss      # Theme classes generated from $themes map
+│   │       ├── _mixins.scss      # Responsive breakpoints, forwards variables
+│   │       ├── _index.scss       # Barrel file for @use
 │   │       ├── _reset.scss       # CSS reset/normalize
 │   │       └── main.scss         # Entry point, imports all partials
 │   ├── components/
@@ -126,6 +127,10 @@ bookshelf/
 │   ├── API-STRATEGY.md           # Book API integration approach
 │   ├── DECISIONS.md              # Architecture Decision Records
 │   └── ROADMAP.md                # Phased build plan
+├── tests/                        # Vitest test files
+│   ├── composables/              # Composable unit tests
+│   ├── middleware/               # Middleware tests
+│   └── server/                   # Server utility + API tests
 ├── data/                         # Sample data (from starter)
 ├── spec/                         # Product specs (from starter)
 ├── guidance/                     # Brand kit, patterns, a11y (from starter)
@@ -166,3 +171,27 @@ Vue composables (`useBooks`, `useShelves`, etc.) are the single interface betwee
 - Handles optimistic updates
 - Abstracts away guest vs. authenticated data sources
 - Makes testing straightforward
+
+### Testing Strategy
+Tests live in `tests/` and run with **Vitest** + **@nuxt/test-utils** + **@vue/test-utils** (happy-dom).
+
+```
+tests/
+├── composables/      # Composable unit tests (useTheme, etc.)
+├── middleware/        # Route middleware tests
+└── server/            # Server util + API handler tests
+```
+
+**What to test:**
+- Composables with logic (theme switching, auth state, goal calculations)
+- Route middleware (auth redirects, public route access)
+- Server utilities (session helpers, database singleton)
+- API handlers (input validation, auth gating, business logic)
+- Edge cases that could silently break (missing env vars, null sessions)
+
+**What NOT to test:**
+- Simple pass-through components with no logic
+- Third-party library internals (Better Auth, Drizzle)
+- Static pages or layouts with no conditional behavior
+
+**Convention:** Every new composable, middleware, or server handler with non-trivial logic gets a corresponding test file. Run `npm run test:run` before pushing.

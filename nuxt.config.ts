@@ -45,6 +45,7 @@ export default defineNuxtConfig({
     googleBooksApiKey: process.env.GOOGLE_BOOKS_API_KEY,
     public: {
       betterAuthUrl: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
+      devMode: process.env.BOOKSHELF_DEV === 'true',
     },
   },
 })

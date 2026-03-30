@@ -14,7 +14,8 @@ Bookshelf is a **Product Challenge** on [Frontend Mentor](https://www.frontendme
 | Book APIs | **Open Library** (primary) + **Google Books** (enrichment/fallback) |
 | Hosting | **Vercel** |
 | Icons | **Lucide Vue** |
-| Themes | Light, Dark, Sepia, High Contrast (CSS custom properties + `data-theme`) |
+| Themes | Light, Dark, Sepia, High Contrast (CSS custom properties + `:root.{theme}-mode` classes) |
+| Testing | **Vitest** + **@nuxt/test-utils** + **@vue/test-utils** (happy-dom) |
 
 ## Differentiators
 
@@ -58,6 +59,7 @@ All 6 are in scope. This is a long-lived, full-stack production application.
 - **Design-it-yourself features** → ask clarifying questions first
 - **Brand kit** → `guidance/brand-kit.md` is the design source of truth
 - **Architecture docs** → `docs/` is the technical source of truth — read before making structural changes
+- **Testing** → non-trivial composables, middleware, and server handlers ship with tests. Run `npm run test:run` before pushing.
 - **Multiple agents may work in parallel** — check `docs/ROADMAP.md` for phase/task ownership
 
 Aim for accessible, semantic, responsive-first code with clean component boundaries. Document significant product and design decisions in `docs/DECISIONS.md`.
