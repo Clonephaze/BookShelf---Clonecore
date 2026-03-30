@@ -7,7 +7,7 @@
       </p>
       <div class="landing-hero__actions">
         <NuxtLink to="/signup" class="btn btn--primary">Sign Up</NuxtLink>
-        <NuxtLink to="/library" class="btn btn--secondary">Try as Guest</NuxtLink>
+        <button class="btn btn--secondary" @click="enterGuestMode">Try as Guest</button>
       </div>
     </div>
   </NuxtLayout>
@@ -17,6 +17,8 @@
 definePageMeta({
   layout: false,
 })
+
+const { enterGuestMode } = useGuest()
 </script>
 
 <style lang="scss" scoped>
