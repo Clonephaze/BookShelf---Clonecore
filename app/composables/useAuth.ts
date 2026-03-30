@@ -5,9 +5,12 @@ let _client: ReturnType<typeof createAuthClient> | null = null
 function getAuthClient() {
   if (!_client) {
     const config = useRuntimeConfig()
-    _client = createAuthClient({
-      baseURL: config.public.betterAuthUrl as string,
-    })
+    // Use current origin in the browser so this works on any deployment URL.
+    // Fall back to configured URL for SSR (used during server-side rendering).
+    const baseURL = typeof window !== 'undefined'
+      ? window.location.origin
+      : (config.public.betterAuthUrl as string)
+    _client = createAuthClient({ baseURL })
   }
   return _client
 }
