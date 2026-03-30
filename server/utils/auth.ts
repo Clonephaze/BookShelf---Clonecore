@@ -9,9 +9,14 @@ let _auth: any = null
 
 export function useAuth() {
   if (!_auth) {
+    // BETTER_AUTH_URL takes priority. VERCEL_PROJECT_PRODUCTION_URL is Vercel's
+    // stable production URL (unlike VERCEL_URL which changes per deployment).
+    const baseURL = process.env.BETTER_AUTH_URL
+      || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 'http://localhost:3000')
+
     _auth = betterAuth({
-      baseURL: process.env.BETTER_AUTH_URL ||
-        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'),
+      baseURL,
+      trustedOrigins: [baseURL],
       secret: process.env.BETTER_AUTH_SECRET,
       database: drizzleAdapter(useDB(), {
         provider: 'pg',
