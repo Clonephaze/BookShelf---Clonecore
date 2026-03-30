@@ -23,6 +23,7 @@
   @each $key, $value in map.get($themes, light) {
     --#{$key}: #{$value};
   }
+  color-scheme: var(--color-scheme);
 }
 
 // System preference: auto dark mode when no theme class
