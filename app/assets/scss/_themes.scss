@@ -1,0 +1,35 @@
+// ============================================
+// Theme System — Bookshelf
+// ============================================
+// Generates CSS custom properties per theme.
+// Default (light) on :root, others via :root.{theme}-mode.
+// System preference detection via prefers-color-scheme.
+// ============================================
+
+@use "sass:map";
+@use "variables" as *;
+
+// Theme loop: generates :root.{name}-mode for each theme
+@each $name, $map in $themes {
+  :root.#{$name}-mode {
+    @each $key, $value in $map {
+      --#{$key}: #{$value};
+    }
+  }
+}
+
+// Default: light theme on :root (no class)
+:root {
+  @each $key, $value in map.get($themes, light) {
+    --#{$key}: #{$value};
+  }
+}
+
+// System preference: auto dark mode when no theme class
+@media (prefers-color-scheme: dark) {
+  :root:not([class*="-mode"]) {
+    @each $key, $value in map.get($themes, dark) {
+      --#{$key}: #{$value};
+    }
+  }
+}

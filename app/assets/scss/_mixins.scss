@@ -1,0 +1,239 @@
+@use "variables" as *;
+@forward "variables";
+
+// ============================================
+// Mixins — Bookshelf
+// ============================================
+
+// --- Responsive ---
+
+@mixin respond-to($breakpoint) {
+  @media (min-width: $breakpoint) {
+    @content;
+  }
+}
+
+@mixin respond-below($breakpoint) {
+  @media (max-width: $breakpoint) {
+    @content;
+  }
+}
+
+// --- Layout ---
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+@mixin container($max-width: $page-max-width) {
+  max-width: $max-width;
+  margin: 0 auto;
+  padding-inline: $spacing-md;
+
+  @include respond-to($breakpoint-md) {
+    padding-inline: $spacing-lg;
+  }
+
+  @include respond-to($breakpoint-xl) {
+    padding-inline: $spacing-xl;
+  }
+}
+
+@mixin section-padding {
+  padding: $spacing-2xl $spacing-md;
+
+  @include respond-below($breakpoint-sm) {
+    padding: $spacing-xl $spacing-md;
+  }
+
+  @include respond-to($breakpoint-md) {
+    padding: $spacing-2xl $spacing-lg;
+  }
+}
+
+// --- Focus ---
+
+@mixin focus-visible-outline(
+  $outline-width: 2px,
+  $outline-offset: 2px
+) {
+  outline: $outline-width solid var(--highlight-color);
+  outline-offset: $outline-offset;
+}
+
+@mixin focus-visible-highlight($offset: 2px) {
+  &:focus-visible {
+    @include focus-visible-outline($outline-offset: $offset);
+  }
+}
+
+// --- Typography ---
+
+@mixin heading($size: $font-size-xl) {
+  font-family: $font-family-heading;
+  font-size: $size;
+  font-weight: $font-weight-semibold;
+  color: var(--text-color);
+}
+
+@mixin body-text {
+  font-family: $font-family-body;
+  font-size: $font-size-body;
+  font-weight: $font-weight-regular;
+  line-height: 1.6;
+  color: var(--text-color-secondary);
+}
+
+@mixin meta-text {
+  font-family: $font-family-body;
+  font-size: $font-size-sm;
+  line-height: 1.45;
+  color: var(--text-color-muted);
+}
+
+// --- Interactive Elements ---
+
+@mixin card-base {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: $radius-lg;
+  transition: all $transition-base;
+}
+
+@mixin card-hover {
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--highlight-color);
+  }
+}
+
+@mixin button-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+  font-family: $font-family-body;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  line-height: 1;
+  text-decoration: none;
+  border-radius: $radius-md;
+  transition: all $transition-base;
+  cursor: pointer;
+  @include focus-visible-highlight;
+}
+
+@mixin button-primary {
+  @include button-base;
+  padding: $spacing-sm $spacing-lg;
+  background: var(--highlight-color);
+  color: #fff;
+  border: 2px solid var(--highlight-color);
+
+  &:hover {
+    background: var(--highlight-color-hover);
+    border-color: var(--highlight-color-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    color: #fff;
+  }
+}
+
+@mixin button-secondary {
+  @include button-base;
+  padding: $spacing-sm $spacing-lg;
+  background: transparent;
+  color: var(--highlight-color);
+  border: 2px solid var(--highlight-color);
+
+  &:hover {
+    background: var(--highlight-color);
+    color: #fff;
+  }
+}
+
+@mixin button-tertiary {
+  @include button-base;
+  padding: $spacing-sm $spacing-lg;
+  background: transparent;
+  color: var(--text-color);
+  border: 2px solid var(--border-color);
+
+  &:hover {
+    background: var(--border-color);
+    transform: translateY(-2px);
+  }
+}
+
+// --- Book-Specific ---
+
+@mixin book-cover($width: 8rem) {
+  width: $width;
+  aspect-ratio: 2 / 3;
+  border-radius: $radius-sm;
+  box-shadow: var(--shadow-book);
+  object-fit: cover;
+  background-color: var(--sub-bg-color);
+}
+
+@mixin hover-lift {
+  transition: transform $transition-fast, box-shadow $transition-fast;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &:hover {
+      transform: none;
+    }
+  }
+}
+
+// --- Accessibility ---
+
+@mixin visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@mixin truncate($lines: 1) {
+  @if $lines == 1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  } @else {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+@mixin motion-safe {
+  @media (prefers-reduced-motion: no-preference) {
+    @content;
+  }
+}
+
+@mixin motion-reduce {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}

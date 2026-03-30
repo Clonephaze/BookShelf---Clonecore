@@ -1,0 +1,123 @@
+// ============================================
+// CSS Reset — Bookshelf
+// ============================================
+// Modern reset. Sensible defaults.
+// ============================================
+
+@use "variables" as *;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+
+  @media (prefers-reduced-motion: reduce) {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  min-height: 100dvh;
+  font-family: $font-family-body;
+  font-size: $font-size-body;
+  line-height: 1.6;
+  color: var(--text-color);
+  background-color: var(--bg-color);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scrollbar-width: thin;
+  transition: background-color $transition-base, color $transition-base;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: $font-family-heading;
+  color: var(--text-color);
+  text-wrap: balance;
+}
+
+a {
+  color: var(--highlight-color);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--highlight-color-hover);
+  }
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--highlight-color);
+  outline-offset: 2px;
+}
+
+// Skip link
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: var(--space-4);
+  z-index: 9999;
+  padding: var(--space-2) var(--space-4);
+  font-weight: var(--font-semibold);
+  color: var(--color-surface);
+  background: var(--color-accent);
+  border-radius: var(--radius-md);
+
+  &:focus {
+    top: var(--space-4);
+  }
+}

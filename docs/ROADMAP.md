@@ -1,0 +1,263 @@
+# Roadmap
+
+Phased build plan. Each phase builds on the previous and results in a working, deployable state.
+
+## Phase 0 — Project Scaffolding
+**Goal:** Empty Nuxt app running locally with all tooling configured.
+
+- [ ] Initialize Nuxt 4 project with TypeScript strict
+- [ ] Set up SCSS pipeline: `_tokens.scss`, `_themes.scss`, `_mixins.scss`, `_reset.scss`, `main.scss`
+- [ ] Port `tokens.css` values into SCSS variables + CSS custom properties
+- [ ] Configure theme system: light, dark, sepia, high-contrast via `[data-theme]`
+- [ ] Install and configure Drizzle ORM + Neon serverless driver
+- [ ] Write Drizzle schema (all tables from `docs/DATABASE.md`)
+- [ ] Run initial migration against Neon
+- [ ] Set up Better Auth (server + client plugin)
+- [ ] Create layouts: `default`, `auth`, `landing`
+- [ ] Set up Lucide Vue icons
+- [ ] Configure Vercel deployment (first deploy: empty shell)
+- [ ] Set up environment variables (`.env.example`, Vercel env vars)
+- [ ] Configure ESLint + Prettier (Vue + TS rules)
+
+**Deliverable:** Deployed empty app with auth working, DB connected, themes toggling.
+
+---
+
+## Phase 1 — Auth & Core Shell
+**Goal:** Users can sign up, log in, and see the app shell with sidebar navigation.
+
+- [ ] Sign up flow (email + password)
+- [ ] Sign in flow
+- [ ] Sign out
+- [ ] Password reset flow
+- [ ] Session persistence across refreshes
+- [ ] Protected route middleware (redirect to login)
+- [ ] App shell: sidebar navigation with shelves list
+- [ ] Create default shelves on account creation (Want to Read, Currently Reading, Read)
+- [ ] Theme switcher component (header)
+- [ ] Responsive sidebar (collapsible on desktop, bottom nav or hamburger on mobile)
+- [ ] Basic page routing: library, search, goals, stats, settings
+
+**Deliverable:** Full auth flow, app shell with navigation, responsive layout.
+
+---
+
+## Phase 2 — Book Search & Library Foundation
+**Goal:** Users can search for books and add them to their library.
+
+- [ ] Server-side Open Library adapter
+- [ ] Server-side Google Books adapter
+- [ ] Unified BookService with parallel search, merge, dedup
+- [ ] Search API route (`/api/books/search`)
+- [ ] Search page with search bar, results grid, loading states
+- [ ] BookSearchResultCard component (cover, title, author, year)
+- [ ] "Add to shelf" action from search results
+- [ ] Book deduplication logic (ISBN match → reuse existing `books` row)
+- [ ] Missing cover placeholder component (title + author in brand typography)
+- [ ] Handle edge cases: no results, API errors, rate limiting, missing metadata
+- [ ] Nitro server-side caching for search results and book details
+
+**Deliverable:** Working book search with dual-API, books persist to database.
+
+---
+
+## Phase 3 — Shelves & Library View
+**Goal:** Users can browse their library, manage shelves, and view books on each shelf.
+
+- [ ] Library overview page (all shelves with preview thumbnails)
+- [ ] Individual shelf view (full book grid)
+- [ ] BookCard component (cover, title, author, rating)
+- [ ] BookGrid component (responsive grid, consistent 2:3 covers)
+- [ ] Create custom shelves
+- [ ] Rename custom shelves
+- [ ] Delete custom shelves (with confirmation, reassign books)
+- [ ] Move book between shelves
+- [ ] Shelf reordering (drag-and-drop or manual)
+- [ ] Sort books within shelf (title, author, date added, date read, rating)
+- [ ] Filter books by genre, author, rating
+- [ ] Empty shelf states with guidance
+- [ ] BookCover component (lazy load, skeleton, error → placeholder)
+
+**Deliverable:** Full shelf management, library browsing, responsive book grids.
+
+---
+
+## Phase 4 — Book Detail & Personal Data
+**Goal:** Rich book detail view with ratings, notes, and personal data.
+
+- [ ] Book detail page (`/book/[id]`)
+- [ ] Large cover display, full metadata (title, author, pages, year, ISBN, publisher, description)
+- [ ] Shelf assignment (change shelf from detail view)
+- [ ] Star rating (1-5, interactive, keyboard accessible)
+- [ ] Personal notes (markdown-supported textarea)
+- [ ] Date added, date started, date finished display
+- [ ] Link to Open Library / Google Books page
+- [ ] Graceful handling of sparse metadata (hide empty fields, adapt layout)
+- [ ] Optimistic UI for rating and notes updates
+
+**Deliverable:** Complete book detail view with all personal data features.
+
+---
+
+## Phase 5 — Reading Progress
+**Goal:** Track reading progress with visual indicators and history.
+
+- [ ] Progress tracking on "Currently Reading" books
+- [ ] Page number input (direct entry + quick increment buttons)
+- [ ] Percentage fallback for books without page count
+- [ ] Progress bar component (animated fill, warm accent color)
+- [ ] Progress visible on library overview (on BookCard)
+- [ ] Quick progress update from library view (without navigating to detail)
+- [ ] Progress history logging (`reading_progress_log` table)
+- [ ] 100% completion prompt → move to "Read" shelf
+- [ ] Milestone moments (50%, 90%, 100%)
+- [ ] "Last updated" timestamp display
+- [ ] Optimistic UI for progress updates
+
+**Deliverable:** Full reading progress tracking with history and visual feedback.
+
+---
+
+## Phase 6 — Reading Goals
+**Goal:** Annual reading goals with pace tracking.
+
+- [ ] Set goal for current year (target books count)
+- [ ] Goal progress display (books completed vs target)
+- [ ] Visual progress indicator (progress ring or bar)
+- [ ] Pace calculation (ahead / on track / behind based on date)
+- [ ] Edit goal mid-year
+- [ ] No-goal state (CTA to set one, no broken UI)
+- [ ] Goal completion celebration (confetti or positive visual moment)
+- [ ] Goal history (view past years)
+
+**Deliverable:** Working reading goals with pace tracking and celebration.
+
+---
+
+## Phase 7 — Guest Experience
+**Goal:** "Try as Guest" provides a compelling, fully populated demo.
+
+- [ ] Guest mode entry from landing page (single click)
+- [ ] Guest session management (server-side or client state)
+- [ ] Seed script: generate guest data JSON from `data/sample-books.json`
+- [ ] Pre-assign 45 books across shelves (~15 Read, ~5 Currently Reading, ~15 Want to Read, ~5 custom)
+- [ ] Pre-populate ratings, notes, dates, progress on relevant books
+- [ ] Pre-populate reading goal (24 books, 15 complete)
+- [ ] Pre-populate year-in-review stats
+- [ ] Guest can browse shelves, view details, explore stats
+- [ ] Gentle sign-up prompts (not aggressive gating)
+- [ ] Guest data is session-based, not persisted
+- [ ] Guest → sign-up conversion (keep guest data? or fresh start — decide)
+
+**Deliverable:** Fully populated guest experience that showcases the entire app.
+
+---
+
+## Phase 8 — Landing Page
+**Goal:** Compelling first impression that converts visitors.
+
+- [ ] Hero section with value proposition
+- [ ] Feature highlights (3-4 key features)
+- [ ] Visual showcase (book covers, shelves, statistics screenshots)
+- [ ] Dual CTAs: "Sign Up" and "Try as Guest"
+- [ ] Responsive design (mobile through desktop)
+- [ ] Fast load time (minimal JS on landing page, SSR)
+- [ ] Warm literary aesthetic from first second
+
+**Deliverable:** Production-quality landing page.
+
+---
+
+## Phase 9 — Statistics & Year-in-Review (Design Challenge)
+**Goal:** Reading statistics dashboard and year-in-review experience.
+
+- [ ] Stats dashboard page (`/stats`)
+- [ ] Books read per month (bar chart)
+- [ ] Genre breakdown (interactive donut chart)
+- [ ] Total pages read, average pages per book
+- [ ] Average rating, rating distribution
+- [ ] Reading pace (pages per day, books per month trend)
+- [ ] Year-in-review page (`/stats/year/[year]`)
+- [ ] Narrative/visual storytelling (not just charts)
+- [ ] Handle sparse data gracefully (3 books vs 50 books)
+- [ ] "So far this year" vs completed year views
+- [ ] Author diversity stats
+
+**Deliverable:** Comprehensive stats dashboard and shareable year-in-review.
+
+---
+
+## Phase 10 — Stretch Features
+**Goal:** Polish and depth.
+
+- [ ] Goodreads CSV import (parse, preview, map shelves, conflict resolution)
+- [ ] Library search (search own books, debounced, Cmd+K shortcut)
+- [ ] Command palette for power users
+- [ ] Book discovery & recommendations (design challenge)
+
+---
+
+## Phase 11 — Differentiators (Ongoing)
+**Goal:** The features that make Bookshelf exceptional.
+
+### Animated Shelf & Cover Interactions
+- [ ] Cover tilt on hover (3D perspective)
+- [ ] Drag-and-drop between shelves
+- [ ] Shelf visual metaphor (bookshelf backdrop)
+- [ ] Micro-interactions (scale, easing, confetti)
+- [ ] Layout transitions (filter/sort reflow)
+- [ ] `prefers-reduced-motion` respect
+
+### AI-Powered Reading Companion
+- [ ] "Why you might like this" for Want to Read books
+- [ ] Book similarity mapping
+- [ ] Smart reading insights
+- [ ] Natural language library search
+- [ ] Auto-genre/tag suggestions
+
+### Social Sharing & Reading Cards
+- [ ] Year-in-review shareable card
+- [ ] Monthly recap cards
+- [ ] Book review cards
+- [ ] Canvas API or server-side image generation
+- [ ] Multiple templates, social media dimensions
+- [ ] Preview and download
+
+### Goodreads Data Migration (Enhanced)
+- [ ] Full CSV parsing with all edge cases
+- [ ] Fuzzy match against book APIs
+- [ ] Import preview with conflict resolution
+- [ ] Progress indicator for large imports
+- [ ] Import statistics dashboard
+
+### Reading Statistics Dashboard (Enhanced)
+- [ ] Reading heatmap (GitHub contribution graph style)
+- [ ] Time-to-finish analysis
+- [ ] Page count distribution histogram
+- [ ] Rating patterns over time
+- [ ] Comparative stats (year over year)
+- [ ] Interactive charts (hover, click to filter)
+
+### Accessibility-First
+- [ ] Full screen reader experience (ARIA landmarks, live regions)
+- [ ] High contrast mode (WCAG AAA)
+- [ ] Dyslexia-friendly font option
+- [ ] Customizable font size and line height
+- [ ] Skip links, logical heading hierarchy
+- [ ] Color-blind safe indicators
+- [ ] Keyboard workflow optimization
+- [ ] Accessibility statement page
+
+---
+
+## Phase 12 — Polish & Performance
+**Goal:** Production-ready quality.
+
+- [ ] Lighthouse scores: Performance > 85, Accessibility > 90, Best Practices > 90
+- [ ] Error handling audit (all API errors, edge cases)
+- [ ] Loading/empty state audit (every view)
+- [ ] Responsive audit (mobile → ultrawide)
+- [ ] Cross-browser testing
+- [ ] SEO meta tags, Open Graph tags
+- [ ] Favicon + app icons
+- [ ] README with screenshots, tech stack, Lighthouse scores

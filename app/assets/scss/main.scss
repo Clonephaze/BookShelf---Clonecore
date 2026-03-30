@@ -1,0 +1,64 @@
+// ============================================
+// Main SCSS Entry Point — Bookshelf
+// ============================================
+
+@use "reset";
+@use "themes";
+
+// --- Reduced Motion ---
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+// --- Skip to Content ---
+
+.skip-to-content {
+  position: absolute;
+  top: -100%;
+  left: 16px;
+  z-index: 9999;
+  padding: 8px 16px;
+  background: var(--highlight-color);
+  color: #fff;
+  border-radius: 0 0 4px 4px;
+  text-decoration: none;
+  font-weight: 600;
+
+  &:focus {
+    top: 0;
+  }
+}
+
+// --- Screen Reader Only ---
+
+.screen-reader-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// --- Page Transitions ---
+
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+}

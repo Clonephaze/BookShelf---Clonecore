@@ -1,0 +1,172 @@
+@use "sass:map";
+
+// ============================================
+// Design Tokens — Bookshelf
+// ============================================
+// Source of truth: guidance/brand-kit.md
+// Theme-variant colors live in $themes map.
+// Static tokens (spacing, radius, typography, etc.) are SCSS vars.
+// ============================================
+
+// --- Color Themes ---
+
+$themes: (
+  light: (
+    color-scheme: light,
+    bg-color: #faf8f5,
+    sub-bg-color: #f3f0eb,
+    surface-color: #ffffff,
+    border-color: #ddd8d0,
+    border-color-subtle: #e8e4dd,
+    text-color: #2c2420,
+    text-color-secondary: #5c534a,
+    text-color-muted: #8c8278,
+    highlight-color: #a8612b,
+    highlight-color-hover: #8b4f20,
+    highlight-color-subtle: #fbf1e8,
+    success-color: #3d7c4f,
+    warning-color: #b8860b,
+    error-color: #c0392b,
+    progress-color: #a8612b,
+    rating-color: #d4a03e,
+    shadow-sm: (0 1px 3px rgba(44, 36, 32, 0.06)),
+    shadow-md: (0 4px 8px -1px rgba(44, 36, 32, 0.08), 0 2px 4px -2px rgba(44, 36, 32, 0.04)),
+    shadow-lg: (0 12px 20px -4px rgba(44, 36, 32, 0.12), 0 4px 8px -4px rgba(44, 36, 32, 0.06)),
+    shadow-book: (0 2px 8px rgba(44, 36, 32, 0.15), 0 1px 3px rgba(44, 36, 32, 0.1)),
+  ),
+  dark: (
+    color-scheme: dark,
+    bg-color: #1a1512,
+    sub-bg-color: #231e1a,
+    surface-color: #231e1a,
+    border-color: #3d352d,
+    border-color-subtle: #2e2822,
+    text-color: #ede8e2,
+    text-color-secondary: #a89e94,
+    text-color-muted: #7a716a,
+    highlight-color: #d4964a,
+    highlight-color-hover: #e0a85e,
+    highlight-color-subtle: #2e2218,
+    success-color: #5aaf6e,
+    warning-color: #d4a03e,
+    error-color: #e8614d,
+    progress-color: #d4964a,
+    rating-color: #e0b84a,
+    shadow-sm: (0 1px 3px rgba(0, 0, 0, 0.3)),
+    shadow-md: (0 4px 8px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.25)),
+    shadow-lg: (0 12px 20px -4px rgba(0, 0, 0, 0.5), 0 4px 8px -4px rgba(0, 0, 0, 0.3)),
+    shadow-book: (0 2px 8px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3)),
+  ),
+  sepia: (
+    color-scheme: light,
+    bg-color: #f5ede0,
+    sub-bg-color: #ede4d4,
+    surface-color: #faf4e8,
+    border-color: #d4c8b4,
+    border-color-subtle: #e0d6c6,
+    text-color: #3d2e1e,
+    text-color-secondary: #6b5840,
+    text-color-muted: #9a8568,
+    highlight-color: #8b5e3c,
+    highlight-color-hover: #704a2e,
+    highlight-color-subtle: #f2e8d8,
+    success-color: #4a7a3e,
+    warning-color: #a07828,
+    error-color: #b04030,
+    progress-color: #8b5e3c,
+    rating-color: #c49838,
+    shadow-sm: (0 1px 3px rgba(61, 46, 30, 0.08)),
+    shadow-md: (0 4px 8px -1px rgba(61, 46, 30, 0.1), 0 2px 4px -2px rgba(61, 46, 30, 0.05)),
+    shadow-lg: (0 12px 20px -4px rgba(61, 46, 30, 0.14), 0 4px 8px -4px rgba(61, 46, 30, 0.08)),
+    shadow-book: (0 2px 8px rgba(61, 46, 30, 0.18), 0 1px 3px rgba(61, 46, 30, 0.12)),
+  ),
+  contrast: (
+    color-scheme: light,
+    bg-color: #ffffff,
+    sub-bg-color: #f0f0f0,
+    surface-color: #ffffff,
+    border-color: #767676,
+    border-color-subtle: #a0a0a0,
+    text-color: #000000,
+    text-color-secondary: #1a1a1a,
+    text-color-muted: #333333,
+    highlight-color: #7a3a00,
+    highlight-color-hover: #5c2c00,
+    highlight-color-subtle: #fff0e0,
+    success-color: #006400,
+    warning-color: #8b6508,
+    error-color: #b30000,
+    progress-color: #7a3a00,
+    rating-color: #b8860b,
+    shadow-sm: (0 1px 3px rgba(0, 0, 0, 0.12)),
+    shadow-md: (0 4px 8px -1px rgba(0, 0, 0, 0.16), 0 2px 4px -2px rgba(0, 0, 0, 0.08)),
+    shadow-lg: (0 12px 20px -4px rgba(0, 0, 0, 0.24), 0 4px 8px -4px rgba(0, 0, 0, 0.12)),
+    shadow-book: (0 2px 8px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.14)),
+  ),
+);
+
+// --- Typography ---
+
+$font-family-heading: 'Lora', Georgia, 'Times New Roman', serif;
+$font-family-body: 'Inter', system-ui, -apple-system, sans-serif;
+$font-family-serif: 'Lora', Georgia, 'Times New Roman', serif;
+$font-family-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+
+$font-size-xs: 0.6875rem;
+$font-size-sm: 0.8125rem;
+$font-size-base: 1rem;
+$font-size-body: clamp(1rem, 2vw, 1.125rem);
+$font-size-lg: clamp(1.15rem, 2.5vw, 1.25rem);
+$font-size-xl: clamp(1.35rem, 3vw, 1.5625rem);
+$font-size-2xl: clamp(1.65rem, 4vw, 1.9375rem);
+$font-size-3xl: clamp(2rem, 5vw, 2.4375rem);
+
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// --- Spacing (4px base) ---
+
+$spacing-xs: 0.25rem;
+$spacing-sm: 0.5rem;
+$spacing-md: 1rem;
+$spacing-lg: 1.5rem;
+$spacing-xl: 2rem;
+$spacing-2xl: 3rem;
+$spacing-3xl: 4rem;
+$spacing-4xl: 5rem;
+
+// --- Breakpoints ---
+
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+$breakpoint-2xl: 1536px;
+
+// --- Border Radius ---
+
+$radius-sm: 0.25rem;
+$radius-md: 0.5rem;
+$radius-lg: 0.75rem;
+$radius-xl: 1rem;
+$radius-full: 9999rem;
+
+// --- Transitions ---
+
+$transition-fast: 0.2s ease;
+$transition-base: 0.3s ease;
+
+// --- Shadows (non-theme, used as SCSS vars for static contexts) ---
+
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+$shadow-md: 0 4px 8px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+$shadow-lg: 0 12px 20px -4px rgba(0, 0, 0, 0.12), 0 4px 8px -4px rgba(0, 0, 0, 0.06);
+
+// --- Layout ---
+
+$sidebar-width: 15rem;
+$content-max-width: 48rem;
+$library-max-width: 72rem;
+$page-max-width: 80rem;

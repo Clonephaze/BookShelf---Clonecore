@@ -1,0 +1,227 @@
+@use "sass:map";
+@use "mixins" as *;
+
+:root {
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scroll-behavior: smooth;
+
+    &.contrast-mode {
+        p {
+            font-family: "Atkinson Hyperlegible", sans-serif;
+            letter-spacing: 0.05ch;
+        }
+    }
+}
+
+* {
+    &:focus-visible {
+        @include focus-visible-outline;
+    }
+}
+
+body {
+    font-family: $font-family-stack;
+    margin: 0;
+    padding: 0;
+    transition:
+        background-color $transition-fast,
+        color $transition-fast;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *:not(.hero-section):not(.hero-section *),
+    *:not(.hero-section)::before,
+    *:not(.hero-section)::after {
+        animation-duration: 0.1ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.1ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+.strike-through {
+    text-decoration: line-through;
+}
+
+.screen-reader-only {
+    height: 0;
+    width: 0;
+    overflow: hidden;
+    position: absolute;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+:root {
+    transition:
+        color-scheme $transition-fast,
+        background-color $transition-fast,
+        border-color $transition-fast,
+        color $transition-fast;
+}
+
+main {
+    padding-top: $navbar-height;
+    z-index: 1;
+    position: relative;
+    overflow-x: clip;
+    width: 100%;
+    height: 100%;
+    scroll-behavior: smooth;
+}
+
+.skip-to-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 99999;
+    width: 0px;
+    height: 0px;
+    overflow: hidden;
+    padding: 0;
+    border: none;
+    background: none;
+
+    &:focus-within {
+        width: auto;
+        height: auto;
+        overflow: visible;
+        padding: $spacing-sm $spacing-md;
+    }
+}
+
+@each $theme-name, $theme-properties in $themes {
+    :root.#{$theme-name}-mode {
+        color-scheme: map.get($theme-properties, color-scheme);
+        background-color: #{map.get($theme-properties, background-color)};
+        color: #{map.get($theme-properties, text-color)};
+
+        --bg-color: #{map.get($theme-properties, background-color)};
+        --sub-bg-color: #{map.get($theme-properties, sub-background-color)};
+        --border-color: #{map.get($theme-properties, border-color)};
+        --text-color: #{map.get($theme-properties, text-color)};
+        --highlight-color: #{map.get($theme-properties, highlight-color)};
+    }
+}
+
+// === 8-Bit Retro Theme Overrides ===
+:root.retro-mode {
+    // Pixel font for headings and UI — body text stays readable
+    // Exclude .hero-section — its animation relies on ch units and precise font metrics
+    h1:not(.hero-section *),
+    h2:not(.hero-section *),
+    h3:not(.hero-section *),
+    h4, h5, h6,
+    .section-title:not(.hero-section *),
+    .card-title,
+    .card-badge,
+    .card-tag,
+    .showcase-label,
+    .contact-label,
+    .build-button,
+    .theme-selector,
+    .btn {
+        font-family: $font-family-pixel;
+        letter-spacing: -0.5px;
+    }
+
+    // Scale down pixel font sizes so they don't blow out layouts
+    h1:not(.hero-section *) { font-size: clamp(1rem, 3vw, 1.75rem); }
+    h2:not(.hero-section *) { font-size: clamp(0.85rem, 2.5vw, 1.4rem); }
+    h3:not(.hero-section *) { font-size: clamp(0.75rem, 2vw, 1.1rem); }
+
+    .card-title { font-size: clamp(0.7rem, 2vw, 0.9rem); }
+    .card-badge,
+    .card-tag { font-size: 0.55rem; }
+
+    // Pixelated images — the signature retro look
+    img,
+    picture,
+    .card-image {
+        image-rendering: pixelated;
+    }
+
+    // Sharp corners everywhere — no border-radius in 8-bit
+    *,
+    *::before,
+    *::after {
+        border-radius: 0 !important;
+    }
+
+    // Retro box-shadow glow instead of soft shadows
+    .portfolio-card,
+    .contact-card,
+    .faq-item {
+        box-shadow: 4px 4px 0 var(--border-color);
+
+        &:hover {
+            box-shadow: 6px 6px 0 var(--highlight-color);
+        }
+    }
+
+    // Dashed borders for that ASCII/pixel-art feel
+    .portfolio-card,
+    .contact-card {
+        border-style: dashed;
+        border-width: 3px;
+    }
+
+    // CRT scanline overlay on the page
+    main::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 9998;
+        background: repeating-linear-gradient(
+            to bottom,
+            transparent,
+            transparent 2px,
+            rgba(0, 0, 0, 0.15) 2px,
+            rgba(0, 0, 0, 0.15) 4px
+        );
+        mix-blend-mode: multiply;
+    }
+
+    // Subtle text-shadow glow on headings
+    .section-title {
+        text-shadow: 0 0 8px var(--highlight-color);
+    }
+}
+
+// Page transitions — opacity-only fallback for browsers without View Transitions API.
+// The API itself handles smooth crossfade snapshots; adding transforms here causes jitter.
+.page-enter-active,
+.page-leave-active {
+    transition: opacity 200ms ease;
+}
+
+.page-enter-from,
+.page-leave-to {
+    opacity: 0;
+}
+
+// Scroll-driven reveal — pure CSS, zero JS, progressive enhancement
+@keyframes scroll-reveal {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scroll-reveal-scale {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

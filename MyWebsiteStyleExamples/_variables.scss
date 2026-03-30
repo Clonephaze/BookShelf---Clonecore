@@ -1,0 +1,207 @@
+@use "sass:map";
+$bg-color: light-dark(oklch(96% 0 0), oklch(20.8% 0 0));
+$text-color: light-dark(oklch(16% 0 0), oklch(96% 0 0));
+$text-color-inverse: light-dark(oklch(96% 0 0), oklch(16% 0 0));
+
+$themes: (
+    light: (
+        color-scheme: light,
+        background-color: oklch(96% 0 0),
+        sub-background-color: oklch(80% 0 0),
+        text-color: oklch(16% 0 0),
+        highlight-color: oklch(40.81% 0.2248 294.45),
+        border-color: oklch(55.81% 0.2248 294.45)
+    ),
+    dark: (
+        color-scheme: dark,
+        background-color: oklch(20.8% 0 0),
+        sub-background-color: oklch(23.97% 0.0526 304.97),
+        text-color: oklch(96% 0 0),
+        highlight-color: oklch(0.7359 0.0994 207.86),
+        border-color: oklch(45.81% 0.2248 294.45)
+    ),
+    sepia: (
+        color-scheme: light,
+        background-color: oklch(90.48% 0.0664 67.56),
+        sub-background-color: oklch(80.23% 0.1023 65.49),
+        text-color: oklch(45.39% 0.0568 55.64),
+        highlight-color: oklch(53.39% 0.0568 55.64),
+        border-color: oklch(73.71% 0.0974 56.7)
+    ),
+    contrast: (
+        color-scheme: dark,
+        background-color: oklch(0% 0 0),
+        sub-background-color: oklch(15% 0 0),
+        text-color: oklch(100% 0 0),
+        highlight-color: oklch(91.27% 0.1901 100.64),
+        border-color: oklch(100% 0 0)
+    ),
+    retro: (
+        color-scheme: dark,
+        background-color: oklch(12% 0.02 280),
+        sub-background-color: oklch(18% 0.03 280),
+        text-color: oklch(85% 0.18 145),
+        highlight-color: oklch(70% 0.25 330),
+        border-color: oklch(65% 0.2 195)
+    )
+);
+
+$font-family-stack:
+    "Urbanist",
+    Helvetica,
+    Arial,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+$font-family-pixel: "Press Start 2P", monospace;
+$font-size-base: 16px;
+$font-size-title: clamp(2rem, 5vw, 3rem);
+$font-size-subtitle: clamp(1.5rem, 3vw, 2rem);
+$font-size-body: clamp(1rem, 2vw, 1.25rem);
+$font-size-body-sm: clamp(0.875rem, 1.5vw, 1rem);
+$font-size-small: 0.875rem;
+
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 992px;
+$breakpoint-xl: 1200px;
+$breakpoint-xxl: 2560px;
+
+$spacing-xs: 0.25rem;
+$spacing-sm: 0.5rem;
+$spacing-md: 1rem;
+$spacing-lg: 1.5rem;
+$spacing-xl: 2rem;
+$spacing-2xl: 3rem;
+$spacing-3xl: 4rem;
+
+$section-padding-mobile: 3rem 1.25rem;
+$section-padding-tablet: 4rem 1.5rem;
+$section-padding-desktop: 4rem 2rem;
+
+$container-max-width: 95vw;
+$container-narrow-section: 1200px;
+$container-narrow: 800px;
+$container-wide: 600px;
+
+$radius-sm: 0.5rem;
+$radius-md: 0.75rem;
+$radius-lg: 1rem;
+$radius-round: 50%;
+
+$transition-fast: 0.2s ease;
+$transition-base: 0.3s ease;
+
+$shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+$shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+$shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3);
+$shadow-xl: 0 10px 40px rgba(0, 0, 0, 0.5);
+
+$card-height-desktop: 550px;
+$card-width-carousel: min(320px, 90vw);
+
+$navbar-height: 70px;
+
+@font-face {
+    font-family: "Urbanist";
+    src: url("/fonts/urbanist-latin-100-normal.woff2") format("woff2");
+    font-display: swap;
+    font-weight: 100;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Urbanist";
+    src: url("/fonts/urbanist-latin-400-normal.woff2") format("woff2");
+    font-display: swap;
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Urbanist";
+    src: url("/fonts/urbanist-latin-600-normal.woff2") format("woff2");
+    font-display: swap;
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Urbanist";
+    src: url("/fonts/urbanist-latin-900-normal.woff2") format("woff2");
+    font-display: swap;
+    font-weight: 900;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Urbanist";
+    src: url("/fonts/urbanist-latin-100-italic.woff2") format("woff2");
+    font-display: swap;
+    font-weight: 100;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "Urbanist";
+    src: url("/fonts/urbanist-latin-400-italic.woff2") format("woff2");
+    font-display: swap;
+    font-weight: 400;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "Urbanist";
+    src: url("/fonts/urbanist-latin-600-italic.woff2") format("woff2");
+    font-display: swap;
+    font-weight: 600;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "Urbanist";
+    src: url("/fonts/urbanist-latin-900-italic.woff2") format("woff2");
+    font-display: swap;
+    font-weight: 900;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    src: url("/fonts/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2");
+    font-display: swap;
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    src: url("/fonts/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2");
+    font-display: swap;
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    src: url("/fonts/atkinson-hyperlegible-latin-400-italic.woff2") format("woff2");
+    font-display: swap;
+    font-weight: 400;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "Atkinson Hyperlegible";
+    src: url("/fonts/atkinson-hyperlegible-latin-700-italic.woff2") format("woff2");
+    font-display: swap;
+    font-weight: 700;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "Press Start 2P";
+    src: url("/fonts/press-start-2p-latin-400-normal.woff2") format("woff2");
+    font-display: swap;
+    font-weight: 400;
+    font-style: normal;
+}
