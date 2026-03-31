@@ -42,12 +42,8 @@
     </form>
 
     <div v-else class="auth-form__success" role="status">
-      <p>Your password has been reset. You can now sign in with your new password.</p>
+      <p>Password updated — signing you in…</p>
     </div>
-
-    <p v-if="success || token" class="auth-form__footer">
-      <NuxtLink to="/login">Back to sign in</NuxtLink>
-    </p>
   </div>
 </template>
 
@@ -56,10 +52,11 @@ definePageMeta({
   layout: 'auth',
 })
 
-const { resetPassword } = useAuth()
+const { resetPassword, signIn, waitForSession } = useAuth()
 const route = useRoute()
 
 const token = computed(() => route.query.token as string | undefined)
+const email = computed(() => route.query.email as string | undefined)
 
 const form = reactive({
   password: '',
@@ -117,6 +114,23 @@ async function handleReset() {
     }
 
     success.value = true
+
+    // Auto-sign-in if we have the email from the reset link
+    if (email.value) {
+      try {
+        await signIn({ email: email.value, password: form.password })
+        const ready = await waitForSession()
+        if (ready) {
+          await navigateTo('/library', { replace: true })
+        } else {
+          window.location.href = '/library'
+        }
+        return
+      }
+      catch {
+        // Sign-in failed — still show success, user can sign in manually
+      }
+    }
   }
   catch {
     errors.general = 'Something went wrong. Please try again.'

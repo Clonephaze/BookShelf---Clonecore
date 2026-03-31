@@ -1,7 +1,9 @@
 import { betterAuth } from 'better-auth'
+import { createAuthMiddleware } from 'better-auth/api'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { useDB } from '../database'
 import { setDevData } from './dev-store'
+import { sendPasswordResetEmail, sendWelcomeEmail } from './email'
 import * as schema from '../database/schema'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -25,15 +27,50 @@ export function useAuth() {
       emailAndPassword: {
         enabled: true,
         sendResetPassword: async ({ user, url }: { user: { email: string }; url: string }) => {
-          // Store for dev tools when in dev mode
-          setDevData('lastResetUrl', url)
-          console.log(`[Auth] Password reset for ${user.email}: ${url}`)
-          // TODO: Replace with real email service (Resend, SendGrid, etc.)
+          // Append email to callback URL so reset page can auto-sign-in after
+          const resetUrl = new URL(url)
+          const callbackURL = resetUrl.searchParams.get('callbackURL')
+          if (callbackURL) {
+            const cb = new URL(callbackURL)
+            cb.searchParams.set('email', user.email)
+            resetUrl.searchParams.set('callbackURL', cb.toString())
+          }
+          const enrichedUrl = resetUrl.toString()
+
+          // Always store for dev tools
+          setDevData('lastResetUrl', enrichedUrl)
+
+          if (process.env.RESEND_API_KEY) {
+            await sendPasswordResetEmail(user.email, enrichedUrl)
+          }
+          else {
+            console.log(`[Auth] Password reset for ${user.email}: ${enrichedUrl}`)
+          }
         },
       },
       session: {
         expiresIn: 60 * 60 * 24 * 7, // 7 days
         updateAge: 60 * 60 * 24, // refresh daily
+      },
+      user: {
+        deleteUser: {
+          enabled: true,
+        },
+      },
+      hooks: {
+        after: createAuthMiddleware(async (ctx) => {
+          if (ctx.path.startsWith('/sign-up')) {
+            const newSession = ctx.context.newSession
+            if (newSession && process.env.RESEND_API_KEY) {
+              try {
+                await sendWelcomeEmail(newSession.user.email, newSession.user.name)
+              }
+              catch (e) {
+                console.error('[Auth] Failed to send welcome email:', e)
+              }
+            }
+          }
+        }),
       },
     })
   }

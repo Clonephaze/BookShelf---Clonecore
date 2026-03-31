@@ -43,6 +43,7 @@ export default defineNuxtConfig({
     databaseUrl: process.env.DATABASE_URL,
     betterAuthSecret: process.env.BETTER_AUTH_SECRET,
     googleBooksApiKey: process.env.GOOGLE_BOOKS_API_KEY,
+    resendApiKey: process.env.RESEND_API_KEY,
     public: {
       // Used as SSR fallback only — browser uses window.location.origin automatically.
       // Set BETTER_AUTH_URL in Vercel env vars for correct reset-password email links.

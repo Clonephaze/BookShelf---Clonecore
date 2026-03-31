@@ -129,6 +129,13 @@
   transition: all $transition-base;
   cursor: pointer;
   @include focus-visible-highlight;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
 }
 
 @mixin button-primary {

@@ -30,8 +30,13 @@
       </p>
 
       <button type="submit" class="auth-form__submit" :disabled="loading">
+        <span v-if="loading" class="auth-form__spinner" aria-hidden="true" />
         {{ loading ? 'Signing in…' : 'Sign In' }}
       </button>
+
+      <p v-if="slow" class="auth-form__slow" role="status">
+        This is taking longer than usual. Hang tight…
+      </p>
 
       <NuxtLink to="/forgot-password" class="auth-form__forgot">Forgot your password?</NuxtLink>
     </form>
@@ -48,7 +53,7 @@ definePageMeta({
   layout: 'auth',
 })
 
-const { signIn } = useAuth()
+const { signIn, waitForSession } = useAuth()
 
 const form = reactive({
   email: '',
@@ -62,6 +67,7 @@ const errors = reactive({
 })
 
 const loading = ref(false)
+const slow = ref(false)
 
 function validate(): boolean {
   errors.email = ''
@@ -84,10 +90,13 @@ function validate(): boolean {
 }
 
 async function handleSignIn() {
-  if (!validate()) return
+  if (!validate() || loading.value) return
 
   loading.value = true
+  slow.value = false
   errors.general = ''
+
+  const slowTimer = setTimeout(() => { slow.value = true }, 4000)
 
   try {
     const { error } = await signIn({
@@ -100,13 +109,22 @@ async function handleSignIn() {
       return
     }
 
-    await navigateTo('/library')
+    // Wait for session to propagate before navigating
+    const ready = await waitForSession()
+    if (ready) {
+      await navigateTo('/library', { replace: true })
+    } else {
+      // Session didn't propagate in time — force a full navigation
+      window.location.href = '/library'
+    }
   }
   catch {
     errors.general = 'Something went wrong. Please try again.'
   }
   finally {
+    clearTimeout(slowTimer)
     loading.value = false
+    slow.value = false
   }
 }
 </script>
@@ -142,6 +160,31 @@ async function handleSignIn() {
     @include button-primary;
     width: 100%;
     margin-top: $spacing-sm;
+  }
+
+  &__spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: auth-spin 0.6s linear infinite;
+  }
+
+  @keyframes auth-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  &__slow {
+    @include meta-text;
+    text-align: center;
+    color: var(--text-color-muted);
+    animation: auth-fade-in 0.3s ease;
+  }
+
+  @keyframes auth-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 
   &__forgot {

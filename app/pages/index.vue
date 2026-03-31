@@ -6,8 +6,11 @@
         Search for books, organize your shelves, track your progress, and explore your reading year.
       </p>
       <div class="landing-hero__actions">
-        <NuxtLink to="/signup" class="btn btn--primary">Sign Up</NuxtLink>
-        <button class="btn btn--secondary" @click="enterGuestMode">Try as Guest</button>
+        <div class="landing-hero__actions-row">
+          <NuxtLink to="/signup" class="btn btn--primary">Sign Up</NuxtLink>
+          <NuxtLink to="/login" class="btn btn--secondary">Sign In</NuxtLink>
+        </div>
+        <button class="btn btn--ghost" @click="enterGuestMode">Try as Guest</button>
       </div>
     </div>
   </NuxtLayout>
@@ -47,6 +50,12 @@ const { enterGuestMode } = useGuest()
   }
 
   &__actions {
+    @include flex-column;
+    align-items: center;
+    gap: $spacing-md;
+  }
+
+  &__actions-row {
     display: flex;
     gap: $spacing-md;
     flex-wrap: wrap;
@@ -61,6 +70,22 @@ const { enterGuestMode } = useGuest()
 
   &--secondary {
     @include button-secondary;
+  }
+
+  &--ghost {
+    @include body-text;
+    background: transparent;
+    border: none;
+    color: var(--text-color-secondary);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    padding: $spacing-xs $spacing-sm;
+    transition: color 0.15s;
+
+    &:hover {
+      color: var(--highlight-color);
+    }
   }
 }
 </style>

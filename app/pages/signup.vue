@@ -33,14 +33,29 @@
         required
         :error="errors.password"
       />
+      <FormField
+        id="confirmPassword"
+        v-model="form.confirmPassword"
+        label="Confirm Password"
+        type="password"
+        placeholder="Repeat your password"
+        autocomplete="new-password"
+        required
+        :error="errors.confirmPassword"
+      />
 
       <p v-if="errors.general" class="auth-form__error" role="alert">
         {{ errors.general }}
       </p>
 
       <button type="submit" class="auth-form__submit" :disabled="loading">
+        <span v-if="loading" class="auth-form__spinner" aria-hidden="true" />
         {{ loading ? 'Creating account…' : 'Sign Up' }}
       </button>
+
+      <p v-if="slow" class="auth-form__slow" role="status">
+        This is taking longer than usual. Hang tight…
+      </p>
     </form>
 
     <p class="auth-form__footer">
@@ -55,27 +70,31 @@ definePageMeta({
   layout: 'auth',
 })
 
-const { signUp } = useAuth()
+const { signUp, waitForSession } = useAuth()
 
 const form = reactive({
   name: '',
   email: '',
   password: '',
+  confirmPassword: '',
 })
 
 const errors = reactive({
   name: '',
   email: '',
   password: '',
+  confirmPassword: '',
   general: '',
 })
 
 const loading = ref(false)
+const slow = ref(false)
 
 function validate(): boolean {
   errors.name = ''
   errors.email = ''
   errors.password = ''
+  errors.confirmPassword = ''
   errors.general = ''
 
   let valid = true
@@ -95,14 +114,22 @@ function validate(): boolean {
     valid = false
   }
 
+  if (form.confirmPassword !== form.password) {
+    errors.confirmPassword = 'Passwords do not match'
+    valid = false
+  }
+
   return valid
 }
 
 async function handleSignUp() {
-  if (!validate()) return
+  if (!validate() || loading.value) return
 
   loading.value = true
+  slow.value = false
   errors.general = ''
+
+  const slowTimer = setTimeout(() => { slow.value = true }, 4000)
 
   try {
     const { error } = await signUp({
@@ -119,13 +146,21 @@ async function handleSignUp() {
     // Initialize default shelves for the new user
     await $fetch('/api/shelves/init', { method: 'POST' })
 
-    await navigateTo('/library')
+    // Wait for session to propagate before navigating
+    const ready = await waitForSession()
+    if (ready) {
+      await navigateTo('/library', { replace: true })
+    } else {
+      window.location.href = '/library'
+    }
   }
   catch {
     errors.general = 'Something went wrong. Please try again.'
   }
   finally {
+    clearTimeout(slowTimer)
     loading.value = false
+    slow.value = false
   }
 }
 </script>
@@ -161,6 +196,31 @@ async function handleSignUp() {
     @include button-primary;
     width: 100%;
     margin-top: $spacing-sm;
+  }
+
+  &__spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: auth-spin 0.6s linear infinite;
+  }
+
+  @keyframes auth-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  &__slow {
+    @include meta-text;
+    text-align: center;
+    color: var(--text-color-muted);
+    animation: auth-fade-in 0.3s ease;
+  }
+
+  @keyframes auth-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 
   &__footer {

@@ -19,10 +19,31 @@ export const useAuth = () => {
   const client = getAuthClient()
   const session = client.useSession()
 
+  const isAuthenticated = computed(() => !!session.value?.data?.user)
+
+  /**
+   * Wait for the session reactive to confirm authentication.
+   * Resolves true when authenticated, false on timeout.
+   */
+  function waitForSession(timeout = 5000): Promise<boolean> {
+    return new Promise((resolve) => {
+      if (isAuthenticated.value) return resolve(true)
+
+      const timer = setTimeout(() => { stop(); resolve(false) }, timeout)
+      const stop = watch(isAuthenticated, (authed) => {
+        if (authed) {
+          clearTimeout(timer)
+          stop()
+          resolve(true)
+        }
+      })
+    })
+  }
+
   return {
     session,
     user: computed(() => session.value?.data?.user ?? null),
-    isAuthenticated: computed(() => !!session.value?.data?.user),
+    isAuthenticated,
     isLoading: computed(() => session.value?.isPending ?? true),
 
     signUp: client.signUp.email,
@@ -30,5 +51,8 @@ export const useAuth = () => {
     signOut: client.signOut,
     requestPasswordReset: client.requestPasswordReset,
     resetPassword: client.resetPassword,
+    changePassword: client.changePassword,
+    deleteUser: client.deleteUser,
+    waitForSession,
   }
 }

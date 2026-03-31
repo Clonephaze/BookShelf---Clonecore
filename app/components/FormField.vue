@@ -100,6 +100,16 @@ defineExpose({ focus: () => inputRef.value?.focus() })
       border-color: var(--highlight-color);
       box-shadow: 0 0 0 3px var(--highlight-color-subtle);
     }
+    
+    // Prevent autofill background color - clashes with color scheme
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus {
+      -webkit-box-shadow: 0 0 0 1000px var(--surface-color) inset;
+      -webkit-text-fill-color: var(--text-color);
+      caret-color: var(--text-color);
+      transition: background-color 5000s ease-in-out 0s; //prevent chrome autofill background flash
+    }
   }
 
   &__toggle {
