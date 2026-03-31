@@ -62,6 +62,10 @@
       Already have an account?
       <NuxtLink to="/login">Sign in</NuxtLink>
     </p>
+
+    <p class="auth-form__legal">
+      By signing up, you agree to our <NuxtLink to="/privacy">Privacy Policy</NuxtLink>.
+    </p>
   </div>
 </template>
 
@@ -231,6 +235,21 @@ async function handleSignUp() {
     a {
       color: var(--highlight-color);
       font-weight: $font-weight-semibold;
+
+      &:hover {
+        color: var(--highlight-color-hover);
+      }
+    }
+  }
+
+  &__legal {
+    @include meta-text;
+    margin-top: $spacing-sm;
+    text-align: center;
+    color: var(--text-color-muted);
+
+    a {
+      color: var(--highlight-color);
 
       &:hover {
         color: var(--highlight-color-hover);

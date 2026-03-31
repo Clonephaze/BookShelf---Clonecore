@@ -69,6 +69,11 @@
           </div>
         </div>
 
+        <div class="settings__group">
+          <h4 class="settings__group-label">Legal</h4>
+          <NuxtLink to="/privacy" class="settings__link">Privacy Policy &rarr;</NuxtLink>
+        </div>
+
         <div v-if="user" class="settings__group">
           <h4 class="settings__group-label">Change password</h4>
           <form class="settings__form" @submit.prevent="handleChangePassword">
@@ -207,7 +212,7 @@
               v-model="deletePassword"
               label="Confirm your password"
               type="password"
-              autocomplete="delete-my-account"
+              autocomplete="off"
               required
               :error="deleteError"
             />
@@ -508,6 +513,18 @@ async function handleDeleteAccount() {
       background: var(--highlight-color-subtle);
       border-radius: $radius-sm;
       margin-top: $spacing-xs;
+    }
+  }
+
+  // Links
+  &__link {
+    @include body-text;
+    color: var(--highlight-color);
+    font-weight: $font-weight-medium;
+    font-size: $font-size-sm;
+
+    &:hover {
+      color: var(--highlight-color-hover);
     }
   }
 

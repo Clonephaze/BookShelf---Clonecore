@@ -4,6 +4,7 @@
       <NuxtLink to="/" class="auth-brand" aria-label="Back to home">
         <h1>Bookshelf</h1>
       </NuxtLink>
+      <NuxtLink to="/" class="auth-back">&larr; Back to home</NuxtLink>
       <slot />
     </main>
   </div>
@@ -26,13 +27,25 @@
 
 .auth-brand {
   display: block;
-  margin-bottom: $spacing-xl;
+  margin-bottom: $spacing-sm;
   text-align: center;
   text-decoration: none;
 
   h1 {
     @include heading($font-size-2xl);
     font-weight: $font-weight-bold;
+  }
+}
+
+.auth-back {
+  @include meta-text;
+  display: block;
+  text-align: center;
+  margin-bottom: $spacing-xl;
+  color: var(--text-color-muted);
+
+  &:hover {
+    color: var(--highlight-color);
   }
 }
 </style>

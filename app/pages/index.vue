@@ -12,6 +12,10 @@
         </div>
         <button class="btn btn--ghost" @click="enterGuestMode">Try as Guest</button>
       </div>
+
+      <footer class="landing-hero__footer">
+        <NuxtLink to="/privacy" class="landing-hero__footer-link">Privacy Policy</NuxtLink>
+      </footer>
     </div>
   </NuxtLayout>
 </template>
@@ -82,6 +86,20 @@ const { enterGuestMode } = useGuest()
     text-underline-offset: 3px;
     padding: $spacing-xs $spacing-sm;
     transition: color 0.15s;
+
+    &:hover {
+      color: var(--highlight-color);
+    }
+  }
+}
+
+.landing-hero__footer {
+  position: absolute;
+  bottom: $spacing-lg;
+
+  &-link {
+    @include meta-text;
+    color: var(--text-color-muted);
 
     &:hover {
       color: var(--highlight-color);

@@ -10,7 +10,7 @@ export default defineNuxtRouteMiddleware((to) => {
     exitGuestMode()
   }
 
-  const publicRoutes = ['/', '/login', '/signup', '/forgot-password', '/reset-password']
+  const publicRoutes = ['/', '/login', '/signup', '/forgot-password', '/reset-password', '/privacy']
   const isPublic = publicRoutes.includes(to.path)
 
   // Guests and authenticated users can both access protected routes
