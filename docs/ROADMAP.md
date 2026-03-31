@@ -192,6 +192,7 @@ Phased build plan. Each phase builds on the previous and results in a working, d
 ## Phase 10 — Stretch Features
 **Goal:** Polish and depth.
 
+- [ ] Progressive Web App (`@vite-pwa/nuxt`: manifest, service worker, offline shell, install prompt)
 - [ ] Goodreads CSV import (parse, preview, map shelves, conflict resolution)
 - [ ] Library search (search own books, debounced, Cmd+K shortcut)
 - [ ] Command palette for power users
