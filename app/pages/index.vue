@@ -25,7 +25,15 @@ definePageMeta({
   layout: false,
 })
 
+const { isAuthenticated, isLoading } = useAuth()
 const { enterGuestMode } = useGuest()
+
+// Auth may still be resolving on a fresh page load — redirect once it settles
+watch([isAuthenticated, isLoading], ([authed, loading]) => {
+  if (!loading && authed) {
+    navigateTo('/library', { replace: true })
+  }
+}, { immediate: true })
 </script>
 
 <style lang="scss" scoped>
