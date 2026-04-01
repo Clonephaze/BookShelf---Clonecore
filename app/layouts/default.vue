@@ -47,24 +47,7 @@ onMounted(() => {
   initTheme()
 })
 
-interface Shelf {
-  id: string
-  name: string
-  slug: string
-  icon: string | null
-}
-
-const shelves = ref<Shelf[]>([])
-
-async function fetchShelves() {
-  if (!isAuthenticated.value) return
-  try {
-    shelves.value = await $fetch('/api/shelves')
-  }
-  catch {
-    // Shelves will be empty — sidebar still renders nav items
-  }
-}
+const { shelves, fetchShelves } = useShelves()
 
 watch(isAuthenticated, (val) => {
   if (val) fetchShelves()

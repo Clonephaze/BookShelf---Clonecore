@@ -18,7 +18,7 @@ const searched = ref(false)
 const errorMessage = ref('')
 
 // Shelves for the "add to shelf" picker
-const shelves = ref<{ id: string, name: string }[]>([])
+const { shelves, fetchShelves: fetchShelvesComposable } = useShelves()
 
 // Track which books the user already has
 const libraryBookIds = ref(new Set<string>())
@@ -74,15 +74,8 @@ function clearFilters() {
   filters.genre = ''
 }
 
-// Fetch user shelves
 async function fetchShelves() {
-  if (!isAuthenticated.value) return
-  try {
-    const data = await $fetch<{ id: string, name: string }[]>('/api/shelves')
-    shelves.value = data
-  } catch {
-    // Shelves will be empty — add button won't show
-  }
+  await fetchShelvesComposable()
 }
 
 // Search books

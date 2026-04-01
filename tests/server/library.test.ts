@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 
 // We test the API handler logic by directly calling the handler functions.
 // This validates request parsing, validation, and response shape.

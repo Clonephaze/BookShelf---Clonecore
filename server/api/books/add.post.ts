@@ -67,6 +67,7 @@ export default defineEventHandler(async (event) => {
         openLibraryKey: book.openLibraryKey,
         googleBooksId: book.googleBooksId,
       }).returning({ id: books.id })
+      if (!inserted) throw createError({ statusCode: 500, statusMessage: 'Failed to insert book' })
       bookId = inserted.id
     }
   } else {
@@ -83,6 +84,7 @@ export default defineEventHandler(async (event) => {
       description: book.description,
       publisher: book.publisher,
     }).returning({ id: books.id })
+    if (!inserted) throw createError({ statusCode: 500, statusMessage: 'Failed to insert book' })
     bookId = inserted.id
   }
 
@@ -120,6 +122,7 @@ export default defineEventHandler(async (event) => {
     userId: session.user.id,
     bookId,
   }).returning({ id: userBooks.id })
+  if (!newUserBook) throw createError({ statusCode: 500, statusMessage: 'Failed to create user book' })
 
   // Add to the specified shelf as primary
   await db.insert(userBookShelves).values({

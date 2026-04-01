@@ -173,6 +173,8 @@ interface ShelfData {
 const libraryData = ref<ShelfData[]>([])
 const loading = ref(true)
 const showNewShelf = ref(false)
+
+const { invalidateShelves } = useShelves()
 const newShelfName = ref('')
 const creatingShelf = ref(false)
 const newShelfInput = ref<HTMLInputElement>()
@@ -184,7 +186,7 @@ async function fetchLibrary() {
   }
   loading.value = true
   try {
-    libraryData.value = await $fetch('/api/library')
+    libraryData.value = await $fetch<ShelfData[]>('/api/library')
   }
   catch {
     // Show empty state
@@ -205,6 +207,7 @@ async function createShelf() {
     })
     newShelfName.value = ''
     showNewShelf.value = false
+    await invalidateShelves()
     await fetchLibrary()
   }
   catch {

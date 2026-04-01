@@ -124,6 +124,8 @@ const shelf = ref<{ id: string; name: string; slug: string; isDefault: boolean }
 const books = ref<ShelfBook[]>([])
 const sortBy = ref('date-added')
 
+const { shelves: cachedShelves, fetchShelves, invalidateShelves } = useShelves()
+
 // Rename state
 const editing = ref(false)
 const editName = ref('')
@@ -163,9 +165,9 @@ async function fetchShelfBooks() {
   loading.value = true
   error.value = false
   try {
-    // First get shelf ID from slug
-    const allShelves = await $fetch<any[]>('/api/shelves')
-    const match = allShelves.find(s => s.slug === slug.value)
+    // Use cached shelves; fetchShelves is a no-op if already loaded
+    await fetchShelves()
+    const match = cachedShelves.value.find(s => s.slug === slug.value)
     if (!match) {
       error.value = true
       loading.value = false
@@ -173,7 +175,7 @@ async function fetchShelfBooks() {
     }
     shelf.value = match
 
-    const data = await $fetch<{ shelf: any; books: ShelfBook[] }>(`/api/shelves/${match.id}/books`)
+    const data = await $fetch<{ shelf: { id: string; name: string; slug: string; isDefault: boolean }; books: ShelfBook[] }>(`/api/shelves/${match.id}/books`)
     books.value = data.books
   }
   catch {
@@ -202,6 +204,7 @@ async function saveRename() {
       method: 'PATCH',
       body: { name },
     })
+    await invalidateShelves()
     await fetchShelfBooks()
     editing.value = false
   }
@@ -219,6 +222,7 @@ async function deleteShelf() {
   deleting.value = true
   try {
     await $fetch(`/api/shelves/${shelf.value.id}`, { method: 'DELETE' })
+    await invalidateShelves()
     await navigateTo('/library')
   }
   catch {

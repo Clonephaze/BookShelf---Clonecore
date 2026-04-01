@@ -55,7 +55,7 @@ function upgradeCoverUrl(url?: string): string | undefined {
 function normalizeVolume(volume: GBVolume): BookSearchResult {
   const info = volume.volumeInfo
   const { isbn13, isbn10 } = extractISBNs(info.industryIdentifiers)
-  const [author, ...additionalAuthors] = info.authors || ['Unknown Author']
+  const [author = 'Unknown Author', ...additionalAuthors] = info.authors ?? []
 
   return {
     title: info.title,

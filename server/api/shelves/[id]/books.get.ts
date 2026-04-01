@@ -4,7 +4,7 @@ import { books, userBooks, userBookShelves, shelves } from '../../../database/sc
 import { requireServerSession } from '../../../utils/session'
 
 export default defineEventHandler(async (event) => {
-  const session = await requireServerSession(event)
+  await requireServerSession(event)
   const db = useDB()
   const shelfId = getRouterParam(event, 'id')
 

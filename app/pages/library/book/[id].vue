@@ -40,7 +40,7 @@
       <div class="book-detail__hero">
         <div class="book-detail__cover-area">
           <BookCover
-            :src="book.coverUrl"
+            :src="book.coverUrl ?? undefined"
             :title="book.title"
             :author="book.author"
             width="16rem"
@@ -221,10 +221,31 @@ definePageMeta({ layout: 'default' })
 
 const route = useRoute()
 
+interface BookDetail {
+  title: string
+  author: string
+  additionalAuthors?: string[]
+  coverUrl?: string | null
+  isbn13?: string | null
+  pageCount?: number | null
+  publishedDate?: string | null
+  publisher?: string | null
+  genres?: string[] | null
+  description?: string | null
+  rating?: number | null
+  notes?: string | null
+  currentPage?: number | null
+  progressPercent?: string | null
+  dateAdded?: string | Date | null
+  dateStarted?: string | Date | null
+  dateFinished?: string | Date | null
+  shelves?: Array<{ shelfId: string; shelfName: string }>
+}
+
 const loading = ref(true)
 const error = ref(false)
-const book = ref<any>(null)
-const allShelves = ref<{ id: string; name: string; slug: string }[]>([])
+const book = ref<BookDetail | null>(null)
+const { shelves: allShelves, fetchShelves } = useShelves()
 const showShelfPicker = ref(false)
 const movingShelf = ref(false)
 
@@ -244,7 +265,7 @@ useHead({
   title: computed(() => book.value ? `${book.value.title} — Bookshelf` : 'Book — Bookshelf'),
 })
 
-function formatDate(date: string | Date | null): string {
+function formatDate(date: string | Date | null | undefined): string {
   if (!date) return '—'
   return new Date(date).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -257,22 +278,13 @@ async function fetchBook() {
   loading.value = true
   error.value = false
   try {
-    book.value = await $fetch(`/api/books/${userBookId.value}`)
+    book.value = await $fetch<BookDetail>(`/api/books/${userBookId.value}`)
   }
   catch {
     error.value = true
   }
   finally {
     loading.value = false
-  }
-}
-
-async function fetchShelves() {
-  try {
-    allShelves.value = await $fetch('/api/shelves')
-  }
-  catch {
-    // Non-critical
   }
 }
 
@@ -299,6 +311,7 @@ onMounted(() => {
   fetchBook()
   fetchShelves()
 })
+
 </script>
 
 <style lang="scss" scoped>

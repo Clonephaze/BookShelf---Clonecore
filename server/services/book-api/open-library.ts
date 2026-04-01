@@ -71,7 +71,7 @@ function buildCoverUrl(isbn13?: string, isbn10?: string, coverId?: number): { co
 function normalizeDoc(doc: OLSearchDoc): BookSearchResult {
   const { isbn13, isbn10 } = extractISBNs(doc.isbn)
   const covers = buildCoverUrl(isbn13, isbn10, doc.cover_i)
-  const [author, ...additionalAuthors] = doc.author_name || ['Unknown Author']
+  const [author = 'Unknown Author', ...additionalAuthors] = doc.author_name ?? []
 
   return {
     title: doc.title,

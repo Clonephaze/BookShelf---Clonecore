@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { BookSearchResult } from '~/server/services/book-api/types'
+import type { BookSearchResult } from '~~/server/services/book-api/types'
 
 const props = defineProps<{
   book: BookSearchResult
