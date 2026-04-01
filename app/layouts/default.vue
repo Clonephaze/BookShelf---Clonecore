@@ -10,7 +10,7 @@
         <ThemeSwitcher />
       </div>
 
-      <SidebarNav :shelves="shelves" />
+      <SidebarNav :shelves="shelvesStore.shelves" />
 
       <div class="sidebar__footer">
         <div v-if="user" class="sidebar__user">
@@ -47,10 +47,10 @@ onMounted(() => {
   initTheme()
 })
 
-const { shelves, fetchShelves } = useShelves()
+const shelvesStore = useShelvesStore()
 
 watch(isAuthenticated, (val) => {
-  if (val) fetchShelves()
+  if (val) shelvesStore.fetch()
 }, { immediate: true })
 
 async function handleSignOut() {

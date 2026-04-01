@@ -64,7 +64,7 @@
     </div>
 
     <!-- Loading state -->
-    <div v-if="loading" class="library__loading">
+    <div v-if="libraryStore.loading && !libraryStore.loaded" class="library__loading">
       <div v-for="n in 3" :key="n" class="library__skeleton-section">
         <div class="library__skeleton-heading" />
         <div class="library__skeleton-grid">
@@ -74,9 +74,9 @@
     </div>
 
     <!-- Shelves with books -->
-    <div v-else-if="libraryData.length" class="library__shelves">
+    <div v-else-if="libraryStore.data.length" class="library__shelves">
       <section
-        v-for="shelf in libraryData"
+        v-for="shelf in libraryStore.data"
         :key="shelf.id"
         class="library__shelf animate-fade-in-up"
       >
@@ -144,57 +144,13 @@ useHead({ title: 'Library — Bookshelf' })
 const { isAuthenticated } = useAuth()
 const { isGuest } = useGuest()
 
-interface ShelfBook {
-  userBookId: string
-  bookId: string
-  title: string
-  author: string
-  coverUrl: string | null
-  coverUrlSmall: string | null
-  pageCount: number | null
-  rating: number | null
-  dateAdded: string | null
-  dateFinished: string | null
-  currentPage: number | null
-  progressPercent: string | null
-}
+const libraryStore = useLibraryStore()
+const shelvesStore = useShelvesStore()
 
-interface ShelfData {
-  id: string
-  name: string
-  slug: string
-  position: number
-  isDefault: boolean
-  icon: string | null
-  books: ShelfBook[]
-  bookCount: number
-}
-
-const libraryData = ref<ShelfData[]>([])
-const loading = ref(true)
 const showNewShelf = ref(false)
-
-const { invalidateShelves } = useShelves()
 const newShelfName = ref('')
 const creatingShelf = ref(false)
 const newShelfInput = ref<HTMLInputElement>()
-
-async function fetchLibrary() {
-  if (!isAuthenticated.value) {
-    loading.value = false
-    return
-  }
-  loading.value = true
-  try {
-    libraryData.value = await $fetch<ShelfData[]>('/api/library')
-  }
-  catch {
-    // Show empty state
-  }
-  finally {
-    loading.value = false
-  }
-}
 
 async function createShelf() {
   const name = newShelfName.value.trim()
@@ -207,8 +163,8 @@ async function createShelf() {
     })
     newShelfName.value = ''
     showNewShelf.value = false
-    await invalidateShelves()
-    await fetchLibrary()
+    await shelvesStore.invalidate()
+    await libraryStore.invalidate()
   }
   catch {
     // Could show error
@@ -229,8 +185,12 @@ watch(showNewShelf, (val) => {
 })
 
 watch(isAuthenticated, (val) => {
-  if (val) fetchLibrary()
+  if (val) libraryStore.fetch()
 }, { immediate: true })
+
+onMounted(() => {
+  if (isAuthenticated.value) libraryStore.revalidate()
+})
 </script>
 
 <style lang="scss" scoped>

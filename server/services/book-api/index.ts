@@ -72,6 +72,7 @@ export async function searchBooks(
   query: string,
   limit: number = 20,
   googleApiKey?: string,
+  sort: 'best-match' | 'relevance' = 'best-match',
 ): Promise<BookSearchResponse> {
   // Fire both APIs in parallel — if one fails, use results from the other
   const [olResults, gbResults] = await Promise.all([
@@ -105,10 +106,12 @@ export async function searchBooks(
     }
   }
 
-  // Rank by completeness
-  const results = [...merged.values()]
-    .sort((a, b) => completenessScore(b) - completenessScore(a))
-    .slice(0, limit)
+  // Rank by completeness (best-match) or preserve merge order (relevance)
+  const ranked = sort === 'best-match'
+    ? [...merged.values()].sort((a, b) => completenessScore(b) - completenessScore(a))
+    : [...merged.values()]
+
+  const results = ranked.slice(0, limit)
 
   return {
     results,

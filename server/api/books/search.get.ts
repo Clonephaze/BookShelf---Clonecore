@@ -12,9 +12,10 @@ export default defineEventHandler(async (event) => {
   }
 
   const limit = Math.min(Math.max(Number(query.limit) || 20, 1), 40)
+  const sort = (query.sort as string) === 'relevance' ? 'relevance' : 'best-match'
   const config = useRuntimeConfig()
 
-  const results = await searchBooks(q, limit, config.googleBooksApiKey)
+  const results = await searchBooks(q, limit, config.googleBooksApiKey, sort)
 
   return results
 })

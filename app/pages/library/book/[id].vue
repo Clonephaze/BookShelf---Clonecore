@@ -125,6 +125,44 @@
               >Cancel</button>
             </div>
           </div>
+
+          <!-- Source links -->
+          <div
+            v-if="book.openLibraryKey || book.googleBooksId || book.isbn13"
+            class="book-detail__sources"
+          >
+            <span class="book-detail__sources-label">Find this book:</span>
+            <a
+              v-if="book.openLibraryKey"
+              :href="`https://openlibrary.org${book.openLibraryKey}`"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="book-detail__source-link"
+            >
+              Open Library
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+            </a>
+            <a
+              v-if="book.googleBooksId"
+              :href="`https://books.google.com/books?id=${book.googleBooksId}`"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="book-detail__source-link"
+            >
+              Google Books
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+            </a>
+            <a
+              v-if="book.isbn13"
+              :href="`https://www.worldcat.org/isbn/${book.isbn13}`"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="book-detail__source-link"
+            >
+              WorldCat
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+            </a>
+          </div>
         </div>
       </div>
 
@@ -227,6 +265,7 @@ interface BookDetail {
   additionalAuthors?: string[]
   coverUrl?: string | null
   isbn13?: string | null
+  isbn10?: string | null
   pageCount?: number | null
   publishedDate?: string | null
   publisher?: string | null
@@ -239,13 +278,15 @@ interface BookDetail {
   dateAdded?: string | Date | null
   dateStarted?: string | Date | null
   dateFinished?: string | Date | null
+  openLibraryKey?: string | null
+  googleBooksId?: string | null
   shelves?: Array<{ shelfId: string; shelfName: string }>
 }
 
 const loading = ref(true)
 const error = ref(false)
 const book = ref<BookDetail | null>(null)
-const { shelves: allShelves, fetchShelves } = useShelves()
+const { shelves: allShelves } = useShelvesStore()
 const showShelfPicker = ref(false)
 const movingShelf = ref(false)
 
@@ -309,7 +350,7 @@ async function moveToShelf(shelfId: string) {
 
 onMounted(() => {
   fetchBook()
-  fetchShelves()
+  useShelvesStore().fetch()
 })
 
 </script>
@@ -568,6 +609,39 @@ onMounted(() => {
 
     &:hover {
       color: var(--text-color);
+    }
+  }
+
+  // --- Sections ---
+  &__sources {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+    margin-top: $spacing-md;
+    padding-top: $spacing-md;
+    border-top: 1px solid var(--border-color-subtle);
+  }
+
+  &__sources-label {
+    font-size: $font-size-xs;
+    color: var(--text-color-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: $font-weight-medium;
+  }
+
+  &__source-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: $font-size-sm;
+    color: var(--highlight-color);
+    text-decoration: none;
+    font-weight: $font-weight-medium;
+
+    &:hover {
+      text-decoration: underline;
     }
   }
 

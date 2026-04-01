@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import type { BookSearchResult } from '~/server/services/book-api/types'
-
+import type { BookSearchResult } from '~~/server/services/book-api/types'
 definePageMeta({
   layout: 'default',
 })
@@ -10,96 +9,14 @@ useHead({ title: 'Search — Bookshelf' })
 const { isAuthenticated } = useAuth()
 const { isGuest } = useGuest()
 
-// Search state
-const query = ref('')
-const results = ref<BookSearchResult[]>([])
-const loading = ref(false)
-const searched = ref(false)
-const errorMessage = ref('')
+const searchStore = useSearchStore()
+const shelvesStore = useShelvesStore()
 
-// Shelves for the "add to shelf" picker
-const { shelves, fetchShelves: fetchShelvesComposable } = useShelves()
-
-// Track which books the user already has
-const libraryBookIds = ref(new Set<string>())
-
-// Track which books are currently being added
+// Track which books are currently being added (UI-only, ephemeral)
 const addingBooks = ref(new Set<string>())
 
-// Detail modal
+// Detail modal (UI-only, ephemeral)
 const selectedBook = ref<BookSearchResult | null>(null)
-
-// Filters
-const filters = reactive({
-  hasCover: false,
-  hasPages: false,
-  genre: '',
-})
-
-// Collect all unique genres from results
-const availableGenres = computed(() => {
-  const genres = new Set<string>()
-  for (const book of results.value) {
-    book.genres?.forEach(g => genres.add(g))
-  }
-  return [...genres].sort()
-})
-
-// Filtered results
-const filteredResults = computed(() => {
-  let list = results.value
-  if (filters.hasCover) {
-    list = list.filter(b => b.coverUrl)
-  }
-  if (filters.hasPages) {
-    list = list.filter(b => b.pageCount)
-  }
-  if (filters.genre) {
-    list = list.filter(b => b.genres?.includes(filters.genre))
-  }
-  return list
-})
-
-const activeFilterCount = computed(() => {
-  let count = 0
-  if (filters.hasCover) count++
-  if (filters.hasPages) count++
-  if (filters.genre) count++
-  return count
-})
-
-function clearFilters() {
-  filters.hasCover = false
-  filters.hasPages = false
-  filters.genre = ''
-}
-
-async function fetchShelves() {
-  await fetchShelvesComposable()
-}
-
-// Search books
-async function doSearch(q: string) {
-  if (!q || q.length < 2) return
-
-  loading.value = true
-  searched.value = true
-  errorMessage.value = ''
-  results.value = []
-  clearFilters()
-
-  try {
-    const data = await $fetch<{ results: BookSearchResult[], total: number }>('/api/books/search', {
-      params: { q, limit: 20 },
-    })
-    results.value = data.results
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Search failed'
-    errorMessage.value = message
-  } finally {
-    loading.value = false
-  }
-}
 
 // Add book to shelf
 async function addBook(book: BookSearchResult, shelfId: string) {
@@ -111,18 +28,14 @@ async function addBook(book: BookSearchResult, shelfId: string) {
       method: 'POST',
       body: { book, shelfId },
     })
-    libraryBookIds.value.add(bookKey)
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Failed to add book'
-    errorMessage.value = message
-  } finally {
+    searchStore.markInLibrary(bookKey)
+  }
+  catch (err: unknown) {
+    searchStore.errorMessage = err instanceof Error ? err.message : 'Failed to add book'
+  }
+  finally {
     addingBooks.value.delete(bookKey)
   }
-}
-
-function isInLibrary(book: BookSearchResult): boolean {
-  const key = book.isbn13 || book.isbn10 || book.title
-  return libraryBookIds.value.has(key)
 }
 
 function isAdding(book: BookSearchResult): boolean {
@@ -130,8 +43,15 @@ function isAdding(book: BookSearchResult): boolean {
   return addingBooks.value.has(key)
 }
 
+async function onSortChange(sort: string) {
+  if (sort === 'best-match' || sort === 'relevance') {
+    await searchStore.refetchWithSort(sort as 'best-match' | 'relevance')
+  }
+  // title / author / newest are handled client-side in the store computed
+}
+
 onMounted(() => {
-  fetchShelves()
+  shelvesStore.fetch()
 })
 </script>
 
@@ -147,23 +67,23 @@ onMounted(() => {
     </header>
 
     <SearchBar
-      v-model="query"
-      :loading="loading"
-      @search="doSearch"
+      v-model="searchStore.query"
+      :loading="searchStore.loading"
+      @search="searchStore.doSearch"
     />
 
     <!-- Error -->
     <div
-      v-if="errorMessage"
+      v-if="searchStore.errorMessage"
       class="search-page__error"
       role="alert"
     >
-      {{ errorMessage }}
+      {{ searchStore.errorMessage }}
     </div>
 
     <!-- Guest notice -->
     <div
-      v-if="isGuest && searched && results.length"
+      v-if="isGuest && searchStore.searched && searchStore.results.length"
       class="search-page__guest-notice"
     >
       <p>Sign up to save books to your library</p>
@@ -177,7 +97,7 @@ onMounted(() => {
 
     <!-- Loading skeleton -->
     <div
-      v-if="loading"
+      v-if="searchStore.loading"
       class="search-page__skeleton"
     >
       <div
@@ -195,26 +115,26 @@ onMounted(() => {
     </div>
 
     <!-- Filters + Results -->
-    <template v-else-if="results.length">
+    <template v-else-if="searchStore.results.length">
       <!-- Filter bar -->
       <div class="search-page__filters">
         <button
           class="filter-chip"
-          :class="{ 'filter-chip--active': filters.hasCover }"
-          @click="filters.hasCover = !filters.hasCover"
+          :class="{ 'filter-chip--active': searchStore.filters.hasCover }"
+          @click="searchStore.filters.hasCover = !searchStore.filters.hasCover"
         >
           Has cover
         </button>
         <button
           class="filter-chip"
-          :class="{ 'filter-chip--active': filters.hasPages }"
-          @click="filters.hasPages = !filters.hasPages"
+          :class="{ 'filter-chip--active': searchStore.filters.hasPages }"
+          @click="searchStore.filters.hasPages = !searchStore.filters.hasPages"
         >
           Has page count
         </button>
         <select
-          v-if="availableGenres.length"
-          v-model="filters.genre"
+          v-if="searchStore.availableGenres.length"
+          v-model="searchStore.filters.genre"
           class="filter-select"
           aria-label="Filter by genre"
         >
@@ -222,7 +142,7 @@ onMounted(() => {
             All genres
           </option>
           <option
-            v-for="g in availableGenres"
+            v-for="g in searchStore.availableGenres"
             :key="g"
             :value="g"
           >
@@ -230,28 +150,43 @@ onMounted(() => {
           </option>
         </select>
         <button
-          v-if="activeFilterCount > 0"
+          v-if="searchStore.activeFilterCount > 0"
           class="filter-clear"
-          @click="clearFilters"
+          @click="searchStore.clearFilters"
         >
           Clear filters
         </button>
+
+        <div class="search-page__filters-spacer" />
+
+        <select
+          v-model="searchStore.sortBy"
+          class="filter-select filter-select--sort"
+          aria-label="Sort results"
+          @change="onSortChange(searchStore.sortBy)"
+        >
+          <option value="best-match">Best match</option>
+          <option value="relevance">Relevance</option>
+          <option value="title">Title A–Z</option>
+          <option value="author">Author A–Z</option>
+          <option value="newest">Newest first</option>
+        </select>
       </div>
 
       <div class="search-page__results">
         <p class="search-page__count">
-          {{ filteredResults.length }} of {{ results.length }} result{{ results.length === 1 ? '' : 's' }}
-          <template v-if="activeFilterCount > 0">
-            ({{ activeFilterCount }} filter{{ activeFilterCount === 1 ? '' : 's' }} active)
+          {{ searchStore.filteredResults.length }} of {{ searchStore.results.length }} result{{ searchStore.results.length === 1 ? '' : 's' }}
+          <template v-if="searchStore.activeFilterCount > 0">
+            ({{ searchStore.activeFilterCount }} filter{{ searchStore.activeFilterCount === 1 ? '' : 's' }} active)
           </template>
         </p>
         <div class="search-page__list">
           <BookSearchResultCard
-            v-for="(book, index) in filteredResults"
+            v-for="(book, index) in searchStore.filteredResults"
             :key="book.isbn13 || book.isbn10 || `${book.title}-${index}`"
             :book="book"
-            :shelves="shelves"
-            :in-library="isInLibrary(book)"
+            :shelves="shelvesStore.shelves"
+            :in-library="searchStore.isInLibrary(book)"
             :adding="isAdding(book)"
             :style="{ '--stagger-index': index }"
             @add="addBook"
@@ -259,13 +194,13 @@ onMounted(() => {
           />
         </div>
         <p
-          v-if="filteredResults.length === 0"
+          v-if="searchStore.filteredResults.length === 0"
           class="search-page__no-filter-match"
         >
           No results match your filters.
           <button
             class="search-page__clear-link"
-            @click="clearFilters"
+            @click="searchStore.clearFilters"
           >
             Clear filters
           </button>
@@ -275,7 +210,7 @@ onMounted(() => {
 
     <!-- Empty state: searched but no results -->
     <div
-      v-else-if="searched && !loading"
+      v-else-if="searchStore.searched && !searchStore.loading"
       class="search-page__empty"
     >
       <svg
@@ -295,7 +230,7 @@ onMounted(() => {
         <path d="M8 11h6" />
       </svg>
       <p class="search-page__empty-text">
-        No books found for "<strong>{{ query }}</strong>"
+        No books found for "<strong>{{ searchStore.query }}</strong>"
       </p>
       <p class="search-page__empty-hint">
         Try a different title, author, or ISBN
@@ -304,7 +239,7 @@ onMounted(() => {
 
     <!-- Initial state: haven't searched yet -->
     <div
-      v-else-if="!searched"
+      v-else-if="!searchStore.searched"
       class="search-page__initial"
     >
       <svg
@@ -333,8 +268,8 @@ onMounted(() => {
     <BookDetailModal
       v-if="selectedBook"
       :book="selectedBook"
-      :shelves="shelves"
-      :in-library="isInLibrary(selectedBook)"
+      :shelves="shelvesStore.shelves"
+      :in-library="searchStore.isInLibrary(selectedBook)"
       :adding="isAdding(selectedBook)"
       @close="selectedBook = null"
       @add="addBook"
@@ -419,6 +354,11 @@ onMounted(() => {
     flex-wrap: wrap;
     align-items: center;
     gap: $spacing-sm;
+  }
+
+  &__filters-spacer {
+    flex: 1;
+    min-width: $spacing-md;
   }
 
   &__no-filter-match {
@@ -574,6 +514,12 @@ onMounted(() => {
   &:focus {
     border-color: var(--highlight-color);
     outline: none;
+  }
+
+  &--sort {
+    margin-left: auto;
+    color: var(--text-color);
+    font-weight: $font-weight-medium;
   }
 }
 

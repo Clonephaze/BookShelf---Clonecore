@@ -124,7 +124,7 @@ const shelf = ref<{ id: string; name: string; slug: string; isDefault: boolean }
 const books = ref<ShelfBook[]>([])
 const sortBy = ref('date-added')
 
-const { shelves: cachedShelves, fetchShelves, invalidateShelves } = useShelves()
+const shelvesStore = useShelvesStore()
 
 // Rename state
 const editing = ref(false)
@@ -165,9 +165,9 @@ async function fetchShelfBooks() {
   loading.value = true
   error.value = false
   try {
-    // Use cached shelves; fetchShelves is a no-op if already loaded
-    await fetchShelves()
-    const match = cachedShelves.value.find(s => s.slug === slug.value)
+    // Use cached shelves; fetch is a no-op if already loaded
+    await shelvesStore.fetch()
+    const match = shelvesStore.shelves.find(s => s.slug === slug.value)
     if (!match) {
       error.value = true
       loading.value = false
@@ -204,7 +204,7 @@ async function saveRename() {
       method: 'PATCH',
       body: { name },
     })
-    await invalidateShelves()
+    await shelvesStore.invalidate()
     await fetchShelfBooks()
     editing.value = false
   }
@@ -222,7 +222,7 @@ async function deleteShelf() {
   deleting.value = true
   try {
     await $fetch(`/api/shelves/${shelf.value.id}`, { method: 'DELETE' })
-    await invalidateShelves()
+    await shelvesStore.invalidate()
     await navigateTo('/library')
   }
   catch {
