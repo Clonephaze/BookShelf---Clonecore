@@ -18,8 +18,8 @@ export default defineNuxtRouteMiddleware((to) => {
     return navigateTo('/login', { replace: true })
   }
 
-  // Redirect logged-in users away from auth pages (guests stay — they may want to sign up)
-  const authPages = ['/login', '/signup', '/forgot-password', '/reset-password']
+  // Redirect logged-in users away from auth/landing pages (guests stay — they may want to sign up)
+  const authPages = ['/', '/login', '/signup', '/forgot-password', '/reset-password']
   if (authPages.includes(to.path) && isAuthenticated.value) {
     return navigateTo('/library', { replace: true })
   }
