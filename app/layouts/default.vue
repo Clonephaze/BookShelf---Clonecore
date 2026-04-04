@@ -2,14 +2,39 @@
   <div class="layout-default">
     <a href="#main-content" class="skip-to-content">Skip to main content</a>
 
-    <HeaderNav :user="user" />
+    <HeaderNav :user="user" @sign-out="handleSignOut" />
 
     <!-- Mobile topbar (phone only) -->
     <header class="topbar">
       <NuxtLink to="/library" class="topbar__brand">
         <span class="topbar__logo">Bookshelf</span>
       </NuxtLink>
-      <ThemeSwitcher />
+      <div class="topbar__actions">
+        <ThemeSwitcher />
+        <div v-if="user" class="topbar__user-wrapper">
+          <button
+            class="topbar__user-btn"
+            aria-label="User menu"
+            @click="userMenuOpen = !userMenuOpen"
+          >
+            <span class="topbar__avatar">{{ userInitial }}</span>
+          </button>
+          <Transition name="dropdown">
+            <div
+              v-if="userMenuOpen"
+              class="topbar__dropdown"
+            >
+              <NuxtLink to="/settings#account" class="topbar__dropdown-item" @click="userMenuOpen = false">
+                Profile Settings
+              </NuxtLink>
+              <button class="topbar__dropdown-item topbar__dropdown-item--danger" @click="handleSignOut">
+                Log out
+              </button>
+            </div>
+          </Transition>
+          <div v-if="userMenuOpen" class="topbar__backdrop" @click="userMenuOpen = false" />
+        </div>
+      </div>
     </header>
 
     <main id="main-content" class="main-content">
@@ -34,11 +59,17 @@ onMounted(() => {
 const shelvesStore = useShelvesStore()
 
 const moreSheetOpen = ref(false)
+const userMenuOpen = ref(false)
 
-// Close sheet on route change
+const userInitial = computed(() =>
+  user.value?.name?.charAt(0)?.toUpperCase() ?? '?',
+)
+
+// Close sheet and menu on route change
 const route = useRoute()
 watch(() => route.path, () => {
   moreSheetOpen.value = false
+  userMenuOpen.value = false
 })
 
 watch(isAuthenticated, (val) => {
@@ -83,6 +114,84 @@ async function handleSignOut() {
     font-weight: $font-weight-bold;
     color: var(--text-color);
   }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+
+  &__user-wrapper {
+    position: relative;
+  }
+
+  &__user-btn {
+    @include flex-center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: $radius-full;
+    background-color: var(--highlight-color);
+    color: #fff;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    border: none;
+    cursor: pointer;
+    transition: background-color $transition-fast;
+
+    &:hover {
+      background-color: var(--highlight-color-hover);
+    }
+  }
+
+  &__avatar {
+    line-height: 1;
+  }
+
+  &__dropdown {
+    position: absolute;
+    top: calc(100% + $spacing-xs);
+    right: 0;
+    min-width: 10rem;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: $radius-md;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    z-index: 200;
+  }
+
+  &__dropdown-item {
+    display: block;
+    width: 100%;
+    padding: $spacing-sm $spacing-md;
+    font-family: $font-family-body;
+    font-size: $font-size-sm;
+    color: var(--text-color);
+    background: none;
+    border: none;
+    text-decoration: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color $transition-fast;
+
+    &:hover {
+      background-color: var(--sub-bg-color);
+    }
+
+    &--danger {
+      color: var(--error-color);
+
+      &:hover {
+        background-color: var(--sub-bg-color);
+      }
+    }
+  }
+
+  &__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 199;
+  }
 }
 
 // --- Main content ---
@@ -103,5 +212,18 @@ async function handleSignOut() {
       padding-bottom: calc($spacing-md + 5rem); // Space for mobile nav + center FAB
     }
   }
+}
+
+// --- Dropdown transition ---
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: opacity 150ms ease, transform 150ms ease;
+  transform-origin: top right;
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
 }
 </style>

@@ -124,6 +124,30 @@
                 @click="showShelfPicker = false"
               >Cancel</button>
             </div>
+
+            <button
+              v-if="!confirmingRemove"
+              class="book-detail__remove-btn"
+              @click="confirmingRemove = true"
+            >
+              Remove from library
+            </button>
+            <div v-else class="book-detail__remove-confirm">
+              <span class="book-detail__remove-warning">Remove this book?</span>
+              <button
+                class="book-detail__remove-yes"
+                :disabled="removing"
+                @click="removeBook"
+              >
+                Yes, remove
+              </button>
+              <button
+                class="book-detail__remove-no"
+                @click="confirmingRemove = false"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
 
           <!-- Source links -->
@@ -299,6 +323,8 @@ const book = ref<BookDetail | null>(null)
 const { shelves: allShelves } = useShelvesStore()
 const showShelfPicker = ref(false)
 const movingShelf = ref(false)
+const confirmingRemove = ref(false)
+const removing = ref(false)
 
 const userBookId = computed(() => route.params.id as string)
 
@@ -355,6 +381,19 @@ async function moveToShelf(shelfId: string) {
   }
   finally {
     movingShelf.value = false
+  }
+}
+
+async function removeBook() {
+  removing.value = true
+  try {
+    await $fetch(`/api/books/${userBookId.value}`, { method: 'DELETE' })
+    useLibraryStore().invalidate()
+    await navigateTo('/library')
+  }
+  catch {
+    removing.value = false
+    confirmingRemove.value = false
   }
 }
 
@@ -620,6 +659,65 @@ onMounted(() => {
     &:hover {
       color: var(--text-color);
     }
+  }
+
+  &__remove-btn {
+    margin-top: $spacing-sm;
+    padding: $spacing-xs $spacing-md;
+    font-family: $font-family-body;
+    font-size: $font-size-sm;
+    color: var(--error-color);
+    background: none;
+    border: 1px solid transparent;
+    border-radius: $radius-md;
+    cursor: pointer;
+    transition: background-color $transition-fast, border-color $transition-fast;
+
+    &:hover {
+      background: rgba(var(--error-color), 0.08);
+      border-color: var(--error-color);
+    }
+  }
+
+  &__remove-confirm {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    margin-top: $spacing-sm;
+    animation: fade-in-scale 150ms $ease-out-expo both;
+  }
+
+  &__remove-warning {
+    font-size: $font-size-sm;
+    color: var(--error-color);
+    font-weight: $font-weight-medium;
+  }
+
+  &__remove-yes {
+    padding: $spacing-xs $spacing-md;
+    font-family: $font-family-body;
+    font-size: $font-size-sm;
+    color: #fff;
+    background: var(--error-color);
+    border: none;
+    border-radius: $radius-md;
+    cursor: pointer;
+    transition: opacity $transition-fast;
+
+    &:hover { opacity: 0.85; }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
+
+  &__remove-no {
+    padding: $spacing-xs $spacing-md;
+    font-family: $font-family-body;
+    font-size: $font-size-xs;
+    color: var(--text-color-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+
+    &:hover { color: var(--text-color); }
   }
 
   // --- Sections ---

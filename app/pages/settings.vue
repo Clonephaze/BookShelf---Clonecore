@@ -257,6 +257,26 @@ const sections = [
   { id: 'danger', label: 'Danger Zone', icon: AlertTriangle },
 ]
 
+// Sync active section with URL hash
+const validIds = new Set(sections.map(s => s.id))
+
+function readHash() {
+  const hash = window.location.hash.slice(1)
+  if (hash && validIds.has(hash)) {
+    activeSection.value = hash
+  }
+}
+
+watch(activeSection, (id) => {
+  if (window.location.hash.slice(1) !== id) {
+    window.history.replaceState(null, '', `#${id}`)
+  }
+})
+
+onMounted(() => {
+  readHash()
+})
+
 const themeOptions: { value: Theme; label: string; icon: typeof Sun }[] = [
   { value: 'system', label: 'System', icon: Monitor },
   { value: 'light', label: 'Light', icon: Sun },

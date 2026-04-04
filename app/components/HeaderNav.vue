@@ -20,14 +20,26 @@
 
         <div class="header-nav__actions">
           <ThemeSwitcher />
-          <button
-            v-if="user"
-            class="header-nav__user-btn"
-            aria-label="User menu"
-            @click="$emit('toggle-user-menu')"
-          >
-            <span class="header-nav__avatar">{{ userInitial }}</span>
-          </button>
+          <div v-if="user" class="header-nav__user-wrapper">
+            <button
+              class="header-nav__user-btn"
+              aria-label="User menu"
+              @click="userMenuOpen = !userMenuOpen"
+            >
+              <span class="header-nav__avatar">{{ userInitial }}</span>
+            </button>
+            <Transition name="dropdown">
+              <div v-if="userMenuOpen" class="header-nav__dropdown">
+                <NuxtLink to="/settings#account" class="header-nav__dropdown-item" @click="userMenuOpen = false">
+                  Profile Settings
+                </NuxtLink>
+                <button class="header-nav__dropdown-item header-nav__dropdown-item--danger" @click="$emit('sign-out')">
+                  Log out
+                </button>
+              </div>
+            </Transition>
+            <div v-if="userMenuOpen" class="header-nav__backdrop" @click="userMenuOpen = false" />
+          </div>
         </div>
       </div>
     </div>
@@ -61,9 +73,10 @@ defineProps<{
   user: { name: string } | null
 }>()
 
-defineEmits<{ 'toggle-user-menu': [] }>()
+defineEmits<{ 'sign-out': [] }>()
 
 const searchQuery = ref('')
+const userMenuOpen = ref(false)
 
 function onSearch() {
   const q = searchQuery.value.trim()
@@ -72,6 +85,11 @@ function onSearch() {
     searchQuery.value = ''
   }
 }
+
+// Close menu on route change
+watch(() => route.path, () => {
+  userMenuOpen.value = false
+})
 const tabs = [
   { to: '/library', label: 'Library', icon: Library },
   { to: '/goals', label: 'Goals', icon: Target },
@@ -201,6 +219,52 @@ function isActive(path: string) {
     line-height: 1;
   }
 
+  &__user-wrapper {
+    position: relative;
+  }
+
+  &__dropdown {
+    position: absolute;
+    top: calc(100% + $spacing-xs);
+    right: 0;
+    min-width: 10rem;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: $radius-md;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    z-index: 200;
+  }
+
+  &__dropdown-item {
+    display: block;
+    width: 100%;
+    padding: $spacing-sm $spacing-md;
+    font-family: $font-family-body;
+    font-size: $font-size-sm;
+    color: var(--text-color);
+    background: none;
+    border: none;
+    text-decoration: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color $transition-fast;
+
+    &:hover {
+      background-color: var(--sub-bg-color);
+    }
+
+    &--danger {
+      color: var(--error-color);
+    }
+  }
+
+  &__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 199;
+  }
+
   // --- Tier 2: Tab bar ---
 
   &__tabs {
@@ -249,5 +313,18 @@ function isActive(path: string) {
   &__tab-icon {
     flex-shrink: 0;
   }
+}
+
+// --- Dropdown transition ---
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: opacity 150ms ease, transform 150ms ease;
+  transform-origin: top right;
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
 }
 </style>

@@ -90,13 +90,39 @@
               <span class="library__shelf-count">{{ shelf.bookCount }}</span>
             </h3>
           </NuxtLink>
-          <NuxtLink
-            v-if="shelf.bookCount > 0"
-            :to="`/library/${shelf.slug}`"
-            class="library__view-all"
-          >
-            View all
-          </NuxtLink>
+          <div class="library__shelf-actions">
+            <button
+              v-if="!shelf.isDefault && confirmDeleteShelf !== shelf.id"
+              class="library__shelf-delete-btn"
+              aria-label="Delete shelf"
+              @click="confirmDeleteShelf = shelf.id"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            </button>
+            <div v-if="confirmDeleteShelf === shelf.id" class="library__shelf-delete-confirm">
+              <span class="library__shelf-delete-warning">Delete shelf?</span>
+              <button
+                class="library__shelf-delete-yes"
+                :disabled="deletingShelf"
+                @click="deleteShelf(shelf.id)"
+              >
+                Yes
+              </button>
+              <button
+                class="library__shelf-delete-no"
+                @click="confirmDeleteShelf = null"
+              >
+                No
+              </button>
+            </div>
+            <NuxtLink
+              v-if="shelf.bookCount > 0"
+              :to="`/library/${shelf.slug}`"
+              class="library__view-all"
+            >
+              View all
+            </NuxtLink>
+          </div>
         </div>
 
         <BookGrid
@@ -151,6 +177,8 @@ const showNewShelf = ref(false)
 const newShelfName = ref('')
 const creatingShelf = ref(false)
 const newShelfInput = ref<HTMLInputElement>()
+const confirmDeleteShelf = ref<string | null>(null)
+const deletingShelf = ref(false)
 
 async function createShelf() {
   const name = newShelfName.value.trim()
@@ -176,6 +204,22 @@ async function createShelf() {
 
 function openBook(userBookId: string) {
   navigateTo(`/library/book/${userBookId}`)
+}
+
+async function deleteShelf(shelfId: string) {
+  deletingShelf.value = true
+  try {
+    await $fetch(`/api/shelves/${shelfId}`, { method: 'DELETE' })
+    confirmDeleteShelf.value = null
+    await shelvesStore.invalidate()
+    await libraryStore.invalidate()
+  }
+  catch {
+    // Could show error
+  }
+  finally {
+    deletingShelf.value = false
+  }
 }
 
 watch(showNewShelf, (val) => {
@@ -381,6 +425,73 @@ onMounted(() => {
     background: var(--sub-bg-color);
     padding: 2px $spacing-sm;
     border-radius: $radius-full;
+  }
+
+  &__shelf-actions {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+
+  &__shelf-delete-btn {
+    @include flex-center;
+    width: 1.75rem;
+    height: 1.75rem;
+    color: var(--text-color-muted);
+    background: none;
+    border: none;
+    border-radius: $radius-sm;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity $transition-fast, color $transition-fast, background-color $transition-fast;
+
+    .library__shelf:hover & {
+      opacity: 1;
+    }
+
+    &:hover {
+      color: var(--error-color);
+      background: var(--sub-bg-color);
+    }
+  }
+
+  &__shelf-delete-confirm {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    animation: fade-in-scale 150ms $ease-out-expo both;
+  }
+
+  &__shelf-delete-warning {
+    font-size: $font-size-sm;
+    color: var(--error-color);
+    font-weight: $font-weight-medium;
+  }
+
+  &__shelf-delete-yes {
+    padding: 2px $spacing-sm;
+    font-family: $font-family-body;
+    font-size: $font-size-xs;
+    color: #fff;
+    background: var(--error-color);
+    border: none;
+    border-radius: $radius-sm;
+    cursor: pointer;
+
+    &:hover { opacity: 0.85; }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
+
+  &__shelf-delete-no {
+    padding: 2px $spacing-sm;
+    font-family: $font-family-body;
+    font-size: $font-size-xs;
+    color: var(--text-color-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+
+    &:hover { color: var(--text-color); }
   }
 
   &__view-all {
