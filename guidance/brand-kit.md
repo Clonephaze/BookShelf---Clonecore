@@ -26,49 +26,74 @@ The `preview.jpg` in the repo root shows these tokens applied to Bookshelf's lib
 
 ## Color Palette
 
-### Light Mode
+### Light Mode (Sepia-Warm)
+
+Warm, papery tones inspired by e-reader sepia modes (Apple Books, Kindle). The default light theme feels like reading on aged parchment.
 
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `--color-bg-primary` | `#FAF8F5` | Main background — warm off-white with a paper-like quality |
-| `--color-bg-secondary` | `#F3F0EB` | Sidebar, card backgrounds |
-| `--color-bg-tertiary` | `#EBE7E0` | Hover states, subtle backgrounds |
-| `--color-surface` | `#FFFFFF` | Cards, elevated surfaces |
-| `--color-border` | `#DDD8D0` | Borders, dividers |
-| `--color-border-subtle` | `#E8E4DD` | Subtle separators |
-| `--color-text-primary` | `#2C2420` | Headings, primary text — deep warm brown |
-| `--color-text-secondary` | `#5C534A` | Body text, descriptions |
-| `--color-text-tertiary` | `#8C8278` | Metadata, timestamps, muted text |
-| `--color-accent` | `#A8612B` | Primary actions, links, active states — warm amber/copper |
-| `--color-accent-hover` | `#8B4F20` | Hover on accent elements |
-| `--color-accent-subtle` | `#FBF1E8` | Accent backgrounds, selected states |
+| `--color-bg-primary` | `#F4EBDB` | Main background — warm parchment |
+| `--color-bg-secondary` | `#EBE1CF` | Sidebar, card backgrounds |
+| `--color-surface` | `#FAF5EB` | Cards, elevated surfaces — lightest cream |
+| `--color-border` | `#D3C7B3` | Borders, dividers — warm tan |
+| `--color-border-subtle` | `#E1D8C8` | Subtle separators |
+| `--color-text-primary` | `#302318` | Headings, primary text — deep espresso brown |
+| `--color-text-secondary` | `#5C4A38` | Body text, descriptions |
+| `--color-text-tertiary` | `#8A7A66` | Metadata, timestamps, muted text |
+| `--color-accent` | `#A0592A` | Primary actions, links — warm copper |
+| `--color-accent-hover` | `#854921` | Hover on accent elements |
+| `--color-accent-subtle` | `#F5EBD9` | Accent backgrounds, selected states |
 | `--color-success` | `#3D7C4F` | Goal complete, book finished |
 | `--color-warning` | `#B8860B` | Warnings, behind-pace indicators |
 | `--color-error` | `#C0392B` | Errors, destructive actions |
-| `--color-progress` | `#A8612B` | Reading progress bars and goal indicators |
+| `--color-progress` | `#A0592A` | Reading progress bars and goal indicators |
 | `--color-rating` | `#D4A03E` | Star ratings, warm gold |
 
-### Dark Mode
+### Dark Mode (Espresso)
+
+Rich, neutral dark browns — deep chocolate/coffee tones without yellow-green cast. Warm accents provide contrast.
 
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `--color-bg-primary` | `#1A1512` | Main background — deep warm black |
-| `--color-bg-secondary` | `#231E1A` | Sidebar, card backgrounds |
-| `--color-bg-tertiary` | `#2E2822` | Hover states, subtle backgrounds |
-| `--color-surface` | `#231E1A` | Cards, elevated surfaces |
-| `--color-border` | `#3D352D` | Borders, dividers |
-| `--color-border-subtle` | `#2E2822` | Subtle separators |
-| `--color-text-primary` | `#EDE8E2` | Headings, primary text |
-| `--color-text-secondary` | `#A89E94` | Body text, descriptions |
-| `--color-text-tertiary` | `#7A716A` | Metadata, timestamps, muted text |
-| `--color-accent` | `#D4964A` | Primary actions, links, active states |
-| `--color-accent-hover` | `#E0A85E` | Hover on accent elements |
-| `--color-accent-subtle` | `#2E2218` | Accent backgrounds, selected states |
+| `--color-bg-primary` | `#141110` | Main background — deep espresso |
+| `--color-bg-secondary` | `#1B1816` | Sidebar, card backgrounds |
+| `--color-surface` | `#211D1A` | Cards, elevated surfaces |
+| `--color-border` | `#382F29` | Borders, dividers |
+| `--color-border-subtle` | `#2A2521` | Subtle separators |
+| `--color-text-primary` | `#E8E1D8` | Headings, primary text — warm cream |
+| `--color-text-secondary` | `#A69C91` | Body text, descriptions |
+| `--color-text-tertiary` | `#706862` | Metadata, timestamps, muted text |
+| `--color-accent` | `#C8844A` | Primary actions, links — warm amber |
+| `--color-accent-hover` | `#D99A60` | Hover on accent elements |
+| `--color-accent-subtle` | `#261D14` | Accent backgrounds, selected states |
 | `--color-success` | `#5AAF6E` | Goal complete, book finished |
 | `--color-warning` | `#D4A03E` | Warnings, behind-pace indicators |
 | `--color-error` | `#E8614D` | Errors, destructive actions |
-| `--color-progress` | `#D4964A` | Reading progress bars and goal indicators |
+| `--color-progress` | `#C8844A` | Reading progress bars and goal indicators |
 | `--color-rating` | `#E0B84A` | Star ratings, warm gold |
+
+### OLED Mode (True Black)
+
+True `#000` background for OLED screens. High contrast with warm accents — serves both accessibility and OLED battery optimization.
+
+| Token | Hex | Usage |
+|-------|-----|-------|
+| `--color-bg-primary` | `#000000` | Main background — true black |
+| `--color-bg-secondary` | `#0C0A09` | Sidebar, card backgrounds — near-black |
+| `--color-surface` | `#161311` | Cards, elevated surfaces |
+| `--color-border` | `#2C2622` | Borders, dividers — warm-tinted |
+| `--color-border-subtle` | `#1C1814` | Subtle separators |
+| `--color-text-primary` | `#F0ECE6` | Headings, primary text — bright cream |
+| `--color-text-secondary` | `#B8AFA5` | Body text, descriptions |
+| `--color-text-tertiary` | `#78706A` | Metadata, timestamps, muted text |
+| `--color-accent` | `#D4964A` | Primary actions, links — warm amber |
+| `--color-accent-hover` | `#E0A85E` | Hover on accent elements |
+| `--color-accent-subtle` | `#1A1408` | Accent backgrounds, selected states |
+| `--color-success` | `#62B876` | Goal complete, book finished |
+| `--color-warning` | `#D9AD48` | Warnings, behind-pace indicators |
+| `--color-error` | `#ED6B57` | Errors, destructive actions |
+| `--color-progress` | `#D4964A` | Reading progress bars and goal indicators |
+| `--color-rating` | `#E5C050` | Star ratings, warm gold |
 
 ## Typography
 

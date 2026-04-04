@@ -9,19 +9,19 @@
 </template>
 
 <script setup lang="ts">
-import { Sun, Moon, BookOpen, Contrast } from 'lucide-vue-next'
+import { Sun, Moon, Smartphone, Monitor } from 'lucide-vue-next'
 import type { Theme } from '~/composables/useTheme'
 
 const { currentTheme, setTheme } = useTheme()
 
-const themeOrder: Theme[] = ['system', 'light', 'dark', 'sepia', 'contrast']
+const themeOrder: Theme[] = ['system', 'light', 'dark', 'oled']
 
 const themeIcon = computed(() => {
   switch (currentTheme.value) {
+    case 'light': return Sun
     case 'dark': return Moon
-    case 'sepia': return BookOpen
-    case 'contrast': return Contrast
-    default: return Sun
+    case 'oled': return Smartphone
+    default: return Monitor
   }
 })
 

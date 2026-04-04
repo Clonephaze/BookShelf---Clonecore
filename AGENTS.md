@@ -14,19 +14,20 @@ Bookshelf is a **Product Challenge** on [Frontend Mentor](https://www.frontendme
 | Book APIs | **Open Library** (primary) + **Google Books** (enrichment/fallback) |
 | Hosting | **Vercel** |
 | Icons | **Lucide Vue** |
-| Themes | Light, Dark, Sepia, High Contrast (CSS custom properties + `:root.{theme}-mode` classes) |
+| Themes | Light (sepia-warm), Dark (espresso), OLED (true black) via CSS custom properties + `:root.{theme}-mode` classes |
 | Testing | **Vitest** + **@nuxt/test-utils** + **@vue/test-utils** (happy-dom) |
 
 ## Differentiators
 
-All 6 are in scope. This is a long-lived, full-stack production application.
+All 5 are in scope (AI companion removed). This is a long-lived, full-stack production application.
 
 1. Animated shelf & cover interactions
-2. AI-powered reading companion
-3. Social sharing & reading cards
-4. Goodreads data migration
-5. Reading statistics dashboard
-6. Accessibility-first reading tracker
+2. Social sharing & reading cards
+3. Goodreads data migration
+4. Reading statistics dashboard
+5. Accessibility-first reading tracker
+
+Plus custom features: Friends system, Reading sessions, Progress intelligence, "Because you read…" engine.
 
 ## Project Documentation
 

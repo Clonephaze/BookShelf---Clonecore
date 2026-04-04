@@ -16,7 +16,7 @@ const emit = defineEmits<{
 }>()
 
 // Use small cover for cards, fall back to full cover
-const coverSrc = computed(() => props.coverUrlSmall || props.coverUrl || undefined)
+const coverSrc = computed(() => props.coverUrl || props.coverUrlSmall || undefined)
 
 const isOpening = ref(false)
 

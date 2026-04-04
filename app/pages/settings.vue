@@ -233,7 +233,7 @@
 
 <script setup lang="ts">
 import {
-  Monitor, Sun, Moon, BookOpen, Contrast,
+  Monitor, Sun, Moon, Smartphone,
   Palette, UserCircle, BookMarked, Bell, Shield, Database, AlertTriangle,
 } from 'lucide-vue-next'
 import type { Theme } from '~/composables/useTheme'
@@ -261,8 +261,7 @@ const themeOptions: { value: Theme; label: string; icon: typeof Sun }[] = [
   { value: 'system', label: 'System', icon: Monitor },
   { value: 'light', label: 'Light', icon: Sun },
   { value: 'dark', label: 'Dark', icon: Moon },
-  { value: 'sepia', label: 'Sepia', icon: BookOpen },
-  { value: 'contrast', label: 'High Contrast', icon: Contrast },
+  { value: 'oled', label: 'OLED', icon: Smartphone },
 ]
 
 const memberSince = computed(() => {

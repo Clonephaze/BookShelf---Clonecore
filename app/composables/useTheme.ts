@@ -1,7 +1,7 @@
-export type Theme = 'light' | 'dark' | 'sepia' | 'contrast' | 'system'
+export type Theme = 'light' | 'dark' | 'oled' | 'system'
 
 const STORAGE_KEY = 'bookshelf-theme'
-const THEME_CLASSES = ['light-mode', 'dark-mode', 'sepia-mode', 'contrast-mode']
+const THEME_CLASSES = ['light-mode', 'dark-mode', 'oled-mode']
 
 export const useTheme = () => {
   const currentTheme = useState<Theme>('theme', () => 'system')

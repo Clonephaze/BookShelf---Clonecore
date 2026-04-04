@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { useTheme } from '../../app/composables/useTheme'
 
-const THEME_CLASSES = ['light-mode', 'dark-mode', 'sepia-mode', 'contrast-mode']
+const THEME_CLASSES = ['light-mode', 'dark-mode', 'oled-mode']
 
 describe('useTheme', () => {
   beforeEach(() => {
@@ -27,8 +27,8 @@ describe('useTheme', () => {
 
   it('setTheme applies the correct CSS class', () => {
     const { setTheme } = useTheme()
-    setTheme('sepia')
-    expect(document.documentElement.classList.contains('sepia-mode')).toBe(true)
+    setTheme('oled')
+    expect(document.documentElement.classList.contains('oled-mode')).toBe(true)
   })
 
   it('setTheme removes the previous theme class', () => {
@@ -36,15 +36,15 @@ describe('useTheme', () => {
     setTheme('dark')
     expect(document.documentElement.classList.contains('dark-mode')).toBe(true)
 
-    setTheme('sepia')
+    setTheme('oled')
     expect(document.documentElement.classList.contains('dark-mode')).toBe(false)
-    expect(document.documentElement.classList.contains('sepia-mode')).toBe(true)
+    expect(document.documentElement.classList.contains('oled-mode')).toBe(true)
   })
 
   it('setTheme persists to localStorage', () => {
     const { setTheme } = useTheme()
-    setTheme('contrast')
-    expect(localStorage.getItem('bookshelf-theme')).toBe('contrast')
+    setTheme('oled')
+    expect(localStorage.getItem('bookshelf-theme')).toBe('oled')
   })
 
   it('system theme removes all theme classes', () => {
@@ -68,8 +68,8 @@ describe('useTheme', () => {
 
   it('resolvedTheme returns explicit theme when not system', () => {
     const { setTheme, resolvedTheme } = useTheme()
-    setTheme('sepia')
-    expect(resolvedTheme.value).toBe('sepia')
+    setTheme('oled')
+    expect(resolvedTheme.value).toBe('oled')
   })
 
   it('resolvedTheme resolves system to dark when user prefers dark', () => {

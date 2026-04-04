@@ -52,6 +52,12 @@ async function onSortChange(sort: string) {
 
 onMounted(() => {
   shelvesStore.fetch()
+
+  // If navigated with ?q= param (e.g. from header search), run the search
+  const q = useRoute().query.q
+  if (typeof q === 'string' && q.trim().length >= 2) {
+    searchStore.doSearch(q.trim())
+  }
 })
 </script>
 

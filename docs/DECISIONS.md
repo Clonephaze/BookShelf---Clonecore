@@ -4,6 +4,41 @@ Log of significant decisions. Newest first.
 
 ---
 
+## ADR-008: Roadmap Expansion — Friends, Sessions, Intelligence, Recs (No AI)
+
+**Date:** 2026-04-04
+**Status:** Accepted
+
+Added four custom features to the roadmap as new phases:
+
+- **Friends** (Phase 13): Username-based friend system. Read-only social — see each other's shelves, progress, goals. No messaging, no comments. Requires adding usernames to auth (retrofitted into Phase 1 as an open task).
+- **Reading Sessions** (Phase 11): Timed reading sessions with page input at end. Feeds pace analytics (pages/hour, session streaks).
+- **Progress Intelligence** (Phase 12): Data-driven insights — pace projections ("finish in 3 days"), goal tracking ("ahead by 12%"), stale book detection.
+- **"Because You Read…" Engine** (Phase 14): Book recommendations via collaborative filtering and genre/author overlap. No AI — uses reading data across users. Transparent reasoning ("because you liked X").
+
+**Removed:** AI-Powered Reading Companion (differentiator #2). Authors and curators already make great rec lists; the "Because You Read…" engine achieves recommendations through user data instead.
+
+Differentiators reduced from 6 to 5. Total roadmap phases expanded from 12 to 16.
+
+---
+
+## ADR-007: Theme Consolidation — 4 Themes → 3
+
+**Date:** 2026-04-04
+**Status:** Accepted
+
+Consolidated from 4 themes (Light, Dark, Sepia, High Contrast) to 3 themes (Light, Dark, OLED).
+
+**Changes:**
+- **Light** now uses warm sepia-toned parchment colors (inspired by Apple Books / Kindle sepia modes). The previous "light" was too cool/neutral, and sepia was redundant as a separate theme.
+- **Dark** shifted to richer, neutral espresso browns. Previous dark had a yellow-green tint.
+- **High Contrast** (blinding white bg + black text) replaced with **OLED** — true `#000` background, high contrast text, warm accents. Serves accessibility needs (high contrast ratios) and OLED display optimization.
+- Sepia removed as standalone theme since its identity is now the default light mode.
+
+**DB note:** The `user_preferences.theme` column is a text field (no enum constraint), so 'sepia'/'high-contrast' values from existing users are handled gracefully — they fall back to system default on next load.
+
+---
+
 ## ADR-006: Vitest Testing Strategy
 
 **Date:** 2026-03-30

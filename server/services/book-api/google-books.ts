@@ -41,14 +41,13 @@ function extractISBNs(identifiers?: { type: string, identifier: string }[]): { i
   return { isbn13, isbn10 }
 }
 
-/** Upgrade Google Books thumbnail to higher-res version */
-function upgradeCoverUrl(url?: string): string | undefined {
+/** Upgrade Google Books thumbnail URL. zoom=3 gives ~400-600px, zoom=1 is the default ~128px. */
+function upgradeCoverUrl(url?: string, zoom = 1): string | undefined {
   if (!url) return undefined
-  // Google Books returns small thumbnails by default.
-  // Replace zoom=1 with zoom=0 for larger images, and force https.
   return url
     .replace('http://', 'https://')
     .replace('&edge=curl', '')
+    .replace(/zoom=\d/, `zoom=${zoom}`)
 }
 
 /** Normalize a Google Books volume into a BookSearchResult */
@@ -63,8 +62,8 @@ function normalizeVolume(volume: GBVolume): BookSearchResult {
     ...(additionalAuthors.length && { additionalAuthors }),
     isbn13,
     isbn10,
-    coverUrl: upgradeCoverUrl(info.imageLinks?.thumbnail),
-    coverUrlSmall: upgradeCoverUrl(info.imageLinks?.smallThumbnail),
+    coverUrl: upgradeCoverUrl(info.imageLinks?.thumbnail, 3),
+    coverUrlSmall: upgradeCoverUrl(info.imageLinks?.thumbnail, 1),
     pageCount: info.pageCount,
     publishedDate: info.publishedDate,
     genres: info.categories?.slice(0, 5),

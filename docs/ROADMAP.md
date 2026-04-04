@@ -8,7 +8,7 @@ Phased build plan. Each phase builds on the previous and results in a working, d
 - [x] Initialize Nuxt 4 project with TypeScript strict
 - [x] Set up SCSS pipeline: `_variables.scss`, `_themes.scss`, `_mixins.scss`, `_reset.scss`, `main.scss`
 - [x] Port `tokens.css` values into SCSS variables + CSS custom properties
-- [x] Configure theme system: light, dark, sepia, high-contrast via `:root.{theme}-mode` classes
+- [x] Configure theme system: light (sepia-warm), dark (espresso), OLED (true black) via `:root.{theme}-mode` classes
 - [x] Install and configure Drizzle ORM + Neon serverless driver
 - [x] Write Drizzle schema (all 11 tables from `docs/DATABASE.md`)
 - [x] Run initial migration against Neon
@@ -39,6 +39,9 @@ Phased build plan. Each phase builds on the previous and results in a working, d
 - [x] Responsive sidebar (desktop sidebar + mobile bottom nav)
 - [x] Basic page routing: library, search, goals, stats, settings
 - [x] Unit tests: useTheme, auth middleware, session helpers, database singleton
+- [ ] Usernames (unique display name, required at signup, used for friend system)
+
+_Note: Usernames were not in the original Phase 1 scope. Added retroactively — needed before friends system._
 
 **Deliverable:** Full auth flow, app shell with navigation, responsive layout.
 
@@ -205,11 +208,73 @@ _Note: Book detail page layout was built in Phase 3 with placeholder sections. P
 - [ ] Goodreads CSV import (parse, preview, map shelves, conflict resolution)
 - [ ] Library search (search own books, debounced, Cmd+K shortcut)
 - [ ] Command palette for power users
-- [ ] Book discovery & recommendations (design challenge)
 
 ---
 
-## Phase 11 — Differentiators (Ongoing)
+## Phase 11 — Reading Sessions
+**Goal:** Timed reading sessions that feed pace analytics.
+
+- [ ] Start a reading session: pick a book, set a timer duration (or open-ended)
+- [ ] Timer UI (countdown, pause/resume, ambient mode option)
+- [ ] Session end prompt: enter new page number
+- [ ] Calculate pages read per session
+- [ ] Session history log (`reading_sessions` table: book, start time, duration, pages read)
+- [ ] Stats derived from sessions: pages per hour, average session length
+- [ ] Weekly / monthly / yearly session summaries
+- [ ] Session streaks (consecutive days with a session)
+- [ ] Integrate session data into Phase 9 stats dashboard
+
+**Deliverable:** Timed reading sessions with pace tracking and historical data.
+
+---
+
+## Phase 12 — Progress Intelligence
+**Goal:** Smart insights derived from reading data.
+
+- [ ] "At your current pace, you'll finish in X days" (per-book projection)
+- [ ] "You're ahead of your yearly goal by X%" / "You need to read X books/month to catch up"
+- [ ] Pace trends: "You read faster on weekends" / "Your pace has increased this month"
+- [ ] Milestone predictions: "You'll hit 50 books by October at this rate"
+- [ ] Stale book detection: "You haven't updated [Book] in 3 weeks"
+- [ ] Contextual nudges on library/dashboard (non-intrusive, dismissable)
+- [ ] All projections based on actual session + progress log data
+
+**Deliverable:** Intelligent, data-driven reading insights throughout the app.
+
+---
+
+## Phase 13 — Friends
+**Goal:** Lightweight social layer — see friends' reading activity.
+
+- [ ] Username system (unique, required, changeable in settings)
+- [ ] Friend requests via username search
+- [ ] Accept / decline / remove friend
+- [ ] Friends list page (`/friends`)
+- [ ] Friend profile view: shelves, currently reading, recent activity, goal progress
+- [ ] Privacy controls: choose what friends can see (shelves, progress, ratings, goals)
+- [ ] Activity feed: "[Friend] finished [Book]" / "[Friend] started [Book]"
+- [ ] No messaging, no comments, no public profiles — intentionally minimal
+
+**Deliverable:** Username-based friend system with read-only activity sharing.
+
+---
+
+## Phase 14 — "Because You Read…" Engine
+**Goal:** Book recommendations based on reading history — no AI, human-curated data.
+
+- [ ] "Because you read [Book A]" → suggested books (based on shared shelves across users, genre overlap, author connections)
+- [ ] Collaborative filtering: "Readers who rated [Book A] highly also rated [Book B] highly"
+- [ ] Genre affinity scoring: surface under-explored genres
+- [ ] Author discovery: "You've read 3 books by [Author] — here are their others"
+- [ ] Recommendation source transparency: always show _why_ a book is recommended
+- [ ] Dismissable recommendations ("Not interested" feeds back into model)
+- [ ] Cold-start handling: recommendations improve as library grows, graceful empty state
+
+**Deliverable:** Data-driven book recommendations without AI dependency.
+
+---
+
+## Phase 15 — Differentiators (Ongoing)
 **Goal:** The features that make Bookshelf exceptional.
 
 ### Animated Shelf & Cover Interactions
@@ -219,13 +284,6 @@ _Note: Book detail page layout was built in Phase 3 with placeholder sections. P
 - [ ] Micro-interactions (scale, easing, confetti)
 - [ ] Layout transitions (filter/sort reflow)
 - [ ] `prefers-reduced-motion` respect
-
-### AI-Powered Reading Companion
-- [ ] "Why you might like this" for Want to Read books
-- [ ] Book similarity mapping
-- [ ] Smart reading insights
-- [ ] Natural language library search
-- [ ] Auto-genre/tag suggestions
 
 ### Social Sharing & Reading Cards
 - [ ] Year-in-review shareable card
@@ -262,7 +320,7 @@ _Note: Book detail page layout was built in Phase 3 with placeholder sections. P
 
 ---
 
-## Phase 12 — Polish & Performance
+## Phase 16 — Polish & Performance
 **Goal:** Production-ready quality.
 
 - [ ] Lighthouse scores: Performance > 85, Accessibility > 90, Best Practices > 90

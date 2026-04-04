@@ -1,15 +1,20 @@
 <template>
-  <nav class="sidebar-nav" aria-label="Main navigation">
+  <nav class="sidebar-nav" :class="{ 'sidebar-nav--collapsed': collapsed }" aria-label="Main navigation">
     <ul class="sidebar-nav__list">
       <li v-for="item in navItems" :key="item.to">
-        <NuxtLink :to="item.to" class="sidebar-nav__link" :aria-current="isActive(item.to) ? 'page' : undefined">
+        <NuxtLink
+          :to="item.to"
+          class="sidebar-nav__link"
+          :aria-current="isActive(item.to) ? 'page' : undefined"
+          :title="collapsed ? item.label : undefined"
+        >
           <component :is="item.icon" :size="18" class="sidebar-nav__icon" />
-          <span>{{ item.label }}</span>
+          <span v-if="!collapsed">{{ item.label }}</span>
         </NuxtLink>
       </li>
     </ul>
 
-    <div v-if="shelves.length" class="sidebar-nav__section">
+    <div v-if="shelves.length && !collapsed" class="sidebar-nav__section">
       <h3 class="sidebar-nav__heading">Shelves</h3>
       <ul class="sidebar-nav__list">
         <li v-for="shelf in shelves" :key="shelf.id">
@@ -45,6 +50,7 @@ interface Shelf {
 
 defineProps<{
   shelves: Shelf[]
+  collapsed?: boolean
 }>()
 
 const route = useRoute()
@@ -79,6 +85,20 @@ function shelfIcon(icon: string | null): LucideIcon {
   @include flex-column;
   gap: $spacing-lg;
 
+  &--collapsed {
+    gap: $spacing-sm;
+
+    .sidebar-nav__list {
+      gap: 0.125rem;
+    }
+
+    .sidebar-nav__link {
+      justify-content: center;
+      padding: $spacing-sm;
+      gap: 0;
+    }
+  }
+
   &__list {
     @include flex-column;
     gap: $spacing-xs;
@@ -95,6 +115,7 @@ function shelfIcon(icon: string | null): LucideIcon {
     border-radius: $radius-md;
     text-decoration: none;
     transition: color $transition-fast, background-color $transition-fast;
+    min-width: max-content;
     @include focus-visible-highlight;
 
     &:hover {
@@ -126,6 +147,7 @@ function shelfIcon(icon: string | null): LucideIcon {
     color: var(--text-color-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    min-width: max-content;
   }
 }
 </style>

@@ -150,11 +150,10 @@ All external API calls (Open Library, Google Books) go through Nuxt server route
 - Provides a single interface regardless of which API answered
 
 ### Theme System
-Themes are implemented via CSS custom properties on `:root` / `[data-theme]`, with SCSS providing the authoring experience (nesting, mixins, maps). Planned themes:
-- **Light** (default) — warm off-white, `tokens.css` light mode
-- **Dark** — deep warm black, `tokens.css` dark mode
-- **Sepia** — warm reading mode, even more papery
-- **High Contrast** — WCAG AAA ratios, accessibility differentiator
+Themes are implemented via CSS custom properties on `:root` / `:root.{theme}-mode`, with SCSS providing the authoring experience (nesting, mixins, maps). Three themes:
+- **Light** (default) — warm sepia-toned parchment, inspired by e-reader sepia modes
+- **Dark** — rich espresso browns, neutral dark tones with warm accents
+- **OLED** — true black (`#000`) background, high contrast dark mode for OLED displays
 
 Theme preference stored in user settings (DB for authenticated, localStorage for guests). System preference (`prefers-color-scheme`) used as default.
 

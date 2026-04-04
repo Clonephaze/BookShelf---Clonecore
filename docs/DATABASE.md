@@ -31,7 +31,7 @@ User-level settings — theme, display, defaults.
 |--------|------|-------|
 | `id` | `uuid` PK | |
 | `user_id` | `text` FK → `user.id` | Unique, one per user |
-| `theme` | `text` | `'light'`, `'dark'`, `'sepia'`, `'high-contrast'`, `'system'` |
+| `theme` | `text` | `'light'`, `'dark'`, `'oled'`, `'system'` |
 | `default_shelf_id` | `uuid` FK → `shelves.id` | Nullable, shelf to add new books to |
 | `books_per_row` | `integer` | Nullable, display preference |
 | `created_at` | `timestamp` | |
