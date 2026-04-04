@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <circle cx="60" cy="60" r="60" fill="#B06451"/>
+  <!-- Bookmark shape -->
+  <path d="M40 18 L40 96 L60 80 L80 96 L80 18Z" fill="#fff" opacity="0.9"/>
+  <!-- Decorative lines -->
+  <rect x="48" y="30" width="24" height="3" rx="1.5" fill="#B06451" opacity="0.3"/>
+  <rect x="48" y="38" width="24" height="2" rx="1" fill="#B06451" opacity="0.2"/>
+  <rect x="48" y="44" width="18" height="2" rx="1" fill="#B06451" opacity="0.2"/>
+  <!-- Heart or star decoration -->
+  <circle cx="60" cy="58" r="6" fill="#B06451" opacity="0.2"/>
+  <path d="M57 56 Q57 53 59 53 Q60 53 60 55 Q60 53 61 53 Q63 53 63 56 Q63 59 60 62 Q57 59 57 56Z" fill="#B06451" opacity="0.35"/>
+</svg>

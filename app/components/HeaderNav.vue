@@ -26,7 +26,12 @@
               aria-label="User menu"
               @click="userMenuOpen = !userMenuOpen"
             >
-              <span class="header-nav__avatar">{{ userInitial }}</span>
+              <ClientOnly>
+                <UserAvatar :avatar-id="user.avatar" :name="user.name" size="sm" />
+                <template #fallback>
+                  <UserAvatar :name="user.name" size="sm" />
+                </template>
+              </ClientOnly>
             </button>
             <Transition name="dropdown">
               <div v-if="userMenuOpen" class="header-nav__dropdown">
@@ -70,7 +75,7 @@ const route = useRoute()
 const router = useRouter()
 
 defineProps<{
-  user: { name: string } | null
+  user: { name: string; avatar?: string | null } | null
 }>()
 
 defineEmits<{ 'sign-out': [] }>()
@@ -97,11 +102,6 @@ const tabs = [
   { to: '/friends', label: 'Friends', icon: Users },
   { to: '/settings', label: 'Settings', icon: Settings },
 ]
-
-const userInitial = computed(() => {
-  const user = useAuth().user.value
-  return user?.name?.charAt(0)?.toUpperCase() ?? '?'
-})
 
 function isActive(path: string) {
   return route.path === path || route.path.startsWith(path + '/')
@@ -213,10 +213,6 @@ function isActive(path: string) {
     &:hover {
       background-color: var(--highlight-color-hover);
     }
-  }
-
-  &__avatar {
-    line-height: 1;
   }
 
   &__user-wrapper {

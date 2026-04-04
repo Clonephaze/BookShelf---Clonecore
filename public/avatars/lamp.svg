@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <circle cx="60" cy="60" r="60" fill="#9B8456"/>
+  <!-- Light glow -->
+  <ellipse cx="56" cy="54" rx="22" ry="16" fill="#fff" opacity="0.1"/>
+  <!-- Lamp shade -->
+  <path d="M38 42 L52 26 L68 26 L74 42Z" fill="#fff" opacity="0.9"/>
+  <!-- Inner shade -->
+  <path d="M42 42 L54 30 L66 30 L70 42Z" fill="#9B8456" opacity="0.15"/>
+  <!-- Arm -->
+  <line x1="60" y1="26" x2="74" y2="26" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+  <line x1="74" y1="26" x2="80" y2="44" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+  <!-- Stand -->
+  <line x1="80" y1="44" x2="80" y2="88" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+  <!-- Base -->
+  <ellipse cx="80" cy="90" rx="14" ry="4" fill="#fff" opacity="0.7"/>
+  <!-- Light rays -->
+  <line x1="44" y1="42" x2="36" y2="58" stroke="#fff" stroke-width="1.5" opacity="0.3" stroke-linecap="round"/>
+  <line x1="56" y1="42" x2="52" y2="62" stroke="#fff" stroke-width="1.5" opacity="0.3" stroke-linecap="round"/>
+  <line x1="68" y1="42" x2="68" y2="62" stroke="#fff" stroke-width="1.5" opacity="0.3" stroke-linecap="round"/>
+  <!-- Book on desk -->
+  <rect x="24" y="80" width="40" height="8" rx="1.5" fill="#fff" opacity="0.5"/>
+  <rect x="26" y="72" width="36" height="8" rx="1.5" fill="#fff" opacity="0.4" transform="rotate(-6 44 76)"/>
+</svg>

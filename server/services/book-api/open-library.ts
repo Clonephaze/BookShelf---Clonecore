@@ -49,19 +49,26 @@ function extractISBNs(isbns?: string[]): { isbn13?: string, isbn10?: string } {
   return { isbn13, isbn10 }
 }
 
-/** Build cover URL from ISBN */
+/**
+ * Build cover URL from ISBN or cover ID.
+ * Uses ?default=false so OL returns 404 (not a blank image) when no cover exists.
+ * Prefers cover_i-based URLs when available — OL's ISBN→cover mapping is
+ * spotty, but cover_i is a reliable signal that the cover actually exists.
+ */
 function buildCoverUrl(isbn13?: string, isbn10?: string, coverId?: number): { coverUrl?: string, coverUrlSmall?: string } {
+  // cover_i is the most reliable — it means OL definitely has this cover
+  if (coverId) {
+    return {
+      coverUrl: `https://covers.openlibrary.org/b/id/${coverId}-L.jpg?default=false`,
+      coverUrlSmall: `https://covers.openlibrary.org/b/id/${coverId}-M.jpg?default=false`,
+    }
+  }
+  // Fall back to ISBN-based URL (may 404 even when OL has the book)
   const isbn = isbn13 || isbn10
   if (isbn) {
     return {
       coverUrl: `${OL_COVER_URL}/${isbn}-L.jpg?default=false`,
       coverUrlSmall: `${OL_COVER_URL}/${isbn}-M.jpg?default=false`,
-    }
-  }
-  if (coverId) {
-    return {
-      coverUrl: `https://covers.openlibrary.org/b/id/${coverId}-L.jpg`,
-      coverUrlSmall: `https://covers.openlibrary.org/b/id/${coverId}-M.jpg`,
     }
   }
   return {}
@@ -85,6 +92,27 @@ function normalizeDoc(doc: OLSearchDoc): BookSearchResult {
     genres: doc.subject?.slice(0, 5),
     publisher: doc.publisher?.[0],
     openLibraryKey: doc.key,
+  }
+}
+
+interface OLWorkResponse {
+  description?: string | { type: string, value: string }
+}
+
+/** Fetch description from the OL Works endpoint */
+async function fetchWorkDescription(workKey: string): Promise<string | undefined> {
+  try {
+    const work = await $fetch<OLWorkResponse>(`https://openlibrary.org${workKey}.json`, {
+      timeout: 4000,
+    })
+    if (!work.description) return undefined
+    // Description can be a plain string or { type, value } object
+    return typeof work.description === 'string'
+      ? work.description
+      : work.description.value
+  }
+  catch {
+    return undefined
   }
 }
 
@@ -118,5 +146,18 @@ export async function searchOpenLibrary(
     timeout: 5000,
   })
 
-  return response.docs.map(normalizeDoc)
+  const results = response.docs.map(normalizeDoc)
+
+  // Enrich top results with descriptions from the Works endpoint
+  // (OL search doesn't return descriptions — they live on /works/{key}.json)
+  const enrichLimit = Math.min(results.length, 5)
+  await Promise.all(
+    results.slice(0, enrichLimit).map(async (result) => {
+      if (result.openLibraryKey) {
+        result.description = await fetchWorkDescription(result.openLibraryKey)
+      }
+    }),
+  )
+
+  return results
 }

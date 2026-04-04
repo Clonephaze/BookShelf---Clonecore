@@ -52,12 +52,70 @@
         <p class="settings__panel-desc">Your profile and login information.</p>
 
         <div v-if="user" class="settings__group">
-          <h4 class="settings__group-label">Profile</h4>
-          <div class="settings__info-grid">
-            <div class="settings__info-item">
-              <span class="settings__info-label">Name</span>
-              <span class="settings__info-value">{{ user.name }}</span>
+          <h4 class="settings__group-label">Profile picture</h4>
+          <div class="settings__avatar-section">
+            <UserAvatar :avatar-id="selectedAvatar" :name="user.name" size="lg" />
+            <div class="settings__avatar-grid">
+              <button
+                v-for="av in avatars"
+                :key="av.id"
+                class="settings__avatar-option"
+                :class="{ 'settings__avatar-option--active': selectedAvatar === av.id }"
+                :aria-label="av.label"
+                :title="av.label"
+                @click="selectAvatar(av.id)"
+              >
+                <img :src="av.src" :alt="av.label" width="40" height="40">
+              </button>
+              <button
+                class="settings__avatar-option"
+                :class="{ 'settings__avatar-option--active': !selectedAvatar }"
+                aria-label="Use initials"
+                title="Use initials"
+                @click="selectAvatar(null)"
+              >
+                <span class="settings__avatar-initials">{{ user.name?.charAt(0)?.toUpperCase() ?? '?' }}</span>
+              </button>
             </div>
+          </div>
+        </div>
+
+        <div v-if="user" class="settings__group">
+          <h4 class="settings__group-label">Username</h4>
+          <p class="settings__group-hint">3–20 characters: lowercase letters, numbers, underscores, hyphens.</p>
+          <form class="settings__form" @submit.prevent="handleUpdateProfile">
+            <FormField
+              id="username"
+              v-model="profileForm.username"
+              label="Username"
+              type="text"
+              placeholder="e.g. bookworm42"
+              autocomplete="username"
+              :error="profileErrors.username"
+            />
+            <FormField
+              id="displayName"
+              v-model="profileForm.name"
+              label="Display name"
+              type="text"
+              autocomplete="name"
+              :error="profileErrors.name"
+            />
+            <p v-if="profileErrors.general" class="settings__error" role="alert">
+              {{ profileErrors.general }}
+            </p>
+            <p v-if="profileSuccess" class="settings__success" role="status">
+              Profile updated successfully.
+            </p>
+            <button type="submit" class="settings__btn settings__btn--primary" :disabled="profileLoading">
+              {{ profileLoading ? 'Saving…' : 'Save Profile' }}
+            </button>
+          </form>
+        </div>
+
+        <div v-if="user" class="settings__group">
+          <h4 class="settings__group-label">Account info</h4>
+          <div class="settings__info-grid">
             <div class="settings__info-item">
               <span class="settings__info-label">Email</span>
               <span class="settings__info-value">{{ user.email }}</span>
@@ -242,7 +300,7 @@ definePageMeta({ layout: 'default' })
 
 useHead({ title: 'Settings — Bookshelf' })
 
-const { user, changePassword, deleteUser, signOut } = useAuth()
+const { user, changePassword, deleteUser, signOut, updateProfile } = useAuth()
 const { currentTheme, setTheme } = useTheme()
 
 const activeSection = ref('appearance')
@@ -291,6 +349,73 @@ const memberSince = computed(() => {
     year: 'numeric',
   })
 })
+
+// Profile editing
+const selectedAvatar = ref<string | null>(user.value?.avatar ?? null)
+const profileForm = reactive({
+  username: (user.value as Record<string, unknown>)?.username as string ?? '',
+  name: user.value?.name ?? '',
+})
+const profileErrors = reactive({ username: '', name: '', general: '' })
+const profileLoading = ref(false)
+const profileSuccess = ref(false)
+
+// Sync form when user data loads/changes
+watch(user, (u) => {
+  if (u) {
+    selectedAvatar.value = (u as Record<string, unknown>).avatar as string ?? null
+    profileForm.username = (u as Record<string, unknown>).username as string ?? ''
+    profileForm.name = u.name ?? ''
+  }
+}, { immediate: true })
+
+function selectAvatar(id: string | null) {
+  selectedAvatar.value = id
+  // Save avatar immediately
+  updateProfile({ avatar: id }).catch(() => {})
+}
+
+async function handleUpdateProfile() {
+  profileErrors.username = ''
+  profileErrors.name = ''
+  profileErrors.general = ''
+  profileSuccess.value = false
+
+  const username = profileForm.username.trim().toLowerCase()
+  const name = profileForm.name.trim()
+
+  if (username && !/^[a-z0-9_-]{3,20}$/.test(username)) {
+    profileErrors.username = 'Must be 3–20 characters: lowercase letters, numbers, underscores, hyphens.'
+    return
+  }
+  if (!name) {
+    profileErrors.name = 'Display name is required.'
+    return
+  }
+
+  profileLoading.value = true
+  try {
+    await updateProfile({
+      username: username || null,
+      name,
+    })
+    profileSuccess.value = true
+  }
+  catch (err: unknown) {
+    const msg = (err as { data?: { message?: string } })?.data?.message
+      || (err as { statusMessage?: string })?.statusMessage
+      || 'Could not update profile.'
+    if (msg.toLowerCase().includes('username')) {
+      profileErrors.username = msg
+    }
+    else {
+      profileErrors.general = msg
+    }
+  }
+  finally {
+    profileLoading.value = false
+  }
+}
 
 // Change password
 const passwordForm = reactive({ current: '', next: '', confirm: '' })
@@ -557,6 +682,57 @@ async function handleDeleteAccount() {
     @include respond-to($breakpoint-sm) {
       grid-template-columns: 1fr 1fr;
     }
+  }
+
+  // Avatar section
+  &__avatar-section {
+    display: flex;
+    align-items: flex-start;
+    gap: $spacing-lg;
+    margin-top: $spacing-xs;
+  }
+
+  &__avatar-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+  }
+
+  &__avatar-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid var(--border-color-subtle);
+    background: var(--surface-color);
+    cursor: pointer;
+    padding: 0;
+    overflow: hidden;
+    transition: border-color 0.15s, box-shadow 0.15s;
+
+    &:hover {
+      border-color: var(--highlight-color);
+    }
+
+    &--active {
+      border-color: var(--highlight-color);
+      box-shadow: 0 0 0 2px var(--highlight-color-subtle);
+    }
+
+    img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+  }
+
+  &__avatar-initials {
+    font-family: $font-family-heading;
+    font-weight: $font-weight-bold;
+    font-size: 1rem;
+    color: var(--highlight-color);
   }
 
   &__info-item {

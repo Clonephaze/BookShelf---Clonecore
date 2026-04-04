@@ -8,6 +8,13 @@
       "when": 1774855849784,
       "tag": "0000_sad_terror",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1775332612925,
+      "tag": "0001_add-username-avatar",
+      "breakpoints": true
     }
   ]
 }

@@ -1,4 +1,5 @@
 import { createAuthClient } from 'better-auth/vue'
+import { inferAdditionalFields } from 'better-auth/client/plugins'
 
 let _client: ReturnType<typeof createAuthClient> | null = null
 
@@ -10,7 +11,17 @@ function getAuthClient() {
     const baseURL = typeof window !== 'undefined'
       ? window.location.origin
       : (config.public.betterAuthUrl as string)
-    _client = createAuthClient({ baseURL })
+    _client = createAuthClient({
+      baseURL,
+      plugins: [
+        inferAdditionalFields({
+          user: {
+            username: { type: 'string', required: false },
+            avatar: { type: 'string', required: false },
+          },
+        }),
+      ],
+    })
   }
   return _client
 }
@@ -54,5 +65,12 @@ export const useAuth = () => {
     changePassword: client.changePassword,
     deleteUser: client.deleteUser,
     waitForSession,
+
+    async updateProfile(data: { username?: string | null; avatar?: string | null; name?: string }) {
+      const res = await $fetch('/api/profile', { method: 'PATCH', body: data })
+      // Refetch session so the reactive user object updates everywhere
+      await session.value?.refetch?.()
+      return res
+    },
   }
 }

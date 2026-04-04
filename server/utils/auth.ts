@@ -53,6 +53,16 @@ export function useAuth() {
         updateAge: 60 * 60 * 24, // refresh daily
       },
       user: {
+        additionalFields: {
+          username: {
+            type: 'string' as const,
+            required: false,
+          },
+          avatar: {
+            type: 'string' as const,
+            required: false,
+          },
+        },
         deleteUser: {
           enabled: true,
         },

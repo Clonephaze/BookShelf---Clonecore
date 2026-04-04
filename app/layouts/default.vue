@@ -17,7 +17,12 @@
             aria-label="User menu"
             @click="userMenuOpen = !userMenuOpen"
           >
-            <span class="topbar__avatar">{{ userInitial }}</span>
+            <ClientOnly>
+              <UserAvatar :avatar-id="(user as any)?.avatar" :name="user?.name" size="sm" />
+              <template #fallback>
+                <UserAvatar :name="user?.name" size="sm" />
+              </template>
+            </ClientOnly>
           </button>
           <Transition name="dropdown">
             <div
@@ -60,10 +65,6 @@ const shelvesStore = useShelvesStore()
 
 const moreSheetOpen = ref(false)
 const userMenuOpen = ref(false)
-
-const userInitial = computed(() =>
-  user.value?.name?.charAt(0)?.toUpperCase() ?? '?',
-)
 
 // Close sheet and menu on route change
 const route = useRoute()
@@ -141,10 +142,6 @@ async function handleSignOut() {
     &:hover {
       background-color: var(--highlight-color-hover);
     }
-  }
-
-  &__avatar {
-    line-height: 1;
   }
 
   &__dropdown {

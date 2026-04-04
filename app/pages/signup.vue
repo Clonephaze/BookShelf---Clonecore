@@ -13,6 +13,17 @@
         required
         :error="errors.name"
       />
+      <div class="auth-form__field-group">
+        <FormField
+          id="username"
+          v-model="form.username"
+          label="Username (optional)"
+          placeholder="e.g. bookworm42"
+          autocomplete="username"
+          :error="errors.username"
+        />
+        <p class="auth-form__hint">3–20 characters: lowercase letters, numbers, underscores, hyphens.</p>
+      </div>
       <FormField
         id="email"
         v-model="form.email"
@@ -44,6 +55,24 @@
         :error="errors.confirmPassword"
       />
 
+      <div class="auth-form__avatar-section">
+        <label class="auth-form__label">Profile picture <span class="auth-form__optional">(optional)</span></label>
+        <div class="auth-form__avatar-grid">
+          <button
+            v-for="av in avatars"
+            :key="av.id"
+            type="button"
+            class="auth-form__avatar-option"
+            :class="{ 'auth-form__avatar-option--active': form.avatar === av.id }"
+            :aria-label="av.label"
+            :title="av.label"
+            @click="form.avatar = form.avatar === av.id ? '' : av.id"
+          >
+            <img :src="av.src" :alt="av.label" width="36" height="36">
+          </button>
+        </div>
+      </div>
+
       <p v-if="errors.general" class="auth-form__error" role="alert">
         {{ errors.general }}
       </p>
@@ -74,28 +103,34 @@ definePageMeta({
   layout: 'auth',
 })
 
-const { signUp, waitForSession } = useAuth()
+const { signUp, waitForSession, updateProfile } = useAuth()
 
 const form = reactive({
   name: '',
+  username: '',
   email: '',
   password: '',
   confirmPassword: '',
+  avatar: '',
 })
 
 const errors = reactive({
   name: '',
+  username: '',
   email: '',
   password: '',
   confirmPassword: '',
   general: '',
 })
 
+const USERNAME_REGEX = /^[a-z0-9_-]{3,20}$/
+
 const loading = ref(false)
 const slow = ref(false)
 
 function validate(): boolean {
   errors.name = ''
+  errors.username = ''
   errors.email = ''
   errors.password = ''
   errors.confirmPassword = ''
@@ -105,6 +140,12 @@ function validate(): boolean {
 
   if (!form.name.trim()) {
     errors.name = 'Name is required'
+    valid = false
+  }
+
+  const username = form.username.trim().toLowerCase()
+  if (username && !USERNAME_REGEX.test(username)) {
+    errors.username = 'Must be 3–20 characters: lowercase letters, numbers, underscores, hyphens.'
     valid = false
   }
 
@@ -149,6 +190,21 @@ async function handleSignUp() {
 
     // Initialize default shelves for the new user
     await $fetch('/api/shelves/init', { method: 'POST' })
+
+    // Set optional profile fields (username, avatar) after account creation
+    // updateProfile also refetches the session so nav shows the new avatar
+    const username = form.username.trim().toLowerCase()
+    if (username || form.avatar) {
+      try {
+        await updateProfile({
+          ...(username ? { username } : {}),
+          ...(form.avatar ? { avatar: form.avatar } : {}),
+        })
+      }
+      catch {
+        // Non-critical — user can set these later in settings
+      }
+    }
 
     // Wait for session to propagate before navigating
     const ready = await waitForSession()
@@ -240,6 +296,70 @@ async function handleSignUp() {
         color: var(--highlight-color-hover);
       }
     }
+  }
+
+  &__label {
+    @include body-text;
+    font-weight: $font-weight-medium;
+    font-size: $font-size-sm;
+    color: var(--text-color);
+  }
+
+  &__optional {
+    font-weight: $font-weight-regular;
+    color: var(--text-color-muted);
+  }
+
+  &__avatar-section {
+    @include flex-column;
+    gap: $spacing-sm;
+  }
+
+  &__avatar-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+  }
+
+  &__avatar-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid var(--border-color-subtle);
+    background: var(--surface-color);
+    cursor: pointer;
+    padding: 0;
+    overflow: hidden;
+    transition: border-color 0.15s, box-shadow 0.15s;
+
+    &:hover {
+      border-color: var(--highlight-color);
+    }
+
+    &--active {
+      border-color: var(--highlight-color);
+      box-shadow: 0 0 0 2px var(--highlight-color-subtle);
+    }
+
+    img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+    }
+  }
+
+  &__field-group {
+    @include flex-column;
+    gap: $spacing-xs;
+  }
+
+  &__hint {
+    @include meta-text;
+    color: var(--text-color-muted);
+    line-height: 1.4;
   }
 
   &__legal {

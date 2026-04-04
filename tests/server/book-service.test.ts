@@ -39,7 +39,7 @@ describe('Open Library Adapter', () => {
       publishedDate: '1925',
       openLibraryKey: '/works/OL123W',
     })
-    expect(results[0].coverUrl).toContain('9780743273565')
+    expect(results[0].coverUrl).toContain('8234567')
   })
 
   it('handles missing ISBNs gracefully', async () => {

@@ -62,7 +62,7 @@ function normalizeVolume(volume: GBVolume): BookSearchResult {
     ...(additionalAuthors.length && { additionalAuthors }),
     isbn13,
     isbn10,
-    coverUrl: upgradeCoverUrl(info.imageLinks?.thumbnail, 3),
+    coverUrl: upgradeCoverUrl(info.imageLinks?.thumbnail, 1),
     coverUrlSmall: upgradeCoverUrl(info.imageLinks?.thumbnail, 1),
     pageCount: info.pageCount,
     publishedDate: info.publishedDate,
