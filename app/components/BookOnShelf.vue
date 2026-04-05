@@ -119,20 +119,22 @@ $spine-w: 2.25rem;
   perspective: 900px;
   overflow: visible;
 
-  // Focus ring — use box-shadow instead of outline for 3D compat
+  // Focus ring — use a ::after pseudo-element on the outer (non-rotating)
+  // element so it paints above the 3D-translated cover face.
   &:focus-visible {
     outline: none;
+    z-index: 5;
 
-    .book-on-shelf__box {
-      &::after {
-        content: '';
-        position: absolute;
-        inset: -3px;
-        border: 2px solid var(--highlight-color);
-        border-radius: $radius-md;
-        pointer-events: none;
-        z-index: 10;
-      }
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border: 2px solid var(--highlight-color);
+      border-radius: $radius-md;
+      pointer-events: none;
+      // Must sit in front of the cover's translateZ(--sw)
+      z-index: 20;
+      transform: translateZ(calc(var(--sw) + 1px));
     }
   }
 

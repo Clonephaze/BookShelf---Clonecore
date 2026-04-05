@@ -33,14 +33,16 @@ function updateScrollState() {
   const el = trackEl.value
   if (!el) return
   canScrollLeft.value = el.scrollLeft > 10
+  // scrollWidth is now stable because updateEndPadding sets a pixel min-width
   canScrollRight.value = el.scrollLeft < el.scrollWidth - el.clientWidth - 10
 }
 
 function scrollBy(direction: 'left' | 'right') {
   const el = trackEl.value
   if (!el) return
-  // Scroll by roughly one "page" worth of visible books
-  const distance = el.clientWidth * 2
+  // Scroll by the width of the flat (non-turn) zone so one press reveals
+  // a full new set of cover-facing books.
+  const distance = el.clientWidth * (1 - TURN_START_FRACTION)
   el.scrollBy({
     left: direction === 'left' ? -distance : distance,
     behavior: 'smooth',
@@ -96,27 +98,29 @@ function updateEndPadding() {
   const bookCount = bookEls.length
 
   if (bookCount === 0) {
-    booksEl.style.paddingRight = ''
+    booksEl.style.minWidth = ''
     return
   }
 
-  // Measure one book's full cover width from the absolutely-positioned inner
-  // box (`.book-on-shelf__box`), which always has `width: var(--bw)` and is
-  // unaffected by the --turn-driven width collapse on the outer element.
-  const firstBox = bookEls[0].querySelector<HTMLElement>('.book-on-shelf__box')
+  // Measure one book's full cover width from the inner __box which always
+  // keeps width: var(--bw), unaffected by the --turn-driven collapse.
+  const firstBox = bookEls[0]?.querySelector<HTMLElement>('.book-on-shelf__box')
   const coverWidth = firstBox ? firstBox.offsetWidth : 0
-  if (coverWidth === 0) return // not yet rendered
+  if (coverWidth === 0) return
 
-  // Estimate the natural content width (all books at full cover size)
-  const gap = parseFloat(getComputedStyle(booksEl).columnGap) || 0
-  const naturalWidth = coverWidth * bookCount + gap * Math.max(0, bookCount - 1)
-  const contentOverflows = naturalWidth > el.clientWidth
+  const styles = getComputedStyle(booksEl)
+  const gap = parseFloat(styles.columnGap) || 0
+  const padLeft = parseFloat(styles.paddingLeft) || 0
+  const naturalWidth = padLeft + coverWidth * bookCount + gap * Math.max(0, bookCount - 1)
 
-  if (contentOverflows) {
-    // Add enough padding so the last books can scroll into the cover zone
-    booksEl.style.paddingRight = '35%'
+  if (naturalWidth > el.clientWidth) {
+    // Lock min-width in pixels so scrollWidth stays stable even when --turn
+    // collapses individual book widths. The extra 35% of viewport gives room
+    // to scroll the last books fully into the flat cover zone.
+    const turnPadding = el.clientWidth * TURN_START_FRACTION
+    booksEl.style.minWidth = `${naturalWidth + turnPadding}px`
   } else {
-    booksEl.style.paddingRight = ''
+    booksEl.style.minWidth = ''
   }
 }
 
@@ -315,7 +319,6 @@ watch(() => props.books.length, () => {
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     padding-bottom: 0;
-    scroll-snap-type: x proximity;
 
     // Hide scrollbar but keep functionality
     scrollbar-width: none;
@@ -329,9 +332,9 @@ watch(() => props.books.length, () => {
     padding: $spacing-md $spacing-sm 0;
     min-width: min-content;
 
-    :deep(.book-on-shelf) {
-      scroll-snap-align: start;
-    }
+    // :deep(.book-on-shelf) {
+      // scroll-snap-align: start;
+    // }
   }
 
   // --- Shelf surface (the plank) ---
