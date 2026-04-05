@@ -40,6 +40,7 @@ export default defineEventHandler(async (event) => {
       dateAdded: userBooks.dateAdded,
       dateStarted: userBooks.dateStarted,
       dateFinished: userBooks.dateFinished,
+      updatedAt: userBooks.updatedAt,
     })
     .from(userBooks)
     .innerJoin(books, eq(userBooks.bookId, books.id))

@@ -1,0 +1,329 @@
+<script setup lang="ts">
+definePageMeta({ layout: 'default' })
+
+const route = useRoute()
+const userBookId = computed(() => route.params.id as string)
+
+const detail = useBookDetail(userBookId)
+const { loading, error, book, fetchBook, shelvesStore } = detail
+
+useHead({
+  title: computed(() => book.value ? `${book.value.title} — Bookshelf` : 'Book — Bookshelf'),
+})
+
+onMounted(() => {
+  fetchBook()
+  shelvesStore.fetch()
+})
+</script>
+
+<template>
+  <div class="book-detail">
+    <NuxtLink to="/library" class="book-detail__back">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="m15 18-6-6 6-6" />
+      </svg>
+      Back to library
+    </NuxtLink>
+
+    <!-- Loading skeleton -->
+    <div v-if="loading" class="book-detail__skeleton">
+      <div class="book-detail__skeleton-cover" />
+      <div class="book-detail__skeleton-info">
+        <div class="book-detail__skeleton-title" />
+        <div class="book-detail__skeleton-author" />
+        <div class="book-detail__skeleton-meta" />
+        <div class="book-detail__skeleton-desc" />
+      </div>
+    </div>
+
+    <!-- Error state -->
+    <div v-else-if="error" class="book-detail__error">
+      <p>Couldn't load this book. It may have been removed.</p>
+      <NuxtLink to="/library" class="book-detail__error-link">Return to library</NuxtLink>
+    </div>
+
+    <!-- Book content -->
+    <template v-else-if="book">
+      <BookDetailContent
+        :detail="detail"
+        :user-book-id="userBookId"
+        class="book-detail__content"
+        @remove="navigateTo('/library')"
+      >
+        <template #cover>
+          <div class="book-detail__cover-area">
+            <div class="book-detail__cover-wrap">
+              <BookCover
+                :src="book.coverUrl ?? undefined"
+                :title="book.title"
+                :author="book.author"
+                width="16rem"
+              />
+              <button
+                class="book-detail__cover-change"
+                aria-label="Change cover"
+                @click="detail.showCoverPicker.value = !detail.showCoverPicker.value"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+              </button>
+            </div>
+            <CoverPicker
+              v-if="detail.showCoverPicker.value"
+              :user-book-id="userBookId"
+              @updated="detail.onCoverUpdated"
+              @close="detail.showCoverPicker.value = false"
+            />
+          </div>
+        </template>
+      </BookDetailContent>
+    </template>
+  </div>
+</template>
+
+<style lang="scss" scoped>
+@use "~/assets/scss/mixins" as *;
+
+.book-detail {
+  @include container($content-max-width);
+  padding-bottom: $spacing-3xl;
+
+  &__back {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-xl;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--text-color-muted);
+    text-decoration: none;
+    transition: color $transition-fast;
+
+    &:hover {
+      color: var(--highlight-color);
+    }
+  }
+
+  // --- Skeleton ---
+  &__skeleton {
+    display: flex;
+    gap: $spacing-xl;
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+
+    @include respond-below($breakpoint-md) {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+
+  &__skeleton-cover {
+    width: 16rem;
+    aspect-ratio: 2 / 3;
+    background: var(--sub-bg-color);
+    border-radius: $radius-lg;
+    flex-shrink: 0;
+  }
+
+  &__skeleton-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+  }
+
+  &__skeleton-title {
+    height: 2rem;
+    width: 70%;
+    background: var(--sub-bg-color);
+    border-radius: $radius-sm;
+  }
+
+  &__skeleton-author {
+    height: 1.25rem;
+    width: 40%;
+    background: var(--sub-bg-color);
+    border-radius: $radius-sm;
+  }
+
+  &__skeleton-meta {
+    height: 3rem;
+    width: 100%;
+    background: var(--sub-bg-color);
+    border-radius: $radius-sm;
+  }
+
+  &__skeleton-desc {
+    height: 6rem;
+    width: 100%;
+    background: var(--sub-bg-color);
+    border-radius: $radius-sm;
+  }
+
+  // --- Error ---
+  &__error {
+    @include flex-center;
+    flex-direction: column;
+    gap: $spacing-md;
+    min-height: 40vh;
+    @include body-text;
+    text-align: center;
+  }
+
+  &__error-link {
+    @include button-secondary;
+    text-decoration: none;
+    font-size: $font-size-sm;
+    padding: $spacing-xs $spacing-md;
+  }
+
+  // --- Content layout via deep selectors on BookDetailContent ---
+  &__content {
+    animation: fade-in $duration-base $ease-out-quart both;
+
+    :deep(.bdc) {
+      display: grid;
+      grid-template-columns: 16rem 1fr;
+      gap: $spacing-xl;
+
+      @include respond-below($breakpoint-md) {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+      }
+    }
+
+    // Cover and header sit side-by-side in the hero area
+    :deep(.bdc__cover-area) {
+      grid-row: 1;
+      grid-column: 1;
+    }
+
+    :deep(.bdc__header) {
+      grid-row: 1;
+      grid-column: 2;
+
+      @include respond-below($breakpoint-md) {
+        grid-row: auto;
+        grid-column: 1;
+      }
+    }
+
+    :deep(.bdc__title) {
+      font-size: $font-size-2xl;
+    }
+
+    // Everything below hero spans full width
+    :deep(.bdc__description),
+    :deep(.bdc__progress),
+    :deep(.bdc__rating-row),
+    :deep(.bdc__notes-row),
+    :deep(.bdc__dates-row),
+    :deep(.bdc__actions),
+    :deep(.bdc__sources) {
+      grid-column: 1 / -1;
+      padding-top: $spacing-lg;
+      border-top: 1px solid var(--border-color-subtle);
+    }
+
+    :deep(.bdc__progress-bar) {
+      height: 8px;
+    }
+
+    :deep(.bdc__page-btn) {
+      min-width: 2.5rem;
+      height: 2.25rem;
+      font-size: $font-size-sm;
+    }
+
+    :deep(.bdc__page-input) {
+      width: 4rem;
+    }
+
+    :deep(.bdc__pct-input) {
+      width: 4rem;
+    }
+
+    :deep(.bdc__time-display) {
+      min-width: 4rem;
+    }
+
+    :deep(.bdc__time-total-input) {
+      width: 8rem;
+      padding: $spacing-xs $spacing-sm;
+    }
+
+    :deep(.bdc__star) {
+      font-size: 1.5rem;
+    }
+
+    :deep(.bdc__notes) {
+      rows: 5;
+    }
+
+    :deep(.bdc__dates-grid) {
+      gap: $spacing-md;
+    }
+
+    :deep(.bdc__description) {
+      @include truncate(none);
+    }
+  }
+
+  // --- Cover (page-specific) ---
+  &__cover-area {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+  }
+
+  &__cover-wrap {
+    position: relative;
+
+    &:hover .book-detail__cover-change {
+      opacity: 1;
+    }
+  }
+
+  &__cover-change {
+    position: absolute;
+    bottom: $spacing-xs;
+    right: $spacing-xs;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.55);
+    border: none;
+    border-radius: $radius-full;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity $transition-fast, background-color $transition-fast;
+    backdrop-filter: blur(4px);
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.75);
+    }
+
+    &:focus-visible {
+      opacity: 1;
+      outline: 2px solid var(--highlight-color);
+      outline-offset: 2px;
+    }
+  }
+}
+</style>

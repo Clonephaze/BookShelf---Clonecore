@@ -112,6 +112,8 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'No valid fields to update' })
   }
 
+  updateData.updatedAt = new Date()
+
   await db
     .update(userBooks)
     .set(updateData)
@@ -135,5 +137,5 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  return { success: true }
+  return { success: true, updatedAt: updateData.updatedAt!.toISOString() }
 })

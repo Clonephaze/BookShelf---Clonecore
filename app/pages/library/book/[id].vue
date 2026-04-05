@@ -225,8 +225,8 @@
         <p class="book-detail__description">{{ book.description }}</p>
       </section>
 
-      <!-- Reading Progress -->
-      <section class="book-detail__section">
+      <!-- Reading Progress (only on Currently Reading / custom shelves) -->
+      <section v-if="showProgressControls" class="book-detail__section">
         <h3 class="book-detail__section-title">Reading Progress</h3>
         <div class="book-detail__progress-area">
           <div class="book-detail__progress-bar">
@@ -328,6 +328,25 @@
         </div>
       </section>
 
+      <!-- Want to Read: prompt to start reading -->
+      <section v-else-if="isOnWantToRead" class="book-detail__section">
+        <h3 class="book-detail__section-title">Reading Progress</h3>
+        <div class="book-detail__progress-area">
+          <div v-if="showStartReadingPrompt" class="book-detail__completion-prompt">
+            <span>Move to <strong>Currently Reading</strong> to start tracking?</span>
+            <button class="book-detail__completion-yes" @click="startReadingAndTrack">Yes, start reading!</button>
+            <button class="book-detail__completion-no" @click="showStartReadingPrompt = false">Not yet</button>
+          </div>
+          <button
+            v-else
+            class="book-detail__mode-switch"
+            @click="showStartReadingPrompt = true"
+          >
+            Start reading this book
+          </button>
+        </div>
+      </section>
+
       <!-- Rating (interactive) -->
       <section class="book-detail__section">
         <h3 class="book-detail__section-title">Your Rating</h3>
@@ -402,6 +421,10 @@
               @change="updateField('dateFinished', ($event.target as HTMLInputElement).value || null)"
             >
           </div>
+          <div v-if="progressLastUpdated" class="book-detail__date-item">
+            <span class="book-detail__date-label">Last updated</span>
+            <span class="book-detail__date-value">{{ progressLastUpdated }}</span>
+          </div>
         </div>
       </section>
     </template>
@@ -434,6 +457,7 @@ interface BookDetail {
   dateAdded?: string | Date | null
   dateStarted?: string | Date | null
   dateFinished?: string | Date | null
+  updatedAt?: string | Date | null
   openLibraryKey?: string | null
   googleBooksId?: string | null
   shelves?: Array<{ shelfId: string; shelfName: string }>
@@ -476,6 +500,37 @@ const showCompletionPrompt = ref(false)
 const pageInputDebounce = ref<ReturnType<typeof setTimeout> | null>(null)
 const minutesInputDebounce = ref<ReturnType<typeof setTimeout> | null>(null)
 const showTimePrompt = ref(false)
+const showStartReadingPrompt = ref(false)
+
+// Shelf awareness — only show progress controls on currently-reading or custom shelves
+const currentShelfSlug = computed(() => {
+  const shelves = book.value?.shelves
+  if (!shelves?.length) return null
+  return shelvesStore.shelves.find(s => s.id === shelves[0].shelfId)?.slug ?? null
+})
+const isOnWantToRead = computed(() => currentShelfSlug.value === 'want-to-read')
+const isOnReadShelf = computed(() => currentShelfSlug.value === 'read')
+const showProgressControls = computed(() => !isOnWantToRead.value && !isOnReadShelf.value)
+
+function formatRelativeTime(date: string | Date | null | undefined): string | null {
+  if (!date) return null
+  const d = new Date(date)
+  if (isNaN(d.getTime())) return null
+  const now = Date.now()
+  const diffMs = now - d.getTime()
+  if (diffMs < 0) return 'just now'
+  const seconds = Math.floor(diffMs / 1000)
+  if (seconds < 60) return 'just now'
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  if (days < 30) return `${days}d ago`
+  return d.toLocaleDateString()
+}
+
+const progressLastUpdated = computed(() => formatRelativeTime(book.value?.updatedAt))
 
 const trackingMode = computed(() => {
   if (!book.value) return 'pages'
@@ -520,7 +575,7 @@ async function updateField(field: string, value: unknown) {
       method: 'PATCH',
       body: { [field]: value },
     })
-    toast.success(`${fieldLabels[field] || 'Field'} saved`)
+    toast.success(`${fieldLabels[field] || 'Field'} saved`, 'save')
     useLibraryStore().revalidate()
   }
   catch {
@@ -609,7 +664,7 @@ async function updateProgress(page: number | null) {
     const body: Record<string, unknown> = { currentPage: page }
     if (pct !== null) body.progressPercent = pct
     await $fetch(`/api/books/${userBookId.value}`, { method: 'PATCH', body })
-    toast.success('Progress saved')
+    toast.success('Progress saved', 'save')
     useLibraryStore().revalidate()
     checkMilestones(oldPct, computePercent())
   }
@@ -651,7 +706,7 @@ async function updatePercentDirect(event: Event) {
       method: 'PATCH',
       body: { progressPercent: pct !== null ? String(pct) : null },
     })
-    toast.success('Progress saved')
+    toast.success('Progress saved', 'save')
     useLibraryStore().revalidate()
     checkMilestones(oldPct, pct ?? 0)
     if (pct === 100) showCompletionPrompt.value = true
@@ -684,7 +739,7 @@ async function updateMinutesProgress(minutes: number | null) {
     const body: Record<string, unknown> = { currentMinutes: minutes }
     if (pct !== null) body.progressPercent = pct
     await $fetch(`/api/books/${userBookId.value}`, { method: 'PATCH', body })
-    toast.success('Progress saved')
+    toast.success('Progress saved', 'save')
     useLibraryStore().revalidate()
     const newPct = computePercent()
     checkMilestones(oldPct, newPct)
@@ -704,6 +759,33 @@ function incrementMinutes(amount: number) {
   const next = Math.max(0, current + amount)
   const clamped = book.value.totalMinutes ? Math.min(next, book.value.totalMinutes) : next
   updateMinutesProgress(clamped)
+}
+
+// Gate: if on Want to Read, prompt to move to Currently Reading first
+async function startReadingAndTrack() {
+  if (!book.value) return
+  showStartReadingPrompt.value = false
+  const readingShelf = shelvesStore.shelves.find(s => s.slug === 'currently-reading')
+  if (!readingShelf) return
+  try {
+    if (!book.value.dateStarted) {
+      await $fetch(`/api/books/${userBookId.value}`, {
+        method: 'PATCH',
+        body: { dateStarted: new Date().toISOString().slice(0, 10) },
+      })
+      book.value.dateStarted = new Date().toISOString()
+    }
+    await $fetch(`/api/books/${userBookId.value}/shelf`, {
+      method: 'PATCH',
+      body: { shelfId: readingShelf.id },
+    })
+    await fetchBook()
+    useLibraryStore().invalidate()
+    toast.success('Moved to Currently Reading! \uD83D\uDCD6')
+  }
+  catch {
+    toast.error('Could not move book')
+  }
 }
 
 function onTotalMinutesInput(event: Event) {

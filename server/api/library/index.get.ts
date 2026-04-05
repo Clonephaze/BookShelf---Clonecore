@@ -32,6 +32,7 @@ export default defineEventHandler(async (event) => {
           progressPercent: userBooks.progressPercent,
           totalMinutes: userBooks.totalMinutes,
           currentMinutes: userBooks.currentMinutes,
+          updatedAt: userBooks.updatedAt,
         })
         .from(userBookShelves)
         .innerJoin(userBooks, eq(userBookShelves.userBookId, userBooks.id))
