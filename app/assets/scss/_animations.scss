@@ -67,6 +67,30 @@ $duration-slow: 500ms;
   50% { opacity: 0.7; }
 }
 
+// --- Shelf Animations ---
+
+@keyframes shelf-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes book-arrive {
+  from {
+    opacity: 0;
+    transform: rotateY(-75deg) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: rotateY(0deg) scale(1);
+  }
+}
+
 // --- Utility Classes ---
 
 .animate-fade-in {

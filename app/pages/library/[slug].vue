@@ -1,20 +1,7 @@
 <template>
   <div class="shelf-view">
     <NuxtLink to="/library" class="shelf-view__back">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        aria-hidden="true"
-      >
-        <path d="m15 18-6-6 6-6" />
-      </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
       Library
     </NuxtLink>
 
@@ -22,8 +9,8 @@
     <div v-if="loading" class="shelf-view__loading">
       <div class="shelf-view__skeleton-title" />
       <div class="shelf-view__skeleton-toolbar" />
-      <div class="shelf-view__skeleton-grid">
-        <div v-for="n in 8" :key="n" class="shelf-view__skeleton-book" />
+      <div class="shelf-view__skeleton-shelf">
+        <div v-for="n in 12" :key="n" class="shelf-view__skeleton-book" />
       </div>
     </div>
 
@@ -62,7 +49,7 @@
         </div>
       </div>
 
-      <!-- Toolbar: sort & filter -->
+      <!-- Toolbar: sort -->
       <div v-if="books.length" class="shelf-view__toolbar">
         <div class="shelf-view__sort">
           <label for="sort-select" class="shelf-view__sort-label">Sort by</label>
@@ -76,12 +63,19 @@
       </div>
 
       <!-- Book grid -->
-      <BookGrid :books="sortedBooks" @open="openBook">
-        <template #empty>
-          <p>This shelf is empty.</p>
-          <NuxtLink to="/search" class="shelf-view__search-link">Search for books to add</NuxtLink>
-        </template>
-      </BookGrid>
+      <div v-if="sortedBooks.length" class="shelf-view__grid">
+        <BookOnShelf
+          v-for="book in sortedBooks"
+          :key="book.userBookId"
+          v-bind="book"
+          style="--turn: 0;"
+          @open="onOpenBook"
+        />
+      </div>
+      <div v-else class="shelf-view__empty">
+        <p>This shelf is empty.</p>
+        <NuxtLink to="/search" class="shelf-view__search-link">Search for books to add</NuxtLink>
+      </div>
     </template>
 
     <!-- Delete confirmation -->
@@ -97,6 +91,14 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- Book detail panel -->
+    <BookDetailPanel
+      v-if="detailBookId"
+      :user-book-id="detailBookId"
+      :source-el="detailSourceEl"
+      @close="closeDetail"
+    />
   </div>
 </template>
 
@@ -115,6 +117,8 @@ interface ShelfBook {
   pageCount: number | null
   rating: number | null
   dateAdded: string | null
+  dateFinished: string | null
+  currentPage: number | null
   progressPercent: string | null
 }
 
@@ -134,6 +138,10 @@ const editInput = ref<HTMLInputElement>()
 // Delete state
 const showDeleteConfirm = ref(false)
 const deleting = ref(false)
+
+// Book detail panel
+const detailBookId = ref<string | null>(null)
+const detailSourceEl = ref<HTMLElement | null>(null)
 
 const slug = computed(() => route.params.slug as string)
 const shelfName = computed(() => shelf.value?.name ?? '')
@@ -165,7 +173,6 @@ async function fetchShelfBooks() {
   loading.value = true
   error.value = false
   try {
-    // Use cached shelves; fetch is a no-op if already loaded
     await shelvesStore.fetch()
     const match = shelvesStore.shelves.find(s => s.slug === slug.value)
     if (!match) {
@@ -186,8 +193,15 @@ async function fetchShelfBooks() {
   }
 }
 
-function openBook(userBookId: string) {
-  navigateTo(`/library/book/${userBookId}`)
+function onOpenBook(userBookId: string, el: HTMLElement) {
+  detailBookId.value = userBookId
+  detailSourceEl.value = el
+}
+
+function closeDetail() {
+  detailBookId.value = null
+  detailSourceEl.value = null
+  fetchShelfBooks()
 }
 
 function startRename() {
@@ -281,16 +295,21 @@ onMounted(fetchShelfBooks)
     margin-bottom: $spacing-xl;
   }
 
-  &__skeleton-grid {
+  &__skeleton-shelf {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
-    gap: $spacing-lg;
+    grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+    gap: $spacing-md;
+    padding: $spacing-md 0;
   }
 
   &__skeleton-book {
     aspect-ratio: 2 / 3;
     background: var(--sub-bg-color);
     border-radius: $radius-sm;
+  }
+
+  &__skeleton-surface {
+    display: none;
   }
 
   // --- Error ---
@@ -412,7 +431,7 @@ onMounted(fetchShelfBooks)
     display: flex;
     align-items: center;
     gap: $spacing-md;
-    margin-bottom: $spacing-lg;
+    margin-bottom: $spacing-md;
   }
 
   &__sort {
@@ -440,6 +459,27 @@ onMounted(fetchShelfBooks)
       outline: none;
       border-color: var(--highlight-color);
     }
+  }
+
+  // --- Book grid ---
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+    gap: $spacing-lg $spacing-md;
+    padding: $spacing-md 0;
+  }
+
+  // --- Empty ---
+  &__empty {
+    @include flex-center;
+    flex-direction: column;
+    gap: $spacing-sm;
+    @include meta-text;
+    padding: $spacing-2xl;
+    text-align: center;
+    background: var(--sub-bg-color);
+    border-radius: $radius-lg;
+    border: 1px dashed var(--border-color);
   }
 
   &__search-link {

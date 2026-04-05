@@ -20,21 +20,7 @@
         class="library__new-shelf-btn"
         @click="showNewShelf = true"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M5 12h14" />
-          <path d="M12 5v14" />
-        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
         New shelf
       </button>
     </div>
@@ -67,98 +53,45 @@
     <div v-if="libraryStore.loading && !libraryStore.loaded" class="library__loading">
       <div v-for="n in 3" :key="n" class="library__skeleton-section">
         <div class="library__skeleton-heading" />
-        <div class="library__skeleton-grid">
-          <div v-for="m in 5" :key="m" class="library__skeleton-book" />
+        <div class="library__skeleton-shelf">
+          <div v-for="m in 12" :key="m" class="library__skeleton-book" />
         </div>
+        <div class="library__skeleton-surface" />
       </div>
     </div>
 
-    <!-- Shelves with books -->
+    <!-- Shelves -->
     <div v-else-if="libraryStore.data.length" class="library__shelves">
-      <section
+      <ShelfRow
         v-for="shelf in libraryStore.data"
         :key="shelf.id"
-        class="library__shelf animate-fade-in-up"
-      >
-        <div class="library__shelf-header">
-          <NuxtLink
-            :to="`/library/${shelf.slug}`"
-            class="library__shelf-name-link"
-          >
-            <h3 class="library__shelf-name">
-              {{ shelf.name }}
-              <span class="library__shelf-count">{{ shelf.bookCount }}</span>
-            </h3>
-          </NuxtLink>
-          <div class="library__shelf-actions">
-            <button
-              v-if="!shelf.isDefault && confirmDeleteShelf !== shelf.id"
-              class="library__shelf-delete-btn"
-              aria-label="Delete shelf"
-              @click="confirmDeleteShelf = shelf.id"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-            </button>
-            <div v-if="confirmDeleteShelf === shelf.id" class="library__shelf-delete-confirm">
-              <span class="library__shelf-delete-warning">Delete shelf?</span>
-              <button
-                class="library__shelf-delete-yes"
-                :disabled="deletingShelf"
-                @click="deleteShelf(shelf.id)"
-              >
-                Yes
-              </button>
-              <button
-                class="library__shelf-delete-no"
-                @click="confirmDeleteShelf = null"
-              >
-                No
-              </button>
-            </div>
-            <NuxtLink
-              v-if="shelf.bookCount > 0"
-              :to="`/library/${shelf.slug}`"
-              class="library__view-all"
-            >
-              View all
-            </NuxtLink>
-          </div>
-        </div>
-
-        <BookGrid
-          v-if="shelf.books.length"
-          :books="shelf.books.slice(0, 8)"
-          @open="openBook"
-        />
-        <div v-else class="library__empty">
-          <p>No books on this shelf yet.</p>
-          <NuxtLink to="/search" class="library__search-link">Search for books</NuxtLink>
-        </div>
-      </section>
+        :name="shelf.name"
+        :slug="shelf.slug"
+        :book-count="shelf.bookCount"
+        :books="shelf.books"
+        :is-default="shelf.isDefault"
+        class="animate-fade-in-up"
+        @open-book="onOpenBook"
+      />
     </div>
 
+    <!-- Empty state -->
     <div v-else class="library__empty-state">
       <div class="library__empty-state-content">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="48"
-          height="48"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="library__empty-icon"
-          aria-hidden="true"
-        >
-          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" />
-        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="library__empty-icon" aria-hidden="true"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></svg>
         <p v-if="isGuest">Sign up to create shelves and start tracking your reading.</p>
         <p v-else>Your library is empty — find your next read in Search.</p>
         <NuxtLink to="/search" class="library__empty-cta">Search for books</NuxtLink>
       </div>
     </div>
+
+    <!-- Book detail panel -->
+    <BookDetailPanel
+      v-if="detailBookId"
+      :user-book-id="detailBookId"
+      :source-el="detailSourceEl"
+      @close="closeDetail"
+    />
   </div>
 </template>
 
@@ -173,12 +106,15 @@ const { isGuest } = useGuest()
 const libraryStore = useLibraryStore()
 const shelvesStore = useShelvesStore()
 
+// New shelf form
 const showNewShelf = ref(false)
 const newShelfName = ref('')
 const creatingShelf = ref(false)
 const newShelfInput = ref<HTMLInputElement>()
-const confirmDeleteShelf = ref<string | null>(null)
-const deletingShelf = ref(false)
+
+// Book detail panel
+const detailBookId = ref<string | null>(null)
+const detailSourceEl = ref<HTMLElement | null>(null)
 
 async function createShelf() {
   const name = newShelfName.value.trim()
@@ -202,24 +138,16 @@ async function createShelf() {
   }
 }
 
-function openBook(userBookId: string) {
-  navigateTo(`/library/book/${userBookId}`)
+function onOpenBook(userBookId: string, el: HTMLElement) {
+  detailBookId.value = userBookId
+  detailSourceEl.value = el
 }
 
-async function deleteShelf(shelfId: string) {
-  deletingShelf.value = true
-  try {
-    await $fetch(`/api/shelves/${shelfId}`, { method: 'DELETE' })
-    confirmDeleteShelf.value = null
-    await shelvesStore.invalidate()
-    await libraryStore.invalidate()
-  }
-  catch {
-    // Could show error
-  }
-  finally {
-    deletingShelf.value = false
-  }
+function closeDetail() {
+  detailBookId.value = null
+  detailSourceEl.value = null
+  // Revalidate in case something changed (move shelf, remove)
+  libraryStore.revalidate()
 }
 
 watch(showNewShelf, (val) => {
@@ -242,6 +170,7 @@ onMounted(() => {
 
 .library {
   @include container($library-max-width);
+  padding-bottom: $spacing-3xl;
 
   &__guest-banner {
     display: flex;
@@ -287,7 +216,7 @@ onMounted(() => {
     justify-content: space-between;
     flex-wrap: wrap;
     gap: $spacing-md;
-    margin-bottom: $spacing-2xl;
+    margin-bottom: $spacing-xl;
   }
 
   &__title {
@@ -361,7 +290,7 @@ onMounted(() => {
   // --- Loading skeleton ---
   &__loading {
     @include flex-column;
-    gap: $spacing-2xl;
+    gap: $spacing-3xl;
   }
 
   &__skeleton-section {
@@ -376,16 +305,24 @@ onMounted(() => {
     margin-bottom: $spacing-md;
   }
 
-  &__skeleton-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
-    gap: $spacing-lg;
+  &__skeleton-shelf {
+    display: flex;
+    gap: 0.15rem;
+    padding: $spacing-md $spacing-sm 0;
   }
 
   &__skeleton-book {
+    width: 2.25rem;
     aspect-ratio: 2 / 3;
     background: var(--sub-bg-color);
     border-radius: $radius-sm;
+    flex-shrink: 0;
+  }
+
+  &__skeleton-surface {
+    height: 14px;
+    background: var(--sub-bg-color);
+    border-radius: 0 0 3px 3px;
   }
 
   // --- Shelves ---
@@ -394,140 +331,7 @@ onMounted(() => {
     gap: $spacing-2xl;
   }
 
-  &__shelf-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: $spacing-md;
-  }
-
-  &__shelf-name-link {
-    text-decoration: none;
-  }
-
-  &__shelf-name {
-    @include heading($font-size-lg);
-    display: flex;
-    align-items: center;
-    gap: $spacing-sm;
-    transition: color $transition-fast;
-
-    .library__shelf-name-link:hover & {
-      color: var(--highlight-color);
-    }
-  }
-
-  &__shelf-count {
-    font-family: $font-family-body;
-    font-size: $font-size-xs;
-    font-weight: $font-weight-medium;
-    color: var(--text-color-muted);
-    background: var(--sub-bg-color);
-    padding: 2px $spacing-sm;
-    border-radius: $radius-full;
-  }
-
-  &__shelf-actions {
-    display: flex;
-    align-items: center;
-    gap: $spacing-sm;
-  }
-
-  &__shelf-delete-btn {
-    @include flex-center;
-    width: 1.75rem;
-    height: 1.75rem;
-    color: var(--text-color-muted);
-    background: none;
-    border: none;
-    border-radius: $radius-sm;
-    cursor: pointer;
-    opacity: 0;
-    transition: opacity $transition-fast, color $transition-fast, background-color $transition-fast;
-
-    .library__shelf:hover & {
-      opacity: 1;
-    }
-
-    &:hover {
-      color: var(--error-color);
-      background: var(--sub-bg-color);
-    }
-  }
-
-  &__shelf-delete-confirm {
-    display: flex;
-    align-items: center;
-    gap: $spacing-xs;
-    animation: fade-in-scale 150ms $ease-out-expo both;
-  }
-
-  &__shelf-delete-warning {
-    font-size: $font-size-sm;
-    color: var(--error-color);
-    font-weight: $font-weight-medium;
-  }
-
-  &__shelf-delete-yes {
-    padding: 2px $spacing-sm;
-    font-family: $font-family-body;
-    font-size: $font-size-xs;
-    color: #fff;
-    background: var(--error-color);
-    border: none;
-    border-radius: $radius-sm;
-    cursor: pointer;
-
-    &:hover { opacity: 0.85; }
-    &:disabled { opacity: 0.6; cursor: not-allowed; }
-  }
-
-  &__shelf-delete-no {
-    padding: 2px $spacing-sm;
-    font-family: $font-family-body;
-    font-size: $font-size-xs;
-    color: var(--text-color-muted);
-    background: none;
-    border: none;
-    cursor: pointer;
-
-    &:hover { color: var(--text-color); }
-  }
-
-  &__view-all {
-    font-size: $font-size-sm;
-    font-weight: $font-weight-medium;
-    color: var(--highlight-color);
-    text-decoration: none;
-    transition: color $transition-fast;
-
-    &:hover {
-      color: var(--highlight-color-hover);
-    }
-  }
-
-  &__empty {
-    @include flex-center;
-    flex-direction: column;
-    gap: $spacing-sm;
-    @include meta-text;
-    padding: $spacing-xl;
-    text-align: center;
-    background: var(--sub-bg-color);
-    border-radius: $radius-lg;
-    border: 1px dashed var(--border-color);
-  }
-
-  &__search-link {
-    font-size: $font-size-sm;
-    color: var(--highlight-color);
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-
+  // --- Empty state ---
   &__empty-state {
     @include flex-center;
     min-height: 40vh;
