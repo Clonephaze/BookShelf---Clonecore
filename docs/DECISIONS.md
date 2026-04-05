@@ -4,6 +4,36 @@ Log of significant decisions. Newest first.
 
 ---
 
+## ADR-010: Non-Blocking Fetch Pattern for Page Performance
+
+**Date:** 2026-04-05
+**Status:** Accepted
+
+Composables that fetch data (e.g. `useGoals`) must not use top-level `await` in `<script setup>`. A top-level `await` triggers Nuxt's `<Suspense>`, which blocks page transitions until the API responds — causing a visible freeze on every navigation.
+
+**Pattern:** Call `fetchGoals()` (no `await`) at component top level. The composable manages its own `loading` ref; the template renders a skeleton/spinner while loading. A dedup flag (`_fetched`) skips redundant fetches unless `force=true` is passed.
+
+This applies to any composable used in layout-level components (GoalWidget in library) or pages where perceived performance matters.
+
+---
+
+## ADR-009: Multi-Period Reading Goals
+
+**Date:** 2026-04-05
+**Status:** Accepted
+
+Expanded the reading goals system from yearly-only to **yearly, monthly, and weekly** book-count goals.
+
+**Schema:** Added `periodType` TEXT column ('yearly' | 'monthly' | 'weekly', default 'yearly') and `periodValue` INTEGER column (0 for yearly, 1–12 for monthly, 1–53 for weekly). Unique constraint changed from `(userId, year)` to `(userId, periodType, year, periodValue)`.
+
+**Composable:** `useGoals` uses Nuxt's `useState` (not plain `ref`) for shared, SSR-safe state that persists across navigations. Provides generic per-goal helpers (`goalProgress`, `goalPaceStatus`, `goalPaceLabel`) that work for any period type, plus convenience shortcuts for the primary yearly goal.
+
+**Daily goals deferred:** Daily book-count goals don't make sense (you rarely finish a book in a day). Daily goals will arrive as "read X minutes/day" with the **Reading Sessions** feature (Phase 11). Session-based goals are a separate goal type but will be displayed on the goals page alongside book-count goals ("separate, but add to both").
+
+**Book counting:** The API counts books by `dateFinished` within the period — `extract(year from dateFinished)` for yearly, `extract(month from dateFinished)` for monthly, `extract(week from dateFinished)` for weekly. Any book with a `dateFinished` in the target period counts, regardless of shelf.
+
+---
+
 ## ADR-008: Roadmap Expansion — Friends, Sessions, Intelligence, Recs (No AI)
 
 **Date:** 2026-04-04

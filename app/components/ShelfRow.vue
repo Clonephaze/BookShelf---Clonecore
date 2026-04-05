@@ -2,13 +2,16 @@
 import type { ShelfBook } from '~/stores/library'
 
 const props = withDefaults(defineProps<{
-  name: string
-  slug: string
-  bookCount: number
+  name?: string
+  slug?: string
+  bookCount?: number
   books: ShelfBook[]
   isDefault?: boolean
   showHeader?: boolean
 }>(), {
+  name: '',
+  slug: '',
+  bookCount: 0,
   showHeader: true,
 })
 

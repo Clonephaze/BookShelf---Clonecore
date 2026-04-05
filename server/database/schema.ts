@@ -157,11 +157,13 @@ export const readingProgressLog = pgTable('reading_progress_log', {
 export const readingGoals = pgTable('reading_goals', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  periodType: text('period_type').notNull().default('yearly'), // 'yearly' | 'monthly' | 'weekly'
   year: integer('year').notNull(),
+  periodValue: integer('period_value').notNull().default(0), // 0 for yearly, 1-12 for monthly, 1-53 for weekly
   targetBooks: integer('target_books').notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 }, (table) => [
-  unique('reading_goals_user_year_unique').on(table.userId, table.year),
+  unique('reading_goals_user_period_unique').on(table.userId, table.periodType, table.year, table.periodValue),
   index('reading_goals_user_id_idx').on(table.userId),
 ])

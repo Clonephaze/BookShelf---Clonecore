@@ -63,17 +63,12 @@
       </div>
 
       <!-- Book grid -->
-      <div v-if="sortedBooks.length" class="shelf-view__grid">
-        <BookOnShelf
-          v-for="book in sortedBooks"
-          :key="book.userBookId"
-          v-bind="book"
-          style="--turn: 0;"
-          @open="onOpenBook"
-        />
-      </div>
-      <div v-else class="shelf-view__empty">
-        <p>This shelf is empty.</p>
+      <ShelfGrid
+        :books="sortedBooks"
+        empty-message="This shelf is empty."
+        @open="onOpenBook"
+      />
+      <div v-if="!sortedBooks.length" class="shelf-view__empty-action">
         <NuxtLink to="/search" class="shelf-view__search-link">Search for books to add</NuxtLink>
       </div>
     </template>
@@ -461,25 +456,11 @@ onMounted(fetchShelfBooks)
     }
   }
 
-  // --- Book grid ---
-  &__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
-    gap: $spacing-lg $spacing-md;
-    padding: $spacing-md 0;
-  }
-
-  // --- Empty ---
-  &__empty {
+  // --- Empty action (below ShelfGrid empty) ---
+  &__empty-action {
     @include flex-center;
-    flex-direction: column;
-    gap: $spacing-sm;
-    @include meta-text;
-    padding: $spacing-2xl;
+    padding-bottom: $spacing-2xl;
     text-align: center;
-    background: var(--sub-bg-color);
-    border-radius: $radius-lg;
-    border: 1px dashed var(--border-color);
   }
 
   &__search-link {

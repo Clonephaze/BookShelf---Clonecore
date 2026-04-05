@@ -126,24 +126,24 @@ _Note: Book detail page layout was built in Phase 3 with placeholder sections. P
 - [x] Progress history logging (`reading_progress_log` table)
 - [x] 100% completion prompt → move to "Read" shelf (auto-sets dateFinished)
 - [x] Milestone moments (50%, 90%, 100%) with toast celebrations
-- [ ] "Last updated" timestamp display
+- [x] "Last updated" timestamp display
 - [x] Optimistic UI for progress updates
 
 **Deliverable:** Full reading progress tracking with history and visual feedback.
 
 ---
 
-## Phase 6 — Reading Goals
+## Phase 6 — Reading Goals ✅
 **Goal:** Annual reading goals with pace tracking.
 
-- [ ] Set goal for current year (target books count)
-- [ ] Goal progress display (books completed vs target)
-- [ ] Visual progress indicator (progress ring or bar)
-- [ ] Pace calculation (ahead / on track / behind based on date)
-- [ ] Edit goal mid-year
-- [ ] No-goal state (CTA to set one, no broken UI)
-- [ ] Goal completion celebration (confetti or positive visual moment)
-- [ ] Goal history (view past years)
+- [x] Set goal for current year (target books count)
+- [x] Goal progress display (books completed vs target)
+- [x] Visual progress indicator (progress ring or bar)
+- [x] Pace calculation (ahead / on track / behind based on date)
+- [x] Edit goal mid-year
+- [x] No-goal state (CTA to set one, no broken UI)
+- [x] Goal completion celebration (confetti or positive visual moment)
+- [x] Goal history (view past years)
 
 **Deliverable:** Working reading goals with pace tracking and celebration.
 

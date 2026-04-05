@@ -25,6 +25,9 @@
       </button>
     </div>
 
+    <!-- Goal progress widget -->
+    <GoalWidget v-if="isAuthenticated && !isGuest" />
+
     <!-- New shelf form -->
     <div v-if="showNewShelf" class="library__new-shelf animate-fade-in-scale">
       <input

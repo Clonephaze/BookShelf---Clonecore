@@ -179,6 +179,10 @@ export function useBookDetail(userBookId: Ref<string> | ComputedRef<string>) {
       })
       toast.success(`${fieldLabels[field] || 'Field'} saved`, 'save')
       libraryStore.revalidate()
+      // Lazily refresh goal counts when finish date changes
+      if (field === 'dateFinished') {
+        useGoals().refreshCompleted()
+      }
     }
     catch {
       ;(book.value as Record<string, unknown>)[field] = oldValue
@@ -402,6 +406,8 @@ export function useBookDetail(userBookId: Ref<string> | ComputedRef<string>) {
     showCompletionPrompt.value = false
     const readShelf = shelvesStore.shelves.find(s => s.slug === 'read')
     if (!readShelf) return
+    const goals = useGoals()
+    const confetti = useConfetti()
     try {
       if (!book.value.dateFinished) {
         await $fetch(`/api/books/${userBookId.value}`, {
@@ -417,6 +423,13 @@ export function useBookDetail(userBookId: Ref<string> | ComputedRef<string>) {
       await fetchBook()
       libraryStore.invalidate()
       toast.success('Moved to Read shelf! 📖')
+
+      // Check if this completion meets the annual goal
+      await goals.refreshCompleted()
+      if (goals.currentGoal.value && goals.paceStatus.value === 'complete') {
+        confetti.fire()
+        toast.success(`🎉 You hit your ${goals.currentYear} reading goal!`)
+      }
     }
     catch {
       toast.error('Could not move book')

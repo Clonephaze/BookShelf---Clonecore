@@ -577,6 +577,10 @@ async function updateField(field: string, value: unknown) {
     })
     toast.success(`${fieldLabels[field] || 'Field'} saved`, 'save')
     useLibraryStore().revalidate()
+    // Lazily refresh goal counts when finish date changes
+    if (field === 'dateFinished') {
+      useGoals().refreshCompleted()
+    }
   }
   catch {
     ;(book.value as Record<string, unknown>)[field] = oldValue
