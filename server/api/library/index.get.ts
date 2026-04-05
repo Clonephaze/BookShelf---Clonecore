@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { eq, asc } from 'drizzle-orm'
 import { useDB } from '../../database'
 import { books, userBooks, userBookShelves, shelves } from '../../database/schema'
 import { requireServerSession } from '../../utils/session'
@@ -30,11 +30,14 @@ export default defineEventHandler(async (event) => {
           dateFinished: userBooks.dateFinished,
           currentPage: userBooks.currentPage,
           progressPercent: userBooks.progressPercent,
+          totalMinutes: userBooks.totalMinutes,
+          currentMinutes: userBooks.currentMinutes,
         })
         .from(userBookShelves)
         .innerJoin(userBooks, eq(userBookShelves.userBookId, userBooks.id))
         .innerJoin(books, eq(userBooks.bookId, books.id))
         .where(eq(userBookShelves.shelfId, shelf.id))
+        .orderBy(asc(userBooks.dateAdded))
 
       return {
         ...shelf,

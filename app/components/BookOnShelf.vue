@@ -7,6 +7,11 @@ const props = defineProps<{
   coverUrl?: string | null
   coverUrlSmall?: string | null
   rating?: number | null
+  pageCount?: number | null
+  currentPage?: number | null
+  progressPercent?: string | null
+  totalMinutes?: number | null
+  currentMinutes?: number | null
 }>()
 
 const emit = defineEmits<{
@@ -16,6 +21,17 @@ const emit = defineEmits<{
 const bookEl = ref<HTMLElement>()
 
 const coverSrc = computed(() => props.coverUrl || props.coverUrlSmall || undefined)
+
+const progressPct = computed(() => {
+  if (props.progressPercent) return parseFloat(props.progressPercent)
+  if (props.currentMinutes && props.totalMinutes) {
+    return Math.round((props.currentMinutes / props.totalMinutes) * 100)
+  }
+  if (props.currentPage && props.pageCount) {
+    return Math.round((props.currentPage / props.pageCount) * 100)
+  }
+  return 0
+})
 
 const spineColor = computed(() => {
   let hash = 0
@@ -59,6 +75,10 @@ function handleClick() {
           :author="author"
           width="100%"
         />
+        <!-- Progress indicator -->
+        <div v-if="progressPct > 0 && progressPct < 100" class="book-on-shelf__progress">
+          <div class="book-on-shelf__progress-fill" :style="{ width: `${progressPct}%` }" />
+        </div>
       </div>
       <!-- 3D box face: spine -->
       <div class="book-on-shelf__spine">
@@ -194,6 +214,23 @@ $spine-w: 2.25rem;
       z-index: 2;
       pointer-events: none;
     }
+  }
+
+  // --- Progress bar on cover ---
+  &__progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(0, 0, 0, 0.2);
+    z-index: 3;
+  }
+
+  &__progress-fill {
+    height: 100%;
+    background: var(--progress-color, #a0592a);
+    transition: width 0.3s ease;
   }
 
   // --- Left face: spine ---

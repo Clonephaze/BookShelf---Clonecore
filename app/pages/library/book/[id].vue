@@ -39,11 +39,26 @@
     <template v-else-if="book">
       <div class="book-detail__hero">
         <div class="book-detail__cover-area">
-          <BookCover
-            :src="book.coverUrl ?? undefined"
-            :title="book.title"
-            :author="book.author"
-            width="16rem"
+          <div class="book-detail__cover-wrap">
+            <BookCover
+              :src="book.coverUrl ?? undefined"
+              :title="book.title"
+              :author="book.author"
+              width="16rem"
+            />
+            <button
+              class="book-detail__cover-change"
+              aria-label="Change cover"
+              @click="showCoverPicker = !showCoverPicker"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+            </button>
+          </div>
+          <CoverPicker
+            v-if="showCoverPicker"
+            :user-book-id="userBookId"
+            @updated="onCoverUpdated"
+            @close="showCoverPicker = false"
           />
         </div>
 
@@ -77,7 +92,11 @@
               <span class="book-detail__meta-label">Published</span>
               <span>{{ book.publishedDate }}</span>
             </div>
-            <div v-if="book.pageCount" class="book-detail__meta-item">
+            <div v-if="trackingMode === 'minutes' && book.totalMinutes" class="book-detail__meta-item">
+              <span class="book-detail__meta-label">Length</span>
+              <span>{{ formatMinutes(book.totalMinutes) }}</span>
+            </div>
+            <div v-else-if="book.pageCount" class="book-detail__meta-item">
               <span class="book-detail__meta-label">Pages</span>
               <span>{{ book.pageCount }}</span>
             </div>
@@ -206,81 +225,182 @@
         <p class="book-detail__description">{{ book.description }}</p>
       </section>
 
-      <!-- === FUTURE PHASE SECTIONS === -->
-
-      <!-- Reading Progress (Phase 5) -->
-      <section class="book-detail__section book-detail__section--future">
-        <h3 class="book-detail__section-title">
-          Reading Progress
-          <span class="book-detail__coming-soon">Coming soon</span>
-        </h3>
-        <div class="book-detail__progress-placeholder">
+      <!-- Reading Progress -->
+      <section class="book-detail__section">
+        <h3 class="book-detail__section-title">Reading Progress</h3>
+        <div class="book-detail__progress-area">
           <div class="book-detail__progress-bar">
             <div
               class="book-detail__progress-fill"
               :style="{ width: progressWidth }"
             />
           </div>
-          <p class="book-detail__progress-text">
-            <template v-if="book.currentPage && book.pageCount">
-              Page {{ book.currentPage }} of {{ book.pageCount }}
+          <div class="book-detail__progress-controls">
+            <template v-if="trackingMode === 'minutes'">
+              <button class="book-detail__page-btn" aria-label="Subtract 30 minutes" @click="incrementMinutes(-30)">−30m</button>
+              <button class="book-detail__page-btn" aria-label="Subtract 5 minutes" @click="incrementMinutes(-5)">−5m</button>
+              <span class="book-detail__time-display">{{ book.currentMinutes ? formatMinutes(book.currentMinutes) : '0m' }}</span>
+              <span v-if="book.totalMinutes" class="book-detail__page-total">/ {{ formatMinutes(book.totalMinutes) }}</span>
+              <button class="book-detail__page-btn" aria-label="Add 5 minutes" @click="incrementMinutes(5)">+5m</button>
+              <button class="book-detail__page-btn" aria-label="Add 30 minutes" @click="incrementMinutes(30)">+30m</button>
+            </template>
+            <template v-else-if="book.pageCount">
+              <button class="book-detail__page-btn" aria-label="Subtract 10 pages" @click="incrementPage(-10)">−10</button>
+              <button class="book-detail__page-btn" aria-label="Subtract 1 page" @click="incrementPage(-1)">−1</button>
+              <div class="book-detail__page-input-wrap">
+                <input
+                  type="number"
+                  class="book-detail__page-input"
+                  :value="book.currentPage ?? ''"
+                  :max="book.pageCount"
+                  min="0"
+                  aria-label="Current page"
+                  @change="onPageInput"
+                >
+                <span class="book-detail__page-total">/ {{ book.pageCount }}</span>
+              </div>
+              <button class="book-detail__page-btn" aria-label="Add 1 page" @click="incrementPage(1)">+1</button>
+              <button class="book-detail__page-btn" aria-label="Add 10 pages" @click="incrementPage(10)">+10</button>
             </template>
             <template v-else>
-              Track your reading progress here
+              <div class="book-detail__pct-input-wrap">
+                <input
+                  type="number"
+                  class="book-detail__pct-input"
+                  :value="book.progressPercent ? Math.round(parseFloat(book.progressPercent)) : ''"
+                  min="0"
+                  max="100"
+                  aria-label="Percent complete"
+                  @change="updatePercentDirect"
+                >
+                <span class="book-detail__pct-symbol">%</span>
+              </div>
             </template>
-          </p>
+          </div>
+          <!-- Total length input for minutes mode -->
+          <div v-if="trackingMode === 'minutes'" class="book-detail__time-total-row">
+            <label class="book-detail__time-total-label" :for="`total-time-${userBookId}`">Total length</label>
+            <input
+              :id="`total-time-${userBookId}`"
+              type="text"
+              class="book-detail__time-total-input"
+              :value="book.totalMinutes ? formatMinutes(book.totalMinutes) : ''"
+              placeholder="e.g. 12h 30m"
+              aria-label="Total audiobook length"
+              @change="onTotalMinutesInput"
+            >
+          </div>
+          <!-- Switch tracking mode -->
+          <div v-if="showTimePrompt && trackingMode !== 'minutes'" class="book-detail__time-prompt">
+            <label class="book-detail__time-total-label" :for="`switch-time-${userBookId}`">Total length</label>
+            <input
+              :id="`switch-time-${userBookId}`"
+              type="text"
+              class="book-detail__time-total-input"
+              placeholder="e.g. 12h 30m"
+              aria-label="Total audiobook length"
+              @keydown.enter="($event: KeyboardEvent) => { const m = parseTimeInput(($event.target as HTMLInputElement).value); if (m != null && m > 0) { updateField('totalMinutes', m); showTimePrompt = false; } }"
+              @change="(e: Event) => { const m = parseTimeInput((e.target as HTMLInputElement).value); if (m != null && m > 0) { updateField('totalMinutes', m); showTimePrompt = false; } }"
+            >
+            <button class="book-detail__mode-switch" @click="showTimePrompt = false">Cancel</button>
+          </div>
+          <button
+            v-else-if="trackingMode === 'pages' || (!book.totalMinutes && !book.currentMinutes)"
+            class="book-detail__mode-switch"
+            @click="showTimePrompt = true"
+          >
+            Track by time instead
+          </button>
+          <button
+            v-else-if="trackingMode === 'minutes'"
+            class="book-detail__mode-switch"
+            @click="updateField('totalMinutes', null); updateField('currentMinutes', null)"
+          >
+            Track by pages instead
+          </button>
+          <span v-if="savingField === 'currentPage' || savingField === 'progressPercent' || savingField === 'currentMinutes'" class="book-detail__saving">Saving…</span>
+          <!-- Completion prompt -->
+          <div v-if="showCompletionPrompt" class="book-detail__completion-prompt">
+            <span>Move to <strong>Read</strong> shelf?</span>
+            <button class="book-detail__completion-yes" @click="completeAndMoveToRead">Yes, I'm done!</button>
+            <button class="book-detail__completion-no" @click="showCompletionPrompt = false">Not yet</button>
+          </div>
         </div>
       </section>
 
-      <!-- Rating & Review (Phase 4) -->
-      <section class="book-detail__section book-detail__section--future">
-        <h3 class="book-detail__section-title">
-          Your Rating
-          <span class="book-detail__coming-soon">Coming soon</span>
-        </h3>
-        <div class="book-detail__rating-placeholder">
-          <div class="book-detail__stars">
-            <span
+      <!-- Rating (interactive) -->
+      <section class="book-detail__section">
+        <h3 class="book-detail__section-title">Your Rating</h3>
+        <div class="book-detail__rating-row">
+          <div
+            class="book-detail__stars"
+            role="group"
+            aria-label="Rate this book"
+            @mouseleave="hoverRating = 0"
+          >
+            <button
               v-for="star in 5"
               :key="star"
               class="book-detail__star"
-              :class="{ 'book-detail__star--filled': book.rating && star <= book.rating }"
-            >★</span>
+              :class="{
+                'book-detail__star--filled': star <= (hoverRating || book.rating || 0),
+                'book-detail__star--hover': hoverRating > 0 && star <= hoverRating,
+              }"
+              :aria-label="`Rate ${star} star${star === 1 ? '' : 's'}`"
+              :aria-pressed="book.rating === star"
+              @mouseenter="hoverRating = star"
+              @click="setRating(star)"
+            >★</button>
           </div>
-          <p class="book-detail__rating-hint">Rate and review this book</p>
+          <span v-if="book.rating" class="book-detail__rating-clear" @click="updateField('rating', null)">Clear</span>
         </div>
       </section>
 
-      <!-- Notes (Phase 4) -->
-      <section class="book-detail__section book-detail__section--future">
+      <!-- Notes (textarea with debounced save) -->
+      <section class="book-detail__section">
         <h3 class="book-detail__section-title">
-          Notes
-          <span class="book-detail__coming-soon">Coming soon</span>
+          <label :for="`notes-${userBookId}`">Notes</label>
         </h3>
-        <div class="book-detail__notes-placeholder">
-          <p v-if="book.notes" class="book-detail__notes-text">{{ book.notes }}</p>
-          <p v-else class="book-detail__notes-hint">Capture your thoughts, quotes, and highlights</p>
+        <div class="book-detail__notes-wrap">
+          <textarea
+            :id="`notes-${userBookId}`"
+            class="book-detail__notes-input"
+            :value="book.notes ?? ''"
+            placeholder="Capture your thoughts, quotes, and highlights…"
+            rows="5"
+            @input="onNotesInput"
+          />
+          <span v-if="savingField === 'notes'" class="book-detail__saving">Saving…</span>
         </div>
       </section>
 
-      <!-- Reading Dates (Phase 4) -->
-      <section class="book-detail__section book-detail__section--future">
-        <h3 class="book-detail__section-title">
-          Reading Dates
-          <span class="book-detail__coming-soon">Coming soon</span>
-        </h3>
+      <!-- Reading Dates -->
+      <section class="book-detail__section">
+        <h3 class="book-detail__section-title">Reading Dates</h3>
         <div class="book-detail__dates">
           <div class="book-detail__date-item">
             <span class="book-detail__date-label">Added</span>
-            <span>{{ formatDate(book.dateAdded) }}</span>
+            <span class="book-detail__date-value">{{ formatDate(book.dateAdded) }}</span>
           </div>
           <div class="book-detail__date-item">
-            <span class="book-detail__date-label">Started</span>
-            <span>{{ book.dateStarted ? formatDate(book.dateStarted) : '—' }}</span>
+            <label class="book-detail__date-label" :for="`date-started-${userBookId}`">Started</label>
+            <input
+              :id="`date-started-${userBookId}`"
+              type="date"
+              class="book-detail__date-input"
+              :value="toDateInput(book.dateStarted)"
+              @change="updateField('dateStarted', ($event.target as HTMLInputElement).value || null)"
+            >
           </div>
           <div class="book-detail__date-item">
-            <span class="book-detail__date-label">Finished</span>
-            <span>{{ book.dateFinished ? formatDate(book.dateFinished) : '—' }}</span>
+            <label class="book-detail__date-label" :for="`date-finished-${userBookId}`">Finished</label>
+            <input
+              :id="`date-finished-${userBookId}`"
+              type="date"
+              class="book-detail__date-input"
+              :value="toDateInput(book.dateFinished)"
+              @change="updateField('dateFinished', ($event.target as HTMLInputElement).value || null)"
+            >
           </div>
         </div>
       </section>
@@ -309,6 +429,8 @@ interface BookDetail {
   notes?: string | null
   currentPage?: number | null
   progressPercent?: string | null
+  totalMinutes?: number | null
+  currentMinutes?: number | null
   dateAdded?: string | Date | null
   dateStarted?: string | Date | null
   dateFinished?: string | Date | null
@@ -325,18 +447,299 @@ const showShelfPicker = ref(false)
 const movingShelf = ref(false)
 const confirmingRemove = ref(false)
 const removing = ref(false)
+const showCoverPicker = ref(false)
+
+function onCoverUpdated(newUrl: string) {
+  if (book.value) book.value.coverUrl = newUrl
+  showCoverPicker.value = false
+}
+
+// Phase 4: interactive rating / notes / dates
+const hoverRating = ref(0)
+const savingField = ref<string | null>(null)
+const notesDebounceTimer = ref<ReturnType<typeof setTimeout> | null>(null)
+const toast = useToast()
+
+const fieldLabels: Record<string, string> = {
+  rating: 'Rating',
+  notes: 'Notes',
+  dateStarted: 'Start date',
+  dateFinished: 'Finish date',
+  currentPage: 'Progress',
+  progressPercent: 'Progress',
+  totalMinutes: 'Total length',
+  currentMinutes: 'Progress',
+}
+
+// Phase 5: reading progress
+const showCompletionPrompt = ref(false)
+const pageInputDebounce = ref<ReturnType<typeof setTimeout> | null>(null)
+const minutesInputDebounce = ref<ReturnType<typeof setTimeout> | null>(null)
+const showTimePrompt = ref(false)
+
+const trackingMode = computed(() => {
+  if (!book.value) return 'pages'
+  if (book.value.totalMinutes || book.value.currentMinutes) return 'minutes'
+  return 'pages'
+})
+
+function formatMinutes(m: number): string {
+  const h = Math.floor(m / 60)
+  const min = m % 60
+  return h > 0 ? `${h}h ${min}m` : `${min}m`
+}
+
+function parseTimeInput(raw: string): number | null {
+  raw = raw.trim().toLowerCase()
+  if (!raw) return null
+  const colonMatch = raw.match(/^(\d+):(\d+)$/)
+  if (colonMatch) return parseInt(colonMatch[1]) * 60 + parseInt(colonMatch[2])
+  const hmMatch = raw.match(/^(\d+)\s*h\s*(?:(\d+)\s*m?)?$/)
+  if (hmMatch) return parseInt(hmMatch[1]) * 60 + (parseInt(hmMatch[2] || '0'))
+  const mMatch = raw.match(/^(\d+)\s*m$/)
+  if (mMatch) return parseInt(mMatch[1])
+  const num = parseInt(raw)
+  if (!isNaN(num) && num >= 0) return num
+  return null
+}
+
+function toDateInput(date: string | Date | null | undefined): string {
+  if (!date) return ''
+  const d = new Date(date)
+  if (isNaN(d.getTime())) return ''
+  return d.toISOString().slice(0, 10)
+}
+
+async function updateField(field: string, value: unknown) {
+  if (!book.value) return
+  const oldValue = (book.value as Record<string, unknown>)[field]
+  ;(book.value as Record<string, unknown>)[field] = value
+  savingField.value = field
+  try {
+    await $fetch(`/api/books/${userBookId.value}`, {
+      method: 'PATCH',
+      body: { [field]: value },
+    })
+    toast.success(`${fieldLabels[field] || 'Field'} saved`)
+    useLibraryStore().revalidate()
+  }
+  catch {
+    ;(book.value as Record<string, unknown>)[field] = oldValue
+    toast.error('Save failed — try again')
+  }
+  finally {
+    savingField.value = null
+  }
+}
+
+function setRating(star: number) {
+  if (!book.value) return
+  const newRating = book.value.rating === star ? null : star
+  updateField('rating', newRating)
+}
+
+function onNotesInput(event: Event) {
+  const value = (event.target as HTMLTextAreaElement).value
+  if (book.value) book.value.notes = value
+  if (notesDebounceTimer.value) clearTimeout(notesDebounceTimer.value)
+  notesDebounceTimer.value = setTimeout(() => {
+    updateField('notes', value || null)
+  }, 700)
+}
 
 const userBookId = computed(() => route.params.id as string)
+const shelvesStore = useShelvesStore()
 
 const progressWidth = computed(() => {
   if (book.value?.progressPercent) {
     return `${parseFloat(book.value.progressPercent)}%`
+  }
+  if (book.value?.currentMinutes && book.value?.totalMinutes) {
+    return `${Math.round((book.value.currentMinutes / book.value.totalMinutes) * 100)}%`
   }
   if (book.value?.currentPage && book.value?.pageCount) {
     return `${Math.round((book.value.currentPage / book.value.pageCount) * 100)}%`
   }
   return '0%'
 })
+
+function computePercent(): number {
+  if (!book.value) return 0
+  if (book.value.progressPercent) return parseFloat(book.value.progressPercent)
+  if (book.value.currentMinutes && book.value.totalMinutes) {
+    return Math.round((book.value.currentMinutes / book.value.totalMinutes) * 100)
+  }
+  if (book.value.currentPage && book.value.pageCount) {
+    return Math.round((book.value.currentPage / book.value.pageCount) * 100)
+  }
+  return 0
+}
+
+function checkMilestones(oldPct: number, newPct: number) {
+  const milestones = [50, 90, 100]
+  for (const m of milestones) {
+    if (oldPct < m && newPct >= m) {
+      if (m === 100) {
+        showCompletionPrompt.value = true
+        toast.success('You finished! \uD83C\uDF89')
+      }
+      else if (m === 90) {
+        toast.success('Almost there \u2014 90% done! \uD83D\uDCD6')
+      }
+      else if (m === 50) {
+        toast.success('Halfway through! \uD83D\uDCDA')
+      }
+    }
+  }
+}
+
+async function updateProgress(page: number | null) {
+  if (!book.value) return
+  const oldPct = computePercent()
+  const oldPage = book.value.currentPage
+  book.value.currentPage = page
+  let pct: string | null = null
+  if (page != null && book.value.pageCount && book.value.pageCount > 0) {
+    const raw = Math.min(100, Math.round((page / book.value.pageCount) * 100))
+    pct = String(raw)
+    book.value.progressPercent = pct
+  }
+  savingField.value = 'currentPage'
+  try {
+    const body: Record<string, unknown> = { currentPage: page }
+    if (pct !== null) body.progressPercent = pct
+    await $fetch(`/api/books/${userBookId.value}`, { method: 'PATCH', body })
+    toast.success('Progress saved')
+    useLibraryStore().revalidate()
+    checkMilestones(oldPct, computePercent())
+  }
+  catch {
+    book.value.currentPage = oldPage
+    toast.error('Save failed \u2014 try again')
+  }
+  finally {
+    savingField.value = null
+  }
+}
+
+function onPageInput(event: Event) {
+  const raw = (event.target as HTMLInputElement).value
+  const page = raw === '' ? null : parseInt(raw, 10)
+  if (page !== null && isNaN(page)) return
+  if (pageInputDebounce.value) clearTimeout(pageInputDebounce.value)
+  pageInputDebounce.value = setTimeout(() => updateProgress(page), 500)
+}
+
+function incrementPage(amount: number) {
+  if (!book.value) return
+  const current = book.value.currentPage ?? 0
+  const next = Math.max(0, current + amount)
+  const clamped = book.value.pageCount ? Math.min(next, book.value.pageCount) : next
+  updateProgress(clamped)
+}
+
+async function updatePercentDirect(event: Event) {
+  if (!book.value) return
+  const raw = (event.target as HTMLInputElement).value
+  const pct = raw === '' ? null : Math.min(100, Math.max(0, parseInt(raw, 10)))
+  if (pct !== null && isNaN(pct)) return
+  const oldPct = computePercent()
+  book.value.progressPercent = pct !== null ? String(pct) : null
+  savingField.value = 'progressPercent'
+  try {
+    await $fetch(`/api/books/${userBookId.value}`, {
+      method: 'PATCH',
+      body: { progressPercent: pct !== null ? String(pct) : null },
+    })
+    toast.success('Progress saved')
+    useLibraryStore().revalidate()
+    checkMilestones(oldPct, pct ?? 0)
+    if (pct === 100) showCompletionPrompt.value = true
+  }
+  catch {
+    book.value.progressPercent = String(oldPct) || null
+    toast.error('Save failed \u2014 try again')
+  }
+  finally {
+    savingField.value = null
+  }
+}
+
+async function updateMinutesProgress(minutes: number | null) {
+  if (!book.value) return
+  const oldPct = computePercent()
+  const oldMinutes = book.value.currentMinutes
+
+  book.value.currentMinutes = minutes
+
+  let pct: string | null = null
+  if (minutes != null && book.value.totalMinutes && book.value.totalMinutes > 0) {
+    const raw = Math.min(100, Math.round((minutes / book.value.totalMinutes) * 100))
+    pct = String(raw)
+    book.value.progressPercent = pct
+  }
+
+  savingField.value = 'currentMinutes'
+  try {
+    const body: Record<string, unknown> = { currentMinutes: minutes }
+    if (pct !== null) body.progressPercent = pct
+    await $fetch(`/api/books/${userBookId.value}`, { method: 'PATCH', body })
+    toast.success('Progress saved')
+    useLibraryStore().revalidate()
+    const newPct = computePercent()
+    checkMilestones(oldPct, newPct)
+  }
+  catch {
+    book.value.currentMinutes = oldMinutes
+    toast.error('Save failed \u2014 try again')
+  }
+  finally {
+    savingField.value = null
+  }
+}
+
+function incrementMinutes(amount: number) {
+  if (!book.value) return
+  const current = book.value.currentMinutes ?? 0
+  const next = Math.max(0, current + amount)
+  const clamped = book.value.totalMinutes ? Math.min(next, book.value.totalMinutes) : next
+  updateMinutesProgress(clamped)
+}
+
+function onTotalMinutesInput(event: Event) {
+  const raw = (event.target as HTMLInputElement).value
+  const minutes = parseTimeInput(raw)
+  if (minutesInputDebounce.value) clearTimeout(minutesInputDebounce.value)
+  minutesInputDebounce.value = setTimeout(() => {
+    updateField('totalMinutes', minutes)
+  }, 500)
+}
+
+async function completeAndMoveToRead() {
+  if (!book.value) return
+  showCompletionPrompt.value = false
+  const readShelf = shelvesStore.shelves.find(s => s.slug === 'read')
+  if (!readShelf) return
+  try {
+    if (!book.value.dateFinished) {
+      await $fetch(`/api/books/${userBookId.value}`, {
+        method: 'PATCH',
+        body: { dateFinished: new Date().toISOString().slice(0, 10) },
+      })
+      book.value.dateFinished = new Date().toISOString()
+    }
+    await $fetch(`/api/books/${userBookId.value}/shelf`, {
+      method: 'PATCH',
+      body: { shelfId: readShelf.id },
+    })
+    await fetchBook()
+    useLibraryStore().invalidate()
+    toast.success('Moved to Read shelf! \uD83D\uDCD6')
+  }
+  catch {
+    toast.error('Could not move book')
+  }
+}
 
 useHead({
   title: computed(() => book.value ? `${book.value.title} — Bookshelf` : 'Book — Bookshelf'),
@@ -375,9 +778,11 @@ async function moveToShelf(shelfId: string) {
     })
     // Refresh book data to get updated shelf info
     await fetchBook()
+    useLibraryStore().invalidate()
+    toast.success('Moved to shelf')
   }
   catch {
-    // Could show a toast
+    toast.error('Could not move book')
   }
   finally {
     movingShelf.value = false
@@ -389,6 +794,7 @@ async function removeBook() {
   try {
     await $fetch(`/api/books/${userBookId.value}`, { method: 'DELETE' })
     useLibraryStore().invalidate()
+    toast.success('Book removed')
     await navigateTo('/library')
   }
   catch {
@@ -514,6 +920,47 @@ onMounted(() => {
 
   &__cover-area {
     flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+  }
+
+  &__cover-wrap {
+    position: relative;
+
+    &:hover .book-detail__cover-change {
+      opacity: 1;
+    }
+  }
+
+  &__cover-change {
+    position: absolute;
+    bottom: $spacing-xs;
+    right: $spacing-xs;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.55);
+    border: none;
+    border-radius: $radius-full;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity $transition-fast, background-color $transition-fast;
+    backdrop-filter: blur(4px);
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.75);
+    }
+
+    &:focus-visible {
+      opacity: 1;
+      outline: 2px solid var(--highlight-color);
+      outline-offset: 2px;
+    }
   }
 
   &__header {
@@ -758,15 +1205,6 @@ onMounted(() => {
     padding: $spacing-lg 0;
     border-top: 1px solid var(--border-color-subtle);
     animation: fade-in-up $duration-base $ease-out-expo both;
-
-    &--future {
-      opacity: 0.7;
-      transition: opacity 0.2s ease;
-
-      &:hover {
-        opacity: 1;
-      }
-    }
   }
 
   &__section-title {
@@ -777,23 +1215,13 @@ onMounted(() => {
     gap: $spacing-sm;
   }
 
-  &__coming-soon {
-    font-family: $font-family-body;
-    font-size: $font-size-xs;
-    font-weight: $font-weight-medium;
-    color: var(--text-color-muted);
-    background: var(--sub-bg-color);
-    padding: 2px $spacing-sm;
-    border-radius: $radius-full;
-  }
-
   &__description {
     @include body-text;
     line-height: 1.7;
   }
 
-  // --- Progress placeholder ---
-  &__progress-placeholder {
+  // --- Progress ---
+  &__progress-area {
     display: flex;
     flex-direction: column;
     gap: $spacing-sm;
@@ -810,58 +1238,284 @@ onMounted(() => {
     height: 100%;
     background: var(--progress-color);
     border-radius: $radius-full;
-    transition: width 0.5s $ease-out-expo;
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     min-width: 0;
   }
 
-  &__progress-text {
-    @include meta-text;
-  }
-
-  // --- Rating placeholder ---
-  &__rating-placeholder {
+  &__progress-controls {
     display: flex;
-    flex-direction: column;
+    align-items: center;
     gap: $spacing-xs;
+    flex-wrap: wrap;
   }
 
-  &__stars {
+  &__page-btn {
     display: flex;
-    gap: $spacing-xs;
-  }
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    height: 2.25rem;
+    padding: 0 $spacing-xs;
+    font-family: $font-family-body;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--text-color-secondary);
+    background: var(--sub-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: $radius-md;
+    cursor: pointer;
+    transition: background-color $transition-fast, border-color $transition-fast;
 
-  &__star {
-    font-size: 1.5rem;
-    color: var(--border-color);
-    line-height: 1;
-    cursor: default;
-
-    &--filled {
-      color: var(--rating-color);
+    &:hover {
+      background: var(--highlight-color-subtle);
+      border-color: var(--highlight-color);
     }
   }
 
-  &__rating-hint {
-    @include meta-text;
+  &__page-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
   }
 
-  // --- Notes placeholder ---
-  &__notes-placeholder {
-    padding: $spacing-md;
+  &__page-input {
+    width: 4rem;
+    padding: $spacing-xs;
+    font-family: $font-family-body;
+    font-size: $font-size-sm;
+    color: var(--text-color);
     background: var(--sub-bg-color);
+    border: 1px solid var(--border-color);
     border-radius: $radius-md;
-    border: 1px dashed var(--border-color);
-    min-height: 6rem;
+    text-align: center;
+    -moz-appearance: textfield;
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+    }
+    &:focus {
+      outline: none;
+      border-color: var(--highlight-color);
+    }
   }
 
-  &__notes-text {
-    @include body-text;
-    white-space: pre-wrap;
+  &__page-total {
+    font-size: $font-size-sm;
+    color: var(--text-color-muted);
   }
 
-  &__notes-hint {
-    @include meta-text;
-    font-style: italic;
+  &__pct-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  &__pct-input {
+    width: 4rem;
+    padding: $spacing-xs;
+    font-family: $font-family-body;
+    font-size: $font-size-sm;
+    color: var(--text-color);
+    background: var(--sub-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: $radius-md;
+    text-align: center;
+    -moz-appearance: textfield;
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+    }
+    &:focus {
+      outline: none;
+      border-color: var(--highlight-color);
+    }
+  }
+
+  &__pct-symbol {
+    font-size: $font-size-sm;
+    color: var(--text-color-muted);
+  }
+
+  &__time-display {
+    font-family: $font-family-body;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--text-color);
+    min-width: 4rem;
+    text-align: center;
+  }
+
+  &__time-total-row {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+
+  &__time-total-label {
+    font-size: $font-size-xs;
+    color: var(--text-color-muted);
+    white-space: nowrap;
+  }
+
+  &__time-total-input {
+    width: 8rem;
+    padding: $spacing-xs $spacing-sm;
+    font-family: $font-family-body;
+    font-size: $font-size-sm;
+    color: var(--text-color);
+    background: var(--sub-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: $radius-md;
+    text-align: center;
+    &:focus {
+      outline: none;
+      border-color: var(--highlight-color);
+    }
+  }
+
+  &__time-prompt {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    animation: fade-in-scale 150ms $ease-out-expo both;
+  }
+
+  &__mode-switch {
+    padding: 0;
+    font-family: $font-family-body;
+    font-size: $font-size-xs;
+    color: var(--text-color-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    &:hover { color: var(--highlight-color); }
+  }
+
+  &__saving {
+    font-size: $font-size-xs;
+    color: var(--text-color-muted);
+  }
+
+  &__completion-prompt {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    background: var(--highlight-color-subtle);
+    border-radius: $radius-md;
+    font-size: $font-size-sm;
+    color: var(--text-color);
+    animation: fade-in-scale 200ms $ease-out-expo both;
+  }
+
+  &__completion-yes {
+    padding: $spacing-xs $spacing-md;
+    font-family: $font-family-body;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: #fff;
+    background: var(--success-color);
+    border: none;
+    border-radius: $radius-md;
+    cursor: pointer;
+    transition: opacity $transition-fast;
+    &:hover { opacity: 0.85; }
+  }
+
+  &__completion-no {
+    padding: $spacing-xs $spacing-sm;
+    font-family: $font-family-body;
+    font-size: $font-size-xs;
+    color: var(--text-color-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    &:hover { color: var(--text-color); }
+  }
+
+  // --- Rating ---
+  &__stars {
+    display: flex;
+    gap: 2px;
+  }
+
+  &__rating-row {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+
+  &__star {
+    padding: 0 1px;
+    font-size: 1.5rem;
+    color: var(--border-color);
+    line-height: 1;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color $transition-fast, transform $transition-fast;
+
+    &--filled {
+      color: var(--rating-color, #c9a227);
+    }
+
+    &--hover {
+      transform: scale(1.15);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--highlight-color);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+  }
+
+  &__rating-clear {
+    font-size: $font-size-xs;
+    color: var(--text-color-muted);
+    cursor: pointer;
+    text-decoration: underline;
+
+    &:hover { color: var(--text-color); }
+  }
+
+  // --- Notes ---
+  &__notes-wrap {
+    position: relative;
+  }
+
+  &__notes-input {
+    width: 100%;
+    padding: $spacing-sm;
+    font-family: $font-family-body;
+    font-size: $font-size-sm;
+    color: var(--text-color);
+    background: var(--sub-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: $radius-md;
+    resize: vertical;
+    transition: border-color $transition-fast;
+    box-sizing: border-box;
+
+    &::placeholder {
+      color: var(--text-color-muted);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--highlight-color);
+    }
+  }
+
+  &__saving {
+    position: absolute;
+    bottom: $spacing-xs;
+    right: $spacing-sm;
+    font-size: $font-size-xs;
+    color: var(--text-color-muted);
+    pointer-events: none;
   }
 
   // --- Dates ---
@@ -888,6 +1542,32 @@ onMounted(() => {
     color: var(--text-color-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
+  }
+
+  &__date-value {
+    font-size: $font-size-sm;
+    color: var(--text-color);
+  }
+
+  &__date-input {
+    padding: $spacing-xs $spacing-sm;
+    font-family: $font-family-body;
+    font-size: $font-size-sm;
+    color: var(--text-color);
+    background: var(--sub-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: $radius-md;
+    transition: border-color $transition-fast;
+
+    &:focus {
+      outline: none;
+      border-color: var(--highlight-color);
+    }
+
+    &::-webkit-calendar-picker-indicator {
+      filter: var(--calendar-icon-filter, invert(0.5));
+      cursor: pointer;
+    }
   }
 }
 </style>

@@ -116,6 +116,8 @@ export const userBooks = pgTable('user_books', {
   notes: text('notes'),
   currentPage: integer('current_page'),
   progressPercent: numeric('progress_percent', { precision: 5, scale: 2 }),
+  totalMinutes: integer('total_minutes'),
+  currentMinutes: integer('current_minutes'),
   dateAdded: timestamp('date_added').notNull().defaultNow(),
   dateStarted: timestamp('date_started'),
   dateFinished: timestamp('date_finished'),
@@ -145,6 +147,7 @@ export const readingProgressLog = pgTable('reading_progress_log', {
   pagesRead: integer('pages_read'),
   fromPage: integer('from_page'),
   toPage: integer('to_page'),
+  minutesListened: integer('minutes_listened'),
   progressPercent: numeric('progress_percent', { precision: 5, scale: 2 }),
   loggedAt: timestamp('logged_at').notNull().defaultNow(),
 }, (table) => [

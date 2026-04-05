@@ -97,36 +97,37 @@ _Note: Usernames were not in the original Phase 1 scope. Added retroactively —
 
 ---
 
-## Phase 4 — Book Detail & Personal Data
+## Phase 4 — Book Detail & Personal Data ✅
 **Goal:** Rich book detail view with ratings, notes, and personal data.
 
 _Note: Book detail page layout was built in Phase 3 with placeholder sections. Phase 4 activates the interactive features._
 
-- [ ] Star rating (1-5, interactive, keyboard accessible)
-- [ ] Personal notes (markdown-supported textarea)
-- [ ] Date started / date finished pickers
-- [ ] Link to Open Library / Google Books page
-- [ ] Optimistic UI for rating and notes updates
-- [ ] Graceful handling of sparse metadata (hide empty fields, adapt layout)
+- [x] Star rating (1-5, interactive, keyboard accessible)
+- [x] Personal notes (textarea with debounced auto-save)
+- [x] Date started / date finished pickers
+- [x] Link to Open Library / Google Books page
+- [x] Optimistic UI for rating and notes updates
+- [x] Graceful handling of sparse metadata (hide empty fields, adapt layout)
+- [x] Toast notification system for save feedback
 
 **Deliverable:** Complete book detail view with all personal data features.
 
 ---
 
-## Phase 5 — Reading Progress
+## Phase 5 — Reading Progress ✅
 **Goal:** Track reading progress with visual indicators and history.
 
-- [ ] Progress tracking on "Currently Reading" books
-- [ ] Page number input (direct entry + quick increment buttons)
-- [ ] Percentage fallback for books without page count
-- [ ] Progress bar component (animated fill, warm accent color)
-- [ ] Progress visible on library overview (on BookCard)
-- [ ] Quick progress update from library view (without navigating to detail)
-- [ ] Progress history logging (`reading_progress_log` table)
-- [ ] 100% completion prompt → move to "Read" shelf
-- [ ] Milestone moments (50%, 90%, 100%)
+- [x] Progress tracking on "Currently Reading" books
+- [x] Page number input (direct entry + quick increment buttons: ±1, ±10)
+- [x] Percentage fallback for books without page count
+- [x] Progress bar component (animated fill, warm accent color)
+- [x] Progress visible on library overview (thin bar on book cover)
+- [x] Quick progress update from library view (BookDetailPanel slide-in)
+- [x] Progress history logging (`reading_progress_log` table)
+- [x] 100% completion prompt → move to "Read" shelf (auto-sets dateFinished)
+- [x] Milestone moments (50%, 90%, 100%) with toast celebrations
 - [ ] "Last updated" timestamp display
-- [ ] Optimistic UI for progress updates
+- [x] Optimistic UI for progress updates
 
 **Deliverable:** Full reading progress tracking with history and visual feedback.
 

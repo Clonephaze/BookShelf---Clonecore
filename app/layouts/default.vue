@@ -50,6 +50,7 @@
 
     <MobileNav :more-open="moreSheetOpen" @toggle-more="moreSheetOpen = !moreSheetOpen" />
     <MobileMoreSheet :open="moreSheetOpen" @close="moreSheetOpen = false" />
+    <ToastContainer />
   </div>
 </template>
 

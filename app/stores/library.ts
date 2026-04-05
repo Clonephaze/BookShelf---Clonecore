@@ -13,6 +13,8 @@ export interface ShelfBook {
   dateFinished: string | null
   currentPage: number | null
   progressPercent: string | null
+  totalMinutes: number | null
+  currentMinutes: number | null
 }
 
 export interface ShelfData {
@@ -58,8 +60,8 @@ export const useLibraryStore = defineStore('library', () => {
     try {
       const fresh = await $fetch<ShelfData[]>('/api/library')
       // Only update if something actually changed (book counts or IDs)
-      const oldSig = JSON.stringify(data.value.map(s => ({ id: s.id, bookCount: s.bookCount, books: s.books.map(b => b.userBookId) })))
-      const newSig = JSON.stringify(fresh.map(s => ({ id: s.id, bookCount: s.bookCount, books: s.books.map(b => b.userBookId) })))
+      const oldSig = JSON.stringify(data.value.map(s => ({ id: s.id, bookCount: s.bookCount, books: s.books.map(b => ({ id: b.userBookId, r: b.rating, p: b.currentPage, pp: b.progressPercent, cm: b.currentMinutes })) })))
+      const newSig = JSON.stringify(fresh.map(s => ({ id: s.id, bookCount: s.bookCount, books: s.books.map(b => ({ id: b.userBookId, r: b.rating, p: b.currentPage, pp: b.progressPercent, cm: b.currentMinutes })) })))
       if (oldSig !== newSig) {
         data.value = fresh
       }

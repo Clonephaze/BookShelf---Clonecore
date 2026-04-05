@@ -35,6 +35,8 @@ export default defineEventHandler(async (event) => {
       notes: userBooks.notes,
       currentPage: userBooks.currentPage,
       progressPercent: userBooks.progressPercent,
+      totalMinutes: userBooks.totalMinutes,
+      currentMinutes: userBooks.currentMinutes,
       dateAdded: userBooks.dateAdded,
       dateStarted: userBooks.dateStarted,
       dateFinished: userBooks.dateFinished,

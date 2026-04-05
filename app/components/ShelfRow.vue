@@ -92,13 +92,31 @@ function updateEndPadding() {
   const booksEl = el.querySelector<HTMLElement>('.shelf-row__books')
   if (!booksEl) return
 
-  // Temporarily remove padding to measure natural content width
-  booksEl.style.paddingRight = ''
-  const contentOverflows = el.scrollWidth > el.clientWidth
+  const bookEls = el.querySelectorAll<HTMLElement>('[data-book-id]')
+  const bookCount = bookEls.length
+
+  if (bookCount === 0) {
+    booksEl.style.paddingRight = ''
+    return
+  }
+
+  // Measure one book's full cover width from the absolutely-positioned inner
+  // box (`.book-on-shelf__box`), which always has `width: var(--bw)` and is
+  // unaffected by the --turn-driven width collapse on the outer element.
+  const firstBox = bookEls[0].querySelector<HTMLElement>('.book-on-shelf__box')
+  const coverWidth = firstBox ? firstBox.offsetWidth : 0
+  if (coverWidth === 0) return // not yet rendered
+
+  // Estimate the natural content width (all books at full cover size)
+  const gap = parseFloat(getComputedStyle(booksEl).columnGap) || 0
+  const naturalWidth = coverWidth * bookCount + gap * Math.max(0, bookCount - 1)
+  const contentOverflows = naturalWidth > el.clientWidth
 
   if (contentOverflows) {
     // Add enough padding so the last books can scroll into the cover zone
     booksEl.style.paddingRight = '35%'
+  } else {
+    booksEl.style.paddingRight = ''
   }
 }
 
@@ -109,6 +127,16 @@ function onTrackScroll() {
     rafId = null
     updateBookTurns()
   })
+}
+
+function onTrackWheel(event: WheelEvent) {
+  const el = trackEl.value
+  if (!el) return
+  // Only intercept vertical wheel when the track is scrollable horizontally
+  if (el.scrollWidth <= el.clientWidth) return
+  if (event.deltaY === 0) return
+  event.preventDefault()
+  el.scrollLeft += event.deltaY
 }
 
 function handleBookOpen(userBookId: string, el: HTMLElement) {
@@ -187,6 +215,7 @@ watch(() => props.books.length, () => {
         ref="trackEl"
         class="shelf-row__track"
         @scroll.passive="onTrackScroll"
+        @wheel="onTrackWheel"
       >
         <div class="shelf-row__books">
           <BookOnShelf
@@ -283,7 +312,7 @@ watch(() => props.books.length, () => {
 
   &__track {
     overflow-x: auto;
-    overflow-y: clip;
+    overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     padding-bottom: 0;
     scroll-snap-type: x proximity;
