@@ -1,6 +1,6 @@
-import { eq, and, sql, isNotNull } from 'drizzle-orm'
+import { eq, and, sql, isNotNull, desc } from 'drizzle-orm'
 import { useDB } from '../../database'
-import { userBooks } from '../../database/schema'
+import { userBooks, books } from '../../database/schema'
 import { requireServerSession } from '../../utils/session'
 
 export default defineEventHandler(async (event) => {
@@ -13,8 +13,8 @@ export default defineEventHandler(async (event) => {
     isNotNull(userBooks.rating),
   )
 
-  // Rating distribution (1-5) and avg rating
-  const [distribution, [avgRow]] = await Promise.all([
+  // Rating distribution (1-5), avg rating, total books, highest rated author
+  const [distribution, [avgRow], [totalRow], topRatedAuthor] = await Promise.all([
     db
       .select({
         rating: userBooks.rating,
@@ -32,6 +32,26 @@ export default defineEventHandler(async (event) => {
       })
       .from(userBooks)
       .where(ratedFilter),
+
+    db
+      .select({
+        count: sql<number>`count(*)::int`,
+      })
+      .from(userBooks)
+      .where(eq(userBooks.userId, userId)),
+
+    db
+      .select({
+        author: books.author,
+        avgRating: sql<number>`round(avg(${userBooks.rating})::numeric, 2)`,
+        bookCount: sql<number>`count(*)::int`,
+      })
+      .from(userBooks)
+      .innerJoin(books, eq(userBooks.bookId, books.id))
+      .where(ratedFilter)
+      .groupBy(books.author)
+      .orderBy(desc(sql`avg(${userBooks.rating})`), desc(sql`count(*)`))
+      .limit(1),
   ])
 
   // Fill in missing ratings (1-5) with zero counts
@@ -42,6 +62,8 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  const topAuthor = topRatedAuthor[0] ?? null
+
   return {
     distribution: [1, 2, 3, 4, 5].map(star => ({
       rating: star,
@@ -49,5 +71,9 @@ export default defineEventHandler(async (event) => {
     })),
     avgRating: avgRow?.avg ? Number(avgRow.avg) : null,
     totalRated: avgRow?.total ?? 0,
+    totalBooks: totalRow?.count ?? 0,
+    highestRatedAuthor: topAuthor
+      ? { author: topAuthor.author, avgRating: Number(topAuthor.avgRating), bookCount: topAuthor.bookCount }
+      : null,
   }
 })

@@ -33,14 +33,28 @@
           <span class="stats__hero-value">{{ overview.booksThisYear }}</span>
           <span class="stats__hero-label">Books in {{ overview.currentYear }}</span>
           <div v-if="overview.sparkline.length > 1" class="stats__sparkline" aria-hidden="true">
-            <svg :viewBox="`0 0 ${overview.sparkline.length * 14} 24`" preserveAspectRatio="none">
+            <svg :viewBox="`0 0 ${sparklineWidth} ${sparklineHeight}`" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="var(--progress-color)" stop-opacity="0.35" />
+                  <stop offset="100%" stop-color="var(--progress-color)" stop-opacity="0" />
+                </linearGradient>
+              </defs>
+              <path :d="sparklineArea" fill="url(#sparkFill)" />
               <polyline
                 :points="sparklinePoints"
                 fill="none"
                 stroke="var(--progress-color)"
-                stroke-width="2"
+                stroke-width="2.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
+              />
+              <circle
+                v-if="overview.sparkline.length"
+                :cx="sparklineLastX"
+                :cy="sparklineLastY"
+                r="3"
+                fill="var(--progress-color)"
               />
             </svg>
           </div>
@@ -91,91 +105,11 @@
                 class="stats__bar"
                 :class="{ 'stats__bar--empty': bar.count === 0 }"
                 :style="{ height: barHeight(bar.count) }"
-              />
+              >
+                <span v-if="bar.count === 0" class="stats__bar-dot" />
+              </div>
               <span class="stats__bar-label">{{ bar.label }}</span>
             </div>
-          </div>
-        </section>
-
-        <!-- Reading heatmap -->
-        <section class="stats__chart-card stats__chart-card--wide">
-          <h2 class="stats__chart-title">
-            Reading Activity
-            <span class="stats__chart-year">{{ heatmap?.year ?? new Date().getFullYear() }}</span>
-          </h2>
-          <div v-if="heatmap" class="stats__heatmap">
-            <div class="stats__heatmap-months">
-              <span v-for="m in heatmapMonths" :key="m" class="stats__heatmap-month">{{ m }}</span>
-            </div>
-            <div class="stats__heatmap-grid">
-              <div
-                v-for="(day, i) in heatmapDays"
-                :key="i"
-                class="stats__heatmap-cell"
-                :class="heatmapCellClass(day)"
-                :title="day.date ? `${day.date}: ${day.count} book${day.count !== 1 ? 's' : ''}` : ''"
-              />
-            </div>
-            <div class="stats__heatmap-legend">
-              <span class="stats__heatmap-legend-label">Less</span>
-              <div class="stats__heatmap-cell stats__heatmap-cell--empty" />
-              <div class="stats__heatmap-cell stats__heatmap-cell--l1" />
-              <div class="stats__heatmap-cell stats__heatmap-cell--l2" />
-              <div class="stats__heatmap-cell stats__heatmap-cell--l3" />
-              <span class="stats__heatmap-legend-label">More</span>
-            </div>
-          </div>
-        </section>
-
-        <!-- Rating distribution -->
-        <section class="stats__chart-card">
-          <h2 class="stats__chart-title">Rating Distribution</h2>
-          <div v-if="ratings && ratings.totalRated > 0" class="stats__rating-chart">
-            <div v-for="row in ratings.distribution" :key="row.rating" class="stats__rating-row">
-              <span class="stats__rating-stars">
-                <svg v-for="s in row.rating" :key="s" class="stats__rating-star" viewBox="0 0 24 24" fill="var(--rating-color)" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-              </span>
-              <div class="stats__rating-bar-track">
-                <div class="stats__rating-bar-fill" :style="{ width: ratingBarWidth(row.count) }" />
-              </div>
-              <span class="stats__rating-count">{{ row.count }}</span>
-            </div>
-          </div>
-          <div v-else class="stats__chart-empty">
-            <p>Rate some books to see your distribution</p>
-          </div>
-        </section>
-
-        <!-- Top authors -->
-        <section class="stats__chart-card">
-          <h2 class="stats__chart-title">Top Authors</h2>
-          <div v-if="authors && authors.topAuthors.length > 0" class="stats__authors">
-            <div class="stats__authors-summary">
-              <span class="stats__authors-stat"><strong>{{ authors.uniqueAuthors }}</strong> unique authors</span>
-              <span v-if="authors.repeatAuthors > 0" class="stats__authors-stat"><strong>{{ authors.repeatAuthors }}</strong> repeat favorites</span>
-            </div>
-            <ol class="stats__authors-list">
-              <li v-for="(a, i) in authors.topAuthors.slice(0, 5)" :key="a.author" class="stats__author-item">
-                <span class="stats__author-rank">{{ i + 1 }}</span>
-                <img
-                  v-if="a.coverUrlSmall"
-                  :src="a.coverUrlSmall"
-                  :alt="a.author"
-                  class="stats__author-cover"
-                  loading="lazy"
-                >
-                <div v-else class="stats__author-cover stats__author-cover--placeholder">
-                  {{ a.author.charAt(0) }}
-                </div>
-                <div class="stats__author-info">
-                  <span class="stats__author-name">{{ a.author }}</span>
-                  <span class="stats__author-count">{{ a.bookCount }} {{ a.bookCount === 1 ? 'book' : 'books' }}</span>
-                </div>
-              </li>
-            </ol>
-          </div>
-          <div v-else class="stats__chart-empty">
-            <p>Finish books to see your most-read authors</p>
           </div>
         </section>
 
@@ -227,6 +161,106 @@
             <p>Finish books to see length insights</p>
           </div>
         </section>
+
+        <!-- Monthly reading activity -->
+        <section class="stats__chart-card stats__chart-card--wide">
+          <h2 class="stats__chart-title">
+            Reading Activity
+            <span class="stats__chart-year">{{ heatmap?.year ?? new Date().getFullYear() }}</span>
+          </h2>
+          <div v-if="heatmap" class="stats__month-grid">
+            <div
+              v-for="(m, i) in monthlyActivity"
+              :key="i"
+              class="stats__month-cell"
+              :class="monthCellClass(m.count)"
+            >
+              <span class="stats__month-name">{{ m.name }}</span>
+              <span class="stats__month-count">{{ m.count }}</span>
+              <span class="stats__month-label">{{ m.count === 1 ? 'book' : 'books' }}</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Rating distribution -->
+        <section class="stats__chart-card">
+          <h2 class="stats__chart-title">Rating Distribution</h2>
+          <div v-if="ratings && ratings.totalRated > 0" class="stats__rating-chart">
+            <div class="stats__rating-summary">
+              <span v-if="ratings.avgRating" class="stats__rating-summary-avg">
+                {{ ratings.avgRating }}
+                <svg class="stats__star-icon" viewBox="0 0 24 24" fill="var(--rating-color)" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                average
+              </span>
+              <span class="stats__rating-summary-count">{{ ratings.totalRated }} of {{ ratings.totalBooks }} rated</span>
+            </div>
+            <div v-for="row in ratingsReversed" :key="row.rating" class="stats__rating-row">
+              <span class="stats__rating-stars">
+                <svg v-for="s in row.rating" :key="s" class="stats__rating-star" viewBox="0 0 24 24" fill="var(--rating-color)" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              </span>
+              <div class="stats__rating-bar-track">
+                <div
+                  class="stats__rating-bar-fill"
+                  :class="{ 'stats__rating-bar-fill--zero': row.count === 0 }"
+                  :style="{ width: ratingBarWidth(row.count) }"
+                />
+              </div>
+              <span class="stats__rating-count">{{ row.count }}</span>
+            </div>
+            <div v-if="ratings.highestRatedAuthor" class="stats__rating-insight">
+              <svg class="stats__rating-insight-icon" viewBox="0 0 24 24" fill="none" stroke="var(--rating-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <span>
+                <strong>{{ ratings.highestRatedAuthor.author }}</strong>
+                is your highest rated author
+                <span class="stats__rating-insight-detail">{{ ratings.highestRatedAuthor.avgRating }}★ across {{ ratings.highestRatedAuthor.bookCount }} {{ ratings.highestRatedAuthor.bookCount === 1 ? 'book' : 'books' }}</span>
+              </span>
+            </div>
+            <div v-if="mostGivenRating" class="stats__rating-insight">
+              <svg class="stats__rating-insight-icon" viewBox="0 0 24 24" fill="none" stroke="var(--progress-color)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              <span>
+                You most often give
+                <strong>{{ mostGivenRating.rating }}★</strong>
+                <span class="stats__rating-insight-detail">{{ mostGivenRating.count }} {{ mostGivenRating.count === 1 ? 'time' : 'times' }}</span>
+              </span>
+            </div>
+          </div>
+          <div v-else class="stats__chart-empty">
+            <p>Rate some books to see your distribution</p>
+          </div>
+        </section>
+
+        <!-- Top authors -->
+        <section class="stats__chart-card">
+          <h2 class="stats__chart-title">Top Authors</h2>
+          <div v-if="authors && authors.topAuthors.length > 0" class="stats__authors">
+            <div class="stats__authors-summary">
+              <span class="stats__authors-stat"><strong>{{ authors.uniqueAuthors }}</strong> unique authors</span>
+              <span v-if="authors.repeatAuthors > 0" class="stats__authors-stat"><strong>{{ authors.repeatAuthors }}</strong> repeat favorites</span>
+            </div>
+            <ol class="stats__authors-list">
+              <li v-for="(a, i) in authors.topAuthors.slice(0, 5)" :key="a.author" class="stats__author-item">
+                <span class="stats__author-rank">{{ i + 1 }}</span>
+                <img
+                  v-if="a.coverUrlSmall"
+                  :src="a.coverUrlSmall"
+                  :alt="a.author"
+                  class="stats__author-cover"
+                  loading="lazy"
+                >
+                <div v-else class="stats__author-cover stats__author-cover--placeholder">
+                  {{ a.author.charAt(0) }}
+                </div>
+                <div class="stats__author-info">
+                  <span class="stats__author-name">{{ a.author }}</span>
+                  <span class="stats__author-count">{{ a.bookCount }} {{ a.bookCount === 1 ? 'book' : 'books' }}</span>
+                </div>
+              </li>
+            </ol>
+          </div>
+          <div v-else class="stats__chart-empty">
+            <p>Finish books to see your most-read authors</p>
+          </div>
+        </section>
       </div>
     </template>
   </div>
@@ -252,7 +286,7 @@ interface TimelineEntry { year: number; month: number; count: number; label: str
 interface Timeline { timeline: TimelineEntry[]; months: number }
 
 interface RatingRow { rating: number; count: number }
-interface Ratings { distribution: RatingRow[]; avgRating: number | null; totalRated: number }
+interface Ratings { distribution: RatingRow[]; avgRating: number | null; totalRated: number; totalBooks: number; highestRatedAuthor: { author: string; avgRating: number; bookCount: number } | null }
 
 interface AuthorRow { author: string; bookCount: number; coverUrlSmall: string | null }
 interface Authors { uniqueAuthors: number; totalBooks: number; repeatAuthors: number; topAuthors: AuthorRow[] }
@@ -262,7 +296,6 @@ interface PageBucket { bucket: string; count: number }
 interface Pages { distribution: PageBucket[]; shortest: BookRef | null; longest: BookRef | null }
 
 interface HeatmapData { year: number; days: Record<string, number> }
-interface HeatmapDay { date: string | null; count: number }
 
 // --- Data fetching ---
 const loading = ref(true)
@@ -302,13 +335,40 @@ async function fetchStats() {
 }
 
 // --- Computed helpers ---
-const sparklinePoints = computed(() => {
-  if (!overview.value) return ''
+const sparklineWidth = 120
+const sparklineHeight = 32
+const sparklinePad = 4
+
+const sparklineCoords = computed(() => {
+  if (!overview.value) return []
   const data = overview.value.sparkline
   const max = Math.max(...data, 1)
-  return data
-    .map((v, i) => `${i * 14 + 7},${24 - (v / max) * 20}`)
-    .join(' ')
+  const step = (sparklineWidth - sparklinePad * 2) / Math.max(data.length - 1, 1)
+  return data.map((v, i) => ({
+    x: sparklinePad + i * step,
+    y: sparklineHeight - sparklinePad - (v / max) * (sparklineHeight - sparklinePad * 2),
+  }))
+})
+
+const sparklinePoints = computed(() =>
+  sparklineCoords.value.map(p => `${p.x},${p.y}`).join(' '),
+)
+
+const sparklineArea = computed(() => {
+  const pts = sparklineCoords.value
+  if (pts.length < 2) return ''
+  const linePart = pts.map(p => `L${p.x},${p.y}`).join(' ')
+  return `M${pts[0]!.x},${sparklineHeight} ${linePart} L${pts[pts.length - 1]!.x},${sparklineHeight} Z`
+})
+
+const sparklineLastX = computed(() => {
+  const pts = sparklineCoords.value
+  return pts.length ? pts[pts.length - 1]!.x : 0
+})
+
+const sparklineLastY = computed(() => {
+  const pts = sparklineCoords.value
+  return pts.length ? pts[pts.length - 1]!.y : 0
 })
 
 const timelineMax = computed(() => {
@@ -346,46 +406,46 @@ function formatNumber(n: number): string {
   return n.toLocaleString()
 }
 
-// --- Heatmap computation ---
-const heatmapMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+// --- Monthly activity grid ---
+const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-const heatmapDays = computed<HeatmapDay[]>(() => {
+const monthlyActivity = computed(() => {
   if (!heatmap.value) return []
   const year = heatmap.value.year
-  const days: HeatmapDay[] = []
+  const counts = new Array(12).fill(0)
 
-  // Start from Jan 1, pad to align with day-of-week grid (Sun-start weeks)
-  const jan1 = new Date(year, 0, 1)
-  const startDow = jan1.getDay() // 0=Sun
-  for (let i = 0; i < startDow; i++) {
-    days.push({ date: null, count: 0 })
+  for (const [dateStr, count] of Object.entries(heatmap.value.days)) {
+    const month = parseInt(dateStr.slice(5, 7), 10) - 1
+    if (month >= 0 && month < 12) counts[month] += count
   }
 
-  // Fill all days of the year (up to today if current year)
-  const now = new Date()
-  const isCurrentYear = year === now.getFullYear()
-  const endDate = isCurrentYear ? now : new Date(year, 11, 31)
-
-  const d = new Date(year, 0, 1)
-  while (d <= endDate) {
-    const key = d.toISOString().slice(0, 10)
-    days.push({
-      date: key,
-      count: heatmap.value.days[key] ?? 0,
-    })
-    d.setDate(d.getDate() + 1)
-  }
-
-  return days
+  return monthNames.map((name, i) => ({
+    name,
+    count: counts[i],
+    // Don't show future months as active-zero
+    isFuture: year === new Date().getFullYear() && i > new Date().getMonth(),
+  }))
 })
 
-function heatmapCellClass(day: HeatmapDay): string {
-  if (!day.date) return 'stats__heatmap-cell--pad'
-  if (day.count === 0) return 'stats__heatmap-cell--empty'
-  if (day.count === 1) return 'stats__heatmap-cell--l1'
-  if (day.count === 2) return 'stats__heatmap-cell--l2'
-  return 'stats__heatmap-cell--l3'
+function monthCellClass(count: number): string {
+  if (count === 0) return 'stats__month-cell--empty'
+  if (count === 1) return 'stats__month-cell--l1'
+  if (count <= 3) return 'stats__month-cell--l2'
+  return 'stats__month-cell--l3'
 }
+
+// --- Reversed rating distribution (5★ at top) ---
+const ratingsReversed = computed(() => {
+  if (!ratings.value) return []
+  return [...ratings.value.distribution].reverse()
+})
+
+const mostGivenRating = computed(() => {
+  if (!ratings.value) return null
+  const sorted = [...ratings.value.distribution].filter(r => r.count > 0).sort((a, b) => b.count - a.count)
+  if (sorted.length < 2) return null // only show if there's a meaningful "most"
+  return sorted[0] ?? null
+})
 
 // Non-blocking fetch
 fetchStats()
@@ -480,8 +540,8 @@ fetchStats()
   &__hero-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: $spacing-md;
-    margin-bottom: $spacing-2xl;
+    gap: $spacing-lg;
+    margin-bottom: $spacing-lg;
 
     @include respond-to($breakpoint-md) {
       grid-template-columns: repeat(4, 1fr);
@@ -542,8 +602,6 @@ fetchStats()
     bottom: 0;
     left: 0;
     right: 0;
-    height: 1.5rem;
-    opacity: 0.3;
     pointer-events: none;
 
     svg {
@@ -643,12 +701,24 @@ fetchStats()
     background: var(--progress-color);
     transition: height 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     min-height: 2px;
+    position: relative;
 
     &--empty {
-      background: var(--border-color);
-      opacity: 0.4;
-      border-style: dashed;
+      background: transparent;
+      min-height: 0;
+      height: 0 !important;
     }
+  }
+
+  &__bar-dot {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--border-color);
   }
 
   &__bar-label {
@@ -663,48 +733,33 @@ fetchStats()
     }
   }
 
-  // --- Heatmap ---
-  &__heatmap {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
+  // --- Monthly activity grid ---
+  &__month-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $spacing-sm;
 
-  &__heatmap-months {
-    display: flex;
-    gap: 0;
-    margin-bottom: $spacing-xs;
-    padding-left: 0;
+    @include respond-to($breakpoint-sm) {
+      grid-template-columns: repeat(4, 1fr);
+    }
 
-    span {
-      flex: 1;
-      font-family: $font-family-body;
-      font-size: 0.5rem;
-      color: var(--text-color-muted);
-      text-align: center;
-
-      @include respond-to($breakpoint-md) {
-        font-size: $font-size-xs;
-      }
+    @include respond-to($breakpoint-md) {
+      grid-template-columns: repeat(6, 1fr);
     }
   }
 
-  &__heatmap-grid {
-    display: grid;
-    grid-template-rows: repeat(7, 1fr);
-    grid-auto-flow: column;
-    grid-auto-columns: 1fr;
+  &__month-cell {
+    @include flex-column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-md $spacing-sm;
+    border-radius: $radius-md;
+    text-align: center;
     gap: 2px;
-  }
+    transition: background 0.2s ease, transform 0.15s ease;
 
-  &__heatmap-cell {
-    aspect-ratio: 1;
-    border-radius: 2px;
-    min-width: 0;
-    min-height: 0;
-    transition: background 0.15s ease;
-
-    &--pad {
-      background: transparent;
+    &:hover {
+      transform: translateY(-1px);
     }
 
     &--empty {
@@ -712,42 +767,67 @@ fetchStats()
     }
 
     &--l1 {
-      background: color-mix(in srgb, var(--progress-color) 35%, var(--sub-bg-color));
+      background: color-mix(in srgb, var(--progress-color) 18%, var(--sub-bg-color));
     }
 
     &--l2 {
-      background: color-mix(in srgb, var(--progress-color) 65%, var(--sub-bg-color));
+      background: color-mix(in srgb, var(--progress-color) 35%, var(--sub-bg-color));
     }
 
     &--l3 {
-      background: var(--progress-color);
+      background: color-mix(in srgb, var(--progress-color) 55%, var(--sub-bg-color));
     }
   }
 
-  &__heatmap-legend {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 3px;
-    margin-top: $spacing-sm;
-  }
-
-  &__heatmap-legend-label {
+  &__month-name {
     font-family: $font-family-body;
     font-size: $font-size-xs;
     color: var(--text-color-muted);
-    margin: 0 $spacing-xs;
+    font-weight: $font-weight-medium;
   }
 
-  &__heatmap-legend .stats__heatmap-cell {
-    width: 0.75rem;
-    height: 0.75rem;
+  &__month-count {
+    font-family: $font-family-heading;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: var(--text-color);
+    line-height: 1.1;
+  }
+
+  &__month-label {
+    font-family: $font-family-body;
+    font-size: 0.625rem;
+    color: var(--text-color-muted);
   }
 
   // --- Rating distribution ---
   &__rating-chart {
     @include flex-column;
     gap: $spacing-sm;
+  }
+
+  &__rating-summary {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    margin-bottom: $spacing-xs;
+    flex-wrap: wrap;
+  }
+
+  &__rating-summary-avg {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    font-family: $font-family-heading;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: var(--text-color);
+  }
+
+  &__rating-summary-count {
+    font-family: $font-family-body;
+    font-size: $font-size-sm;
+    color: var(--text-color-muted);
   }
 
   &__rating-row {
@@ -769,7 +849,7 @@ fetchStats()
 
   &__rating-bar-track {
     flex: 1;
-    height: 0.5rem;
+    height: 0.75rem;
     background: var(--sub-bg-color);
     border-radius: $radius-full;
     overflow: hidden;
@@ -780,6 +860,11 @@ fetchStats()
     background: var(--rating-color);
     border-radius: $radius-full;
     transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    min-width: 0;
+
+    &--zero {
+      width: 0 !important;
+    }
   }
 
   &__rating-count {
@@ -789,6 +874,38 @@ fetchStats()
     font-size: $font-size-xs;
     font-weight: $font-weight-semibold;
     color: var(--text-color-muted);
+  }
+
+  &__rating-insight {
+    display: flex;
+    align-items: flex-start;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    background: var(--sub-bg-color);
+    border-radius: $radius-md;
+    margin-top: $spacing-xs;
+    font-family: $font-family-body;
+    font-size: $font-size-sm;
+    color: var(--text-color-secondary);
+    line-height: 1.4;
+
+    strong {
+      color: var(--text-color);
+      font-weight: $font-weight-semibold;
+    }
+  }
+
+  &__rating-insight-icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  &__rating-insight-detail {
+    color: var(--text-color-muted);
+    font-size: $font-size-xs;
+    margin-left: $spacing-xs;
   }
 
   // --- Authors ---
