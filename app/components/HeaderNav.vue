@@ -67,6 +67,11 @@
         >
           <component :is="tab.icon" :size="16" class="header-nav__tab-icon" />
           <span>{{ tab.label }}</span>
+          <span
+            v-if="tab.to === '/friends' && pendingCount > 0"
+            class="header-nav__badge"
+            :aria-label="`${pendingCount} pending friend request${pendingCount > 1 ? 's' : ''}`"
+          >{{ pendingCount }}</span>
         </NuxtLink>
       </div>
     </div>
@@ -79,6 +84,8 @@ import { Search, Library, Target, BarChart3, Settings, Users, Timer, Sparkles } 
 const route = useRoute()
 const router = useRouter()
 const { isGuest } = useGuest()
+const { isAuthenticated } = useAuth()
+const { receivedRequests, fetchFriends } = useFriends()
 
 defineProps<{
   user: { name: string; avatar?: string | null } | null
@@ -88,6 +95,15 @@ defineEmits<{ 'sign-out': [] }>()
 
 const searchQuery = ref('')
 const userMenuOpen = ref(false)
+
+const pendingCount = computed(() => receivedRequests.value.length)
+
+// Fetch friend data early so badge count is available in nav
+onMounted(() => {
+  if (isAuthenticated.value || isGuest.value) {
+    fetchFriends()
+  }
+})
 
 function onSearch() {
   const q = searchQuery.value.trim()
@@ -349,6 +365,21 @@ function isActive(path: string) {
 
   &__tab-icon {
     flex-shrink: 0;
+  }
+
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: var(--error-color);
+    color: #fff;
+    font-size: 11px;
+    font-weight: $font-weight-bold;
+    line-height: 1;
   }
 }
 

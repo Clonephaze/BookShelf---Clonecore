@@ -341,35 +341,27 @@
       <!-- Notifications -->
       <section v-if="activeSection === 'notifications'" class="settings__panel">
         <h3 class="settings__panel-title">Notifications</h3>
-        <p class="settings__panel-desc">Control when and how you hear from Bookshelf.</p>
+        <p class="settings__panel-desc">Bookshelf sends the following emails to keep you informed.</p>
 
         <div class="settings__group">
-          <h4 class="settings__group-label">Email notifications</h4>
-          <p class="settings__group-hint">Reading reminders, goal milestones, and weekly digests.</p>
-          <div class="settings__toggle-row">
-            <label class="settings__toggle">
-              <input type="checkbox" disabled>
-              <span class="settings__toggle-slider" />
-              <span class="settings__toggle-label">Weekly reading digest</span>
-            </label>
-            <span class="settings__badge">Coming soon</span>
+          <h4 class="settings__group-label">Emails you'll receive</h4>
+          <div class="settings__info-list">
+            <div class="settings__info-item">
+              <strong>Welcome</strong>
+              <span>A getting-started guide when you create your account.</span>
+            </div>
+            <div class="settings__info-item">
+              <strong>Password reset</strong>
+              <span>A secure link when you request a password change.</span>
+            </div>
+            <div class="settings__info-item">
+              <strong>Friend requests</strong>
+              <span>A notification when someone sends you a friend request.</span>
+            </div>
           </div>
-          <div class="settings__toggle-row">
-            <label class="settings__toggle">
-              <input type="checkbox" disabled>
-              <span class="settings__toggle-slider" />
-              <span class="settings__toggle-label">Goal milestone alerts</span>
-            </label>
-            <span class="settings__badge">Coming soon</span>
-          </div>
-          <div class="settings__toggle-row">
-            <label class="settings__toggle">
-              <input type="checkbox" disabled>
-              <span class="settings__toggle-slider" />
-              <span class="settings__toggle-label">Reading reminders</span>
-            </label>
-            <span class="settings__badge">Coming soon</span>
-          </div>
+          <p class="settings__group-hint" style="margin-top: 1rem;">
+            We only send transactional emails — no marketing, no digests, no spam.
+          </p>
         </div>
       </section>
 
@@ -1244,6 +1236,34 @@ async function handleDeleteAccount() {
   &__group-hint {
     @include meta-text;
     line-height: 1.5;
+  }
+
+  // Info list (notifications)
+  &__info-list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+    margin-top: $spacing-xs;
+  }
+
+  &__info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: $spacing-sm $spacing-md;
+    background: var(--surface-color-alt, var(--surface-color));
+    border-radius: $radius-sm;
+    border: 1px solid var(--border-color-subtle);
+
+    strong {
+      @include body-text;
+      font-weight: $font-weight-semibold;
+    }
+
+    span {
+      @include meta-text;
+      line-height: 1.4;
+    }
   }
 
   // Links

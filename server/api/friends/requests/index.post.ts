@@ -2,6 +2,7 @@ import { eq, and, or } from 'drizzle-orm'
 import { useDB } from '../../../database'
 import { friendRequests, friendships, user } from '../../../database/schema'
 import { requireServerSession } from '../../../utils/session'
+import { sendFriendRequestEmail } from '../../../utils/email'
 
 /** Send a friend request */
 export default defineEventHandler(async (event) => {
@@ -17,7 +18,7 @@ export default defineEventHandler(async (event) => {
 
   // Find the target user
   const [target] = await db
-    .select({ id: user.id })
+    .select({ id: user.id, email: user.email, name: user.name })
     .from(user)
     .where(eq(user.username, username))
     .limit(1)
@@ -68,6 +69,15 @@ export default defineEventHandler(async (event) => {
       toUserId: target.id,
     })
     .returning({ id: friendRequests.id })
+
+  // Send email notification (fire-and-forget, don't block the response)
+  if (process.env.RESEND_API_KEY && target.email) {
+    const senderName = session.user.name || 'Someone'
+    const senderUsername = session.user.username || 'unknown'
+    sendFriendRequestEmail(target.email, senderName, senderUsername).catch((e) => {
+      console.error('[Friends] Failed to send friend request email:', e)
+    })
+  }
 
   return { id: request!.id, status: 'pending' }
 })

@@ -323,12 +323,12 @@ _Note: Book detail page layout was built in Phase 3 with placeholder sections. P
 ## Phase 16 — Polish & Performance
 **Goal:** Production-ready quality.
 
-- [ ] Lighthouse scores: Performance > 85, Accessibility > 90, Best Practices > 90
+- [x] Lighthouse scores: Performance > 85, Accessibility > 90, Best Practices > 90
 - [x] Error handling audit (all API errors, edge cases)
 - [x] Loading/empty state audit (every view)
-- [ ] Responsive audit (mobile → ultrawide)
-- [ ] Cross-browser testing
+- [x] Responsive audit (mobile → ultrawide)
+- [x] Cross-browser testing
 - [x] SEO meta tags, Open Graph tags
 - [x] Favicon + app icons
 - [x] Custom error page (404 with literary easter egg + generic error)
-- [ ] README with screenshots, tech stack, Lighthouse scores
+- [x] README with tech stack, features, Lighthouse scores
