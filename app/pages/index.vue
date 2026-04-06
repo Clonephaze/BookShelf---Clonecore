@@ -322,9 +322,9 @@ const marqueeRow1 = [
   { cover: isbn('9780451524935'), title: '1984' },
   { cover: isbn('9780547928227'), title: 'The Hobbit' },
   { cover: isbn('9780743273565'), title: 'The Great Gatsby' },
-  { cover: isbn('9780061120084'), title: 'To Kill a Mockingbird (Harper)' },
+  { cover: isbn('9780593356159'), title: 'People We Meet on Vacation' },
   { cover: isbn('9780593099322'), title: 'Recursion' },
-  { cover: isbn('9780593395943'), title: 'The Atlas Six' },
+  { cover: isbn('9780063251922'), title: 'Fourth Wing' },
 ]
 
 const marqueeRow2 = [
@@ -359,10 +359,10 @@ const marqueeRow3 = [
   { cover: isbn('9780062498533'), title: 'The Girl on the Train' },
   { cover: isbn('9780062963673'), title: 'The House in the Cerulean Sea' },
   { cover: isbn('9780593355305'), title: 'Piranesi' },
-  { cover: isbn('9780062873712'), title: 'Educated' },
+  { cover: isbn('9780316017930'), title: 'Outliers' },
   { cover: isbn('9780593337585'), title: 'Anxious People' },
-  { cover: isbn('9780062390851'), title: 'Dark Matter' },
-  { cover: isbn('9780593321485'), title: 'The Thursday Murder Club' },
+  { cover: isbn('9780593230251'), title: 'The Priory of the Orange Tree' },
+  { cover: isbn('9780063021426'), title: 'Malibu Rising' },
 ]
 
 const ctaBooks = [
@@ -563,7 +563,7 @@ onMounted(() => {
 
 $marquee-cover-width: 7rem;
 $marquee-gap: $spacing-md;
-$marquee-duration: 60s;
+$marquee-duration: 30s;
 
 @keyframes marquee-scroll {
   from { transform: translateX(0); }
@@ -589,9 +589,9 @@ $marquee-duration: 60s;
     display: flex;
     overflow: hidden;
 
-    &--1 { transform: rotate(-3deg) translateX(-2rem); }
-    &--2 { transform: rotate(-3deg) translateX(1rem); }
-    &--3 { transform: rotate(-3deg) translateX(-4rem); }
+    &--1 { transform: rotate(-3deg); }
+    &--2 { transform: rotate(-3deg); }
+    &--3 { transform: rotate(-3deg); }
   }
 
   &__track {
@@ -600,9 +600,25 @@ $marquee-duration: 60s;
     animation: marquee-scroll $marquee-duration linear infinite;
     will-change: transform;
 
+    @include respond-to($breakpoint-md) {
+      animation-duration: 45s;
+    }
+
+    @include respond-to($breakpoint-lg) {
+      animation-duration: 60s;
+    }
+
     &--reverse {
       animation-name: marquee-scroll-reverse;
       animation-duration: #{$marquee-duration * 1.15};
+
+      @include respond-to($breakpoint-md) {
+        animation-duration: #{45s * 1.15};
+      }
+
+      @include respond-to($breakpoint-lg) {
+        animation-duration: #{60s * 1.15};
+      }
     }
   }
 
@@ -644,7 +660,7 @@ $marquee-duration: 60s;
       inset: 0;
       background:
         linear-gradient(to right, var(--bg-color) 0%, transparent 15%, transparent 85%, var(--bg-color) 100%),
-        linear-gradient(to bottom, var(--bg-color) 0%, transparent 12%, transparent 88%, var(--bg-color) 100%);
+        linear-gradient(to bottom, var(--bg-color) 0%, transparent 20%, transparent 80%, var(--bg-color) 100%);
     }
   }
 }
