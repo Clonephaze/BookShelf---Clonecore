@@ -27,12 +27,13 @@
 </template>
 
 <script setup lang="ts">
-import { Settings, Users, Timer, ChevronRight } from 'lucide-vue-next'
+import { Settings, Users, Timer, ChevronRight, Sparkles } from 'lucide-vue-next'
 
 defineProps<{ open: boolean }>()
 const emit = defineEmits<{ close: [] }>()
 
 const items = [
+  { to: '/discover', label: 'Discover', icon: Sparkles },
   { to: '/sessions', label: 'Sessions', icon: Timer },
   { to: '/friends', label: 'Friends', icon: Users },
   { to: '/settings', label: 'Settings', icon: Settings },
