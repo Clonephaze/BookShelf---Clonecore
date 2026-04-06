@@ -244,17 +244,17 @@ _Note: Book detail page layout was built in Phase 3 with placeholder sections. P
 
 ---
 
-## Phase 13 — Friends
+## Phase 13 — Friends ✅
 **Goal:** Lightweight social layer — see friends' reading activity.
 
-- [ ] Username system (unique, required, changeable in settings)
-- [ ] Friend requests via username search
-- [ ] Accept / decline / remove friend
-- [ ] Friends list page (`/friends`)
-- [ ] Friend profile view: shelves, currently reading, recent activity, goal progress
-- [ ] Privacy controls: choose what friends can see (shelves, progress, ratings, goals)
-- [ ] Activity feed: "[Friend] finished [Book]" / "[Friend] started [Book]"
-- [ ] No messaging, no comments, no public profiles — intentionally minimal
+- [x] Username system (unique, required, changeable in settings)
+- [x] Friend requests via username search
+- [x] Accept / decline / remove friend
+- [x] Friends list page (`/friends`)
+- [x] Friend profile view: shelves, currently reading, recent activity, goal progress
+- [x] Privacy controls: choose what friends can see (shelves, progress, ratings, goals)
+- [x] Activity feed: "[Friend] finished [Book]" / "[Friend] started [Book]"
+- [x] No messaging, no comments, no public profiles — intentionally minimal
 
 **Deliverable:** Username-based friend system with read-only activity sharing.
 

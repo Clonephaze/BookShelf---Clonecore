@@ -2,6 +2,7 @@ import { eq, or, and } from 'drizzle-orm'
 import { useDB } from '../../database'
 import { books, userBooks, userBookShelves, shelves } from '../../database/schema'
 import { requireServerSession } from '../../utils/session'
+import { logActivity } from '../../utils/activity'
 import type { AddBookPayload } from '../../services/book-api/types'
 
 export default defineEventHandler(async (event) => {
@@ -130,6 +131,9 @@ export default defineEventHandler(async (event) => {
     shelfId,
     isPrimary: true,
   })
+
+  // Log activity
+  logActivity({ userId: session.user.id, action: 'added_book', userBookId: newUserBook.id })
 
   return { success: true, bookId, userBookId: newUserBook.id }
 })

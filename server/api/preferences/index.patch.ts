@@ -33,6 +33,14 @@ export default defineEventHandler(async (event) => {
     updates.booksPerRow = body.booksPerRow === null ? null : val
   }
 
+  // Privacy toggles
+  const privacyFields = ['showShelves', 'showProgress', 'showRatings', 'showGoals', 'showActivity'] as const
+  for (const field of privacyFields) {
+    if (body[field] !== undefined) {
+      updates[field] = Boolean(body[field])
+    }
+  }
+
   // Upsert: insert if not exists, update if exists
   const [existing] = await db
     .select({ id: userPreferences.id })

@@ -22,6 +22,13 @@
       "when": 1775463423242,
       "tag": "0002_nervous_ink",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1775492641139,
+      "tag": "0003_add-friends-social",
+      "breakpoints": true
     }
   ]
 }

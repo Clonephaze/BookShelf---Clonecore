@@ -72,8 +72,15 @@
         </button>
       </div>
       <div v-else class="sessions__empty-books">
-        <p>No books on your "Currently Reading" shelf.</p>
-        <NuxtLink to="/search" class="sessions__empty-cta">Find a book to read</NuxtLink>
+        <div class="sessions__empty-books-icon">
+          <BookOpen :size="32" />
+        </div>
+        <h3 class="sessions__empty-books-title">No books in progress</h3>
+        <p class="sessions__empty-books-text">Add a book to your "Currently Reading" shelf to start timing your sessions.</p>
+        <NuxtLink to="/search" class="sessions__empty-cta">
+          <Search :size="16" />
+          Find a book to read
+        </NuxtLink>
       </div>
     </div>
 
@@ -119,7 +126,9 @@
 
     <!-- Empty state -->
     <div v-else-if="!loading && !sessionStore.active" class="sessions__empty">
-      <div class="sessions__empty-icon" aria-hidden="true">⏱️</div>
+      <div class="sessions__empty-icon" aria-hidden="true">
+        <Timer :size="40" />
+      </div>
       <h2 class="sessions__empty-title">No sessions yet</h2>
       <p class="sessions__empty-text">
         Start a reading session to track your pace and build reading habits.
@@ -143,7 +152,7 @@
 </template>
 
 <script setup lang="ts">
-import { Play, Flame } from 'lucide-vue-next'
+import { Play, Flame, Timer, BookOpen, Search } from 'lucide-vue-next'
 import type { SessionHistoryItem, SessionStats } from '~/stores/session'
 import type { ShelfBook } from '~/stores/library'
 
@@ -438,15 +447,42 @@ onMounted(async () => {
     @include flex-column;
     align-items: center;
     gap: $spacing-sm;
-    padding: $spacing-lg;
+    padding: $spacing-xl $spacing-lg;
     text-align: center;
-    color: var(--text-color-muted);
+  }
+
+  &__empty-books-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--highlight-color) 12%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--highlight-color);
+    margin-bottom: $spacing-xs;
+  }
+
+  &__empty-books-title {
+    font-family: $font-family-heading;
+    font-size: $font-size-base;
+    font-weight: $font-weight-semibold;
+    color: var(--text-color);
+  }
+
+  &__empty-books-text {
     font-family: $font-family-body;
     font-size: $font-size-sm;
+    color: var(--text-color-muted);
+    max-width: 22rem;
+    line-height: 1.5;
   }
 
   &__empty-cta {
     @include button-base;
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-xs;
     padding: $spacing-sm $spacing-md;
     background: var(--highlight-color);
     color: var(--highlight-text-color);
@@ -455,6 +491,11 @@ onMounted(async () => {
     font-size: $font-size-sm;
     font-weight: $font-weight-medium;
     text-decoration: none;
+    margin-top: $spacing-xs;
+
+    &:hover {
+      filter: brightness(1.1);
+    }
   }
 
   // History
@@ -567,7 +608,14 @@ onMounted(async () => {
   }
 
   &__empty-icon {
-    font-size: 2.5rem;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--highlight-color) 12%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--highlight-color);
   }
 
   &__empty-title {

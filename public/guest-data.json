@@ -1004,6 +1004,89 @@
       "updatedAt": "2026-04-06"
     }
   ],
+  "friends": {
+    "list": [
+      {
+        "friendshipId": "fs-001",
+        "id": "user-emma",
+        "username": "emmareads",
+        "name": "Emma Chen",
+        "avatar": "avatar-1",
+        "friendsSince": "2025-11-15T00:00:00Z"
+      },
+      {
+        "friendshipId": "fs-002",
+        "id": "user-marcus",
+        "username": "marcusb",
+        "name": "Marcus Brown",
+        "avatar": "avatar-2",
+        "friendsSince": "2026-01-08T00:00:00Z"
+      },
+      {
+        "friendshipId": "fs-003",
+        "id": "user-sophia",
+        "username": "sophiawrites",
+        "name": "Sophia Martinez",
+        "avatar": null,
+        "friendsSince": "2026-03-02T00:00:00Z"
+      }
+    ],
+    "requests": [
+      {
+        "id": "req-001",
+        "direction": "received",
+        "user": {
+          "id": "user-alex",
+          "username": "alexjreads",
+          "name": "Alex Johnson",
+          "avatar": null
+        },
+        "createdAt": "2026-04-05T14:30:00Z"
+      }
+    ],
+    "activity": [
+      {
+        "id": "act-001",
+        "action": "finished_reading",
+        "metadata": null,
+        "createdAt": "2026-04-05T18:00:00Z",
+        "user": { "id": "user-emma", "name": "Emma Chen", "username": "emmareads", "avatar": "avatar-1" },
+        "book": { "title": "Intermezzo", "author": "Sally Rooney", "coverUrlSmall": null }
+      },
+      {
+        "id": "act-002",
+        "action": "rated_book",
+        "metadata": { "rating": 5 },
+        "createdAt": "2026-04-04T20:15:00Z",
+        "user": { "id": "user-marcus", "name": "Marcus Brown", "username": "marcusb", "avatar": "avatar-2" },
+        "book": { "title": "Project Hail Mary", "author": "Andy Weir", "coverUrlSmall": null }
+      },
+      {
+        "id": "act-003",
+        "action": "started_reading",
+        "metadata": null,
+        "createdAt": "2026-04-03T09:00:00Z",
+        "user": { "id": "user-sophia", "name": "Sophia Martinez", "username": "sophiawrites", "avatar": null },
+        "book": { "title": "The Midnight Library", "author": "Matt Haig", "coverUrlSmall": null }
+      },
+      {
+        "id": "act-004",
+        "action": "added_book",
+        "metadata": null,
+        "createdAt": "2026-04-02T16:30:00Z",
+        "user": { "id": "user-emma", "name": "Emma Chen", "username": "emmareads", "avatar": "avatar-1" },
+        "book": { "title": "Tomorrow, and Tomorrow, and Tomorrow", "author": "Gabrielle Zevin", "coverUrlSmall": null }
+      },
+      {
+        "id": "act-005",
+        "action": "hit_goal",
+        "metadata": { "target": 24 },
+        "createdAt": "2026-04-01T12:00:00Z",
+        "user": { "id": "user-marcus", "name": "Marcus Brown", "username": "marcusb", "avatar": "avatar-2" },
+        "book": null
+      }
+    ]
+  },
   "insights": [
     {
       "id": "proj-76d19fc3-1a03-4899-9460-471c1c64d9e1",

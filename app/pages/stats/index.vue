@@ -717,8 +717,8 @@ const genreColors = [
   'var(--border-color)',
 ]
 
-function genreColor(i: number): string {
-  return genreColors[i % genreColors.length]
+function genreColor(i: number) {
+  return genreColors[i % genreColors.length] ?? genreColors[0]
 }
 
 const donutSegments = computed(() => {

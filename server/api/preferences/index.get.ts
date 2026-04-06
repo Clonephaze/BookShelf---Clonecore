@@ -19,6 +19,11 @@ export default defineEventHandler(async (event) => {
       theme: 'system',
       defaultShelfId: null,
       booksPerRow: null,
+      showShelves: true,
+      showProgress: true,
+      showRatings: true,
+      showGoals: true,
+      showActivity: true,
     }
   }
 
@@ -26,5 +31,10 @@ export default defineEventHandler(async (event) => {
     theme: prefs.theme,
     defaultShelfId: prefs.defaultShelfId,
     booksPerRow: prefs.booksPerRow,
+    showShelves: prefs.showShelves,
+    showProgress: prefs.showProgress,
+    showRatings: prefs.showRatings,
+    showGoals: prefs.showGoals,
+    showActivity: prefs.showActivity,
   }
 })

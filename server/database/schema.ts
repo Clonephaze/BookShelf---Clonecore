@@ -64,6 +64,12 @@ export const userPreferences = pgTable('user_preferences', {
   theme: text('theme').notNull().default('system'),
   defaultShelfId: uuid('default_shelf_id'),
   booksPerRow: integer('books_per_row'),
+  // Privacy: what friends can see
+  showShelves: boolean('show_shelves').notNull().default(true),
+  showProgress: boolean('show_progress').notNull().default(true),
+  showRatings: boolean('show_ratings').notNull().default(true),
+  showGoals: boolean('show_goals').notNull().default(true),
+  showActivity: boolean('show_activity').notNull().default(true),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })
@@ -192,4 +198,44 @@ export const readingSessions = pgTable('reading_sessions', {
   index('reading_sessions_user_id_idx').on(table.userId),
   index('reading_sessions_user_book_idx').on(table.userBookId),
   index('reading_sessions_user_active_idx').on(table.userId, table.status),
+])
+
+// ============================================
+// Friends & Social
+// ============================================
+
+export const friendRequests = pgTable('friend_requests', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  fromUserId: text('from_user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  toUserId: text('to_user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  status: text('status').notNull().default('pending'), // 'pending' | 'accepted' | 'declined'
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => [
+  unique('friend_requests_pair_unique').on(table.fromUserId, table.toUserId),
+  index('friend_requests_to_user_idx').on(table.toUserId, table.status),
+  index('friend_requests_from_user_idx').on(table.fromUserId),
+])
+
+export const friendships = pgTable('friendships', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  friendId: text('friend_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => [
+  unique('friendships_pair_unique').on(table.userId, table.friendId),
+  index('friendships_user_idx').on(table.userId),
+  index('friendships_friend_idx').on(table.friendId),
+])
+
+export const activityLog = pgTable('activity_log', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  action: text('action').notNull(), // 'added_book' | 'started_reading' | 'finished_reading' | 'rated_book' | 'hit_goal'
+  userBookId: uuid('user_book_id').references(() => userBooks.id, { onDelete: 'cascade' }),
+  metadata: text('metadata'), // JSON string for extra context (e.g., rating value, goal target)
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => [
+  index('activity_log_user_idx').on(table.userId, table.createdAt),
+  index('activity_log_created_idx').on(table.createdAt),
 ])

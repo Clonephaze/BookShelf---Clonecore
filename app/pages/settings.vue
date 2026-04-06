@@ -243,32 +243,47 @@
       <!-- Privacy & Sharing -->
       <section v-if="activeSection === 'privacy'" class="settings__panel">
         <h3 class="settings__panel-title">Privacy &amp; Sharing</h3>
-        <p class="settings__panel-desc">Control who can see your reading activity.</p>
+        <p class="settings__panel-desc">Control what friends can see on your profile.</p>
 
         <div class="settings__group">
-          <h4 class="settings__group-label">Profile visibility</h4>
-          <p class="settings__group-hint">Choose whether your profile and reading activity are public or private.</p>
+          <h4 class="settings__group-label">Friends can see</h4>
+          <p class="settings__group-hint">Toggle what's visible to friends who view your profile.</p>
           <div class="settings__toggle-row">
             <label class="settings__toggle">
-              <input type="checkbox" disabled>
+              <input v-model="privacySettings.showShelves" type="checkbox" @change="savePrivacy">
               <span class="settings__toggle-slider" />
-              <span class="settings__toggle-label">Public profile</span>
+              <span class="settings__toggle-label">Shelves &amp; library</span>
             </label>
-            <span class="settings__badge">Coming with Friends</span>
           </div>
-        </div>
-
-        <div class="settings__group">
-          <h4 class="settings__group-label">Sharing defaults</h4>
-          <p class="settings__group-hint">Default privacy for reading cards and year-in-review.</p>
           <div class="settings__toggle-row">
             <label class="settings__toggle">
-              <input type="checkbox" disabled>
+              <input v-model="privacySettings.showProgress" type="checkbox" @change="savePrivacy">
               <span class="settings__toggle-slider" />
-              <span class="settings__toggle-label">Share reading activity by default</span>
+              <span class="settings__toggle-label">Reading progress</span>
             </label>
-            <span class="settings__badge">Coming with Friends</span>
           </div>
+          <div class="settings__toggle-row">
+            <label class="settings__toggle">
+              <input v-model="privacySettings.showRatings" type="checkbox" @change="savePrivacy">
+              <span class="settings__toggle-slider" />
+              <span class="settings__toggle-label">Ratings &amp; reviews</span>
+            </label>
+          </div>
+          <div class="settings__toggle-row">
+            <label class="settings__toggle">
+              <input v-model="privacySettings.showGoals" type="checkbox" @change="savePrivacy">
+              <span class="settings__toggle-slider" />
+              <span class="settings__toggle-label">Reading goals</span>
+            </label>
+          </div>
+          <div class="settings__toggle-row">
+            <label class="settings__toggle">
+              <input v-model="privacySettings.showActivity" type="checkbox" @change="savePrivacy">
+              <span class="settings__toggle-slider" />
+              <span class="settings__toggle-label">Activity feed</span>
+            </label>
+          </div>
+          <p v-if="privacySaved" class="settings__save-note">Saved</p>
         </div>
       </section>
 
@@ -395,14 +410,14 @@
           <div class="settings__export-actions">
             <button
               class="settings__btn settings__btn--secondary"
-              :disabled="exportLoading"
+              :disabled="!!exportLoading"
               @click="handleExport('json')"
             >
               {{ exportLoading === 'json' ? 'Exporting…' : 'Download JSON' }}
             </button>
             <button
               class="settings__btn settings__btn--secondary"
-              :disabled="exportLoading"
+              :disabled="!!exportLoading"
               @click="handleExport('csv')"
             >
               {{ exportLoading === 'csv' ? 'Exporting…' : 'Download CSV' }}
@@ -523,7 +538,7 @@ const memberSince = computed(() => {
 })
 
 // Profile editing
-const selectedAvatar = ref<string | null>(user.value?.avatar ?? null)
+const selectedAvatar = ref<string | null>(user.value?.image ?? null)
 const profileForm = reactive({
   username: (user.value as Record<string, unknown>)?.username as string ?? '',
   name: user.value?.name ?? '',
@@ -691,10 +706,57 @@ watch(activeSection, (id) => {
   if (id === 'reading' && !libraryStore.loaded) {
     loadPreferences()
   }
+  if (id === 'privacy') {
+    loadPrivacy()
+  }
 }, { immediate: true })
 
+// --- Privacy Settings ---
+const privacySettings = reactive({
+  showShelves: true,
+  showProgress: true,
+  showRatings: true,
+  showGoals: true,
+  showActivity: true,
+})
+const privacySaved = ref(false)
+const privacyLoaded = ref(false)
+
+async function loadPrivacy() {
+  if (privacyLoaded.value) return
+  try {
+    const prefs = await $fetch<{
+      showShelves: boolean
+      showProgress: boolean
+      showRatings: boolean
+      showGoals: boolean
+      showActivity: boolean
+    }>('/api/preferences')
+    privacySettings.showShelves = prefs.showShelves
+    privacySettings.showProgress = prefs.showProgress
+    privacySettings.showRatings = prefs.showRatings
+    privacySettings.showGoals = prefs.showGoals
+    privacySettings.showActivity = prefs.showActivity
+    privacyLoaded.value = true
+  }
+  catch { /* graceful fallback */ }
+}
+
+async function savePrivacy() {
+  privacySaved.value = false
+  try {
+    await $fetch('/api/preferences', {
+      method: 'PATCH',
+      body: { ...privacySettings },
+    })
+    privacySaved.value = true
+    setTimeout(() => { privacySaved.value = false }, 2000)
+  }
+  catch { /* silent */ }
+}
+
 // --- Data Export ---
-const exportLoading = ref<string | false>(false)
+const exportLoading = ref<string | null>(null)
 const exportError = ref('')
 
 async function handleExport(format: 'json' | 'csv') {
@@ -719,7 +781,7 @@ async function handleExport(format: 'json' | 'csv') {
     exportError.value = 'Export failed. Please try again.'
   }
   finally {
-    exportLoading.value = false
+    exportLoading.value = null
   }
 }
 
@@ -1157,8 +1219,28 @@ async function handleDeleteAccount() {
     display: flex;
     align-items: center;
     gap: $spacing-sm;
-    cursor: not-allowed;
-    opacity: 0.5;
+    cursor: pointer;
+
+    input[type="checkbox"] {
+      position: absolute;
+      width: 0;
+      height: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    &:has(input:disabled) {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    input:checked + .settings__toggle-slider {
+      background: var(--highlight-color);
+
+      &::after {
+        transform: translateX(1.25rem);
+      }
+    }
   }
 
   &__toggle-slider {
@@ -1188,6 +1270,12 @@ async function handleDeleteAccount() {
     font-family: $font-family-body;
     font-size: $font-size-sm;
     color: var(--text-color);
+  }
+
+  &__save-note {
+    font-size: $font-size-sm;
+    color: var(--highlight-color);
+    margin-top: $spacing-sm;
   }
 
   // Badge

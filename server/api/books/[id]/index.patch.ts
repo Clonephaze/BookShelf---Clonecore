@@ -2,6 +2,7 @@ import { eq, and } from 'drizzle-orm'
 import { useDB } from '../../../database'
 import { userBooks, readingProgressLog } from '../../../database/schema'
 import { requireServerSession } from '../../../utils/session'
+import { logActivity } from '../../../utils/activity'
 
 interface PatchBody {
   rating?: number | null
@@ -135,6 +136,18 @@ export default defineEventHandler(async (event) => {
       minutesListened: listened,
       progressPercent: logPercent,
     })
+  }
+
+  // Log activity for significant changes
+  const userId = session.user.id
+  if ('rating' in body && body.rating) {
+    logActivity({ userId, action: 'rated_book', userBookId, metadata: { rating: body.rating } })
+  }
+  if ('dateStarted' in body && body.dateStarted) {
+    logActivity({ userId, action: 'started_reading', userBookId })
+  }
+  if ('dateFinished' in body && body.dateFinished) {
+    logActivity({ userId, action: 'finished_reading', userBookId })
   }
 
   return { success: true, updatedAt: updateData.updatedAt!.toISOString() }
