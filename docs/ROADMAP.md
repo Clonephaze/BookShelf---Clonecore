@@ -149,7 +149,7 @@ _Note: Book detail page layout was built in Phase 3 with placeholder sections. P
 
 ---
 
-## Phase 7 — Guest Experience
+## Phase 7 — Guest Experience ✅
 **Goal:** "Try as Guest" provides a compelling, fully populated demo.
 
 - [x] Guest mode entry from landing page (single click)
@@ -229,16 +229,16 @@ _Note: Book detail page layout was built in Phase 3 with placeholder sections. P
 
 ---
 
-## Phase 12 — Progress Intelligence
+## Phase 12 — Progress Intelligence ✅
 **Goal:** Smart insights derived from reading data.
 
-- [ ] "At your current pace, you'll finish in X days" (per-book projection)
-- [ ] "You're ahead of your yearly goal by X%" / "You need to read X books/month to catch up"
-- [ ] Pace trends: "You read faster on weekends" / "Your pace has increased this month"
-- [ ] Milestone predictions: "You'll hit 50 books by October at this rate"
-- [ ] Stale book detection: "You haven't updated [Book] in 3 weeks"
-- [ ] Contextual nudges on library/dashboard (non-intrusive, dismissable)
-- [ ] All projections based on actual session + progress log data
+- [x] "At your current pace, you'll finish in X days" (per-book projection)
+- [x] "You're ahead of your yearly goal by X%" / "You need to read X books/month to catch up"
+- [x] Pace trends: "You read faster on weekends" / "Your pace has increased this month"
+- [x] Milestone predictions: "You'll hit 50 books by October at this rate"
+- [x] Stale book detection: "You haven't updated [Book] in 3 weeks"
+- [x] Contextual nudges on library/dashboard (non-intrusive, dismissable)
+- [x] All projections based on actual session + progress log data
 
 **Deliverable:** Intelligent, data-driven reading insights throughout the app.
 
@@ -279,7 +279,7 @@ _Note: Book detail page layout was built in Phase 3 with placeholder sections. P
 **Goal:** The features that make Bookshelf exceptional.
 
 ### Animated Shelf & Cover Interactions
-- [ ] Cover tilt on hover (3D perspective)
+- [x] Cover tilt on hover (3D perspective)
 - [ ] Drag-and-drop between shelves
 - [ ] Shelf visual metaphor (bookshelf backdrop)
 - [ ] Micro-interactions (scale, easing, confetti)

@@ -417,6 +417,19 @@
           </NuxtLink>
         </section>
 
+        <!-- Progress Intelligence insights -->
+        <section v-if="insightsVisible.length > 0" class="stats__chart-card">
+          <h2 class="stats__chart-title">Insights</h2>
+          <div class="stats__insights-list">
+            <InsightCard
+              v-for="insight in insightsVisible"
+              :key="insight.id"
+              :insight="insight"
+              @dismiss="dismissInsight"
+            />
+          </div>
+        </section>
+
         <!-- Year-in-review link -->
         <section v-if="overview && overview.totalBooks >= 3" class="stats__review-cta" data-reveal>
           <NuxtLink :to="`/stats/year/${selectedYear}`" class="stats__review-link">
@@ -499,6 +512,9 @@ const availableYears = computed(() => {
 })
 const selectedYear = ref(currentYear)
 
+// --- Progress Intelligence ---
+const { insights: insightsVisible, dismiss: dismissInsight, fetchInsights } = useInsights()
+
 // --- Data fetching ---
 const loading = ref(true)
 const overview = ref<Overview | null>(null)
@@ -529,7 +545,7 @@ async function fetchStats() {
       $fetch<HeatmapData>(`${base}/heatmap${yearQ}`),
       $fetch<Genres>(`${base}/genres${yearQ}`).catch(() => null),
       $fetch<Pace>(`${base}/pace${yearQ}`).catch(() => null),
-      $fetch<SessionStatsData>(`/api/sessions/stats${yearQ}`).catch(() => null),
+      $fetch<SessionStatsData>(`${isGuest.value ? '/api/guest/sessions/stats' : '/api/sessions/stats'}${yearQ}`).catch(() => null),
     ])
     overview.value = o
     timeline.value = t
@@ -742,6 +758,7 @@ watch(selectedYear, () => fetchStats())
 
 // Non-blocking fetch
 fetchStats()
+fetchInsights()
 </script>
 
 <style lang="scss" scoped>
@@ -769,6 +786,13 @@ fetchStats()
   &__subtitle {
     @include meta-text;
     margin-top: $spacing-xs;
+  }
+
+  // --- Insights ---
+  &__insights-list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
   }
 
   // --- Loading ---

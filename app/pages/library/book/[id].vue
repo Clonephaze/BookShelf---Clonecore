@@ -369,6 +369,16 @@
         </div>
       </section>
 
+      <!-- Per-book insights -->
+      <div v-if="bookInsights.length > 0" class="book-detail__insights">
+        <InsightCard
+          v-for="insight in bookInsights"
+          :key="insight.id"
+          :insight="insight"
+          @dismiss="dismissInsight"
+        />
+      </div>
+
       <SessionStartModal
         :open="showSessionModal"
         :user-book-id="userBookId"
@@ -540,6 +550,10 @@ const showStartReadingPrompt = ref(false)
 const sessionStore = useSessionStore()
 const showSessionModal = ref(false)
 
+// Phase 12: progress intelligence
+const { forBook, dismiss: dismissInsight, fetchInsights } = useInsights()
+fetchInsights()
+
 function onSessionStarted() {
   showSessionModal.value = false
   navigateTo('/sessions')
@@ -650,6 +664,7 @@ function onNotesInput(event: Event) {
 }
 
 const userBookId = computed(() => route.params.id as string)
+const bookInsights = forBook(userBookId.value)
 const shelvesStore = useShelvesStore()
 
 const progressWidth = computed(() => {
@@ -1604,6 +1619,13 @@ onMounted(() => {
         color: var(--surface-color);
       }
     }
+  }
+
+  // --- Insights ---
+  &__insights {
+    display: grid;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-md;
   }
 
   // --- Rating ---

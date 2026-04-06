@@ -1004,6 +1004,59 @@
       "updatedAt": "2026-04-06"
     }
   ],
+  "insights": [
+    {
+      "id": "proj-76d19fc3-1a03-4899-9460-471c1c64d9e1",
+      "type": "projection",
+      "icon": "📖",
+      "title": "12 days to finish",
+      "body": "At your current pace, you'll finish **He Who Fights with Monsters** around **Apr 18** (373 pages left).",
+      "link": "/library/book/76d19fc3-1a03-4899-9460-471c1c64d9e1",
+      "bookTitle": "He Who Fights with Monsters"
+    },
+    {
+      "id": "proj-30bac5bd-c70a-4c31-82ff-ea50dbc1d867",
+      "type": "projection",
+      "icon": "📖",
+      "title": "~22 days to finish",
+      "body": "Based on your progress, you'll finish **The Way of Kings** around **Apr 28** (785 pages left).",
+      "link": "/library/book/30bac5bd-c70a-4c31-82ff-ea50dbc1d867",
+      "bookTitle": "The Way of Kings"
+    },
+    {
+      "id": "goal-ahead",
+      "type": "goal",
+      "icon": "🚀",
+      "title": "25% ahead of schedule",
+      "body": "You've read **15 books** — 6 more than expected by now. Keep it up!",
+      "link": "/goals"
+    },
+    {
+      "id": "milestone-50",
+      "type": "milestone",
+      "icon": "🏆",
+      "title": "50 book milestone",
+      "body": "At this rate, you'll hit **50 books** by **August 2027**.",
+      "link": "/stats"
+    },
+    {
+      "id": "streak",
+      "type": "streak",
+      "icon": "🔥",
+      "title": "5-day reading streak!",
+      "body": "You've read 5 days in a row. Keep the momentum going!",
+      "link": "/sessions"
+    },
+    {
+      "id": "stale-eee2796a-0005-4a49-a03c-4e67f0a1c234",
+      "type": "stale",
+      "icon": "📚",
+      "title": "14 days since last update",
+      "body": "You haven't updated **The Women** in 14 days. Still reading?",
+      "link": "/library/book/eee2796a-0005-4a49-a03c-4e67f0a1c234",
+      "bookTitle": "The Women"
+    }
+  ],
   "sessions": {
     "history": [
       {
