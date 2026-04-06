@@ -152,32 +152,32 @@ _Note: Book detail page layout was built in Phase 3 with placeholder sections. P
 ## Phase 7 — Guest Experience
 **Goal:** "Try as Guest" provides a compelling, fully populated demo.
 
-- [ ] Guest mode entry from landing page (single click)
-- [ ] Guest session management (server-side or client state)
-- [ ] Seed script: generate guest data JSON from `data/sample-books.json`
-- [ ] Pre-assign 45 books across shelves (~15 Read, ~5 Currently Reading, ~15 Want to Read, ~5 custom)
-- [ ] Pre-populate ratings, notes, dates, progress on relevant books
-- [ ] Pre-populate reading goal (24 books, 15 complete)
-- [ ] Pre-populate year-in-review stats
-- [ ] Guest can browse shelves, view details, explore stats
-- [ ] Gentle sign-up prompts (not aggressive gating)
-- [ ] Guest data is session-based, not persisted
-- [ ] Guest → sign-up conversion (keep guest data? or fresh start — decide)
+- [x] Guest mode entry from landing page (single click)
+- [x] Guest session management (server-side or client state)
+- [x] Seed script: generate guest data JSON from `data/sample-books.json`
+- [x] Pre-assign 45 books across shelves (~15 Read, ~5 Currently Reading, ~15 Want to Read, ~5 custom)
+- [x] Pre-populate ratings, notes, dates, progress on relevant books
+- [x] Pre-populate reading goal (24 books, 15 complete)
+- [x] Pre-populate year-in-review stats
+- [x] Guest can browse shelves, view details, explore stats
+- [x] Gentle sign-up prompts (not aggressive gating)
+- [x] Guest data is session-based, not persisted
+- [x] Guest → sign-up conversion (keep guest data? or fresh start — decide)
 
 **Deliverable:** Fully populated guest experience that showcases the entire app.
 
 ---
 
-## Phase 8 — Landing Page
+## Phase 8 — Landing Page ✅
 **Goal:** Compelling first impression that converts visitors.
 
-- [ ] Hero section with value proposition
-- [ ] Feature highlights (3-4 key features)
-- [ ] Visual showcase (book covers, shelves, statistics screenshots)
-- [ ] Dual CTAs: "Sign Up" and "Try as Guest"
-- [ ] Responsive design (mobile through desktop)
-- [ ] Fast load time (minimal JS on landing page, SSR)
-- [ ] Warm literary aesthetic from first second
+- [x] Hero section with value proposition
+- [x] Feature highlights (3-4 key features)
+- [x] Visual showcase (book covers, shelves, statistics screenshots)
+- [x] Dual CTAs: "Sign Up" and "Try as Guest"
+- [x] Responsive design (mobile through desktop)
+- [x] Fast load time (minimal JS on landing page, SSR)
+- [x] Warm literary aesthetic from first second
 
 **Deliverable:** Production-quality landing page.
 
