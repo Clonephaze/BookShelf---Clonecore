@@ -869,6 +869,8 @@ fetchStats()
   &__chart-card {
     @include card-base;
     padding: $spacing-md;
+    overflow: hidden;
+    min-width: 0;
 
     @include respond-to($breakpoint-sm) {
       padding: $spacing-lg;
@@ -913,8 +915,8 @@ fetchStats()
     align-items: flex-end;
     gap: 1px;
     height: 7rem;
-    padding-top: $spacing-sm;
-    overflow-x: auto;
+    padding-top: $spacing-lg;
+    overflow: hidden;
     -webkit-overflow-scrolling: touch;
 
     @include respond-to($breakpoint-sm) {
@@ -924,7 +926,6 @@ fetchStats()
 
     @include respond-to($breakpoint-md) {
       height: 10rem;
-      overflow-x: visible;
     }
   }
 
@@ -1096,6 +1097,7 @@ fetchStats()
     display: flex;
     align-items: center;
     gap: $spacing-sm;
+    min-width: 0;
   }
 
   &__rating-stars {
@@ -1329,6 +1331,7 @@ fetchStats()
     display: flex;
     gap: $spacing-sm;
     align-items: center;
+    min-width: 0;
   }
 
   &__pages-cover {
