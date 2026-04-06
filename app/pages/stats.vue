@@ -311,13 +311,15 @@ const hoveredBar = ref<TimelineEntry | null>(null)
 async function fetchStats() {
   loading.value = true
   try {
+    const { isGuest } = useGuest()
+    const base = isGuest.value ? '/api/guest/stats' : '/api/stats'
     const [o, t, r, a, p, h] = await Promise.all([
-      $fetch<Overview>('/api/stats/overview'),
-      $fetch<Timeline>('/api/stats/timeline'),
-      $fetch<Ratings>('/api/stats/ratings'),
-      $fetch<Authors>('/api/stats/authors'),
-      $fetch<Pages>('/api/stats/pages'),
-      $fetch<HeatmapData>('/api/stats/heatmap'),
+      $fetch<Overview>(`${base}/overview`),
+      $fetch<Timeline>(`${base}/timeline`),
+      $fetch<Ratings>(`${base}/ratings`),
+      $fetch<Authors>(`${base}/authors`),
+      $fetch<Pages>(`${base}/pages`),
+      $fetch<HeatmapData>(`${base}/heatmap`),
     ])
     overview.value = o
     timeline.value = t

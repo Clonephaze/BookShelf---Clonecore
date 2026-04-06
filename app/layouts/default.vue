@@ -11,7 +11,10 @@
       </NuxtLink>
       <div class="topbar__actions">
         <ThemeSwitcher />
-        <div v-if="user" class="topbar__user-wrapper">
+        <template v-if="isGuest">
+          <NuxtLink to="/signup" class="topbar__guest-cta">Sign Up</NuxtLink>
+        </template>
+        <div v-else-if="user" class="topbar__user-wrapper">
           <button
             class="topbar__user-btn"
             aria-label="User menu"
@@ -56,6 +59,7 @@
 
 <script setup lang="ts">
 const { user, signOut, isAuthenticated } = useAuth()
+const { isGuest } = useGuest()
 const { initTheme } = useTheme()
 
 onMounted(() => {
@@ -74,8 +78,8 @@ watch(() => route.path, () => {
   userMenuOpen.value = false
 })
 
-watch(isAuthenticated, (val) => {
-  if (val) shelvesStore.fetch()
+watch([isAuthenticated, isGuest], ([authed, guest]) => {
+  if (authed || guest) shelvesStore.fetch()
 }, { immediate: true })
 
 async function handleSignOut() {
@@ -125,6 +129,24 @@ async function handleSignOut() {
 
   &__user-wrapper {
     position: relative;
+  }
+
+  &__guest-cta {
+    display: inline-flex;
+    align-items: center;
+    padding: $spacing-xs $spacing-md;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    font-family: $font-family-body;
+    color: #fff;
+    background-color: var(--highlight-color);
+    border-radius: $radius-md;
+    text-decoration: none;
+    transition: background-color $transition-fast;
+
+    &:hover {
+      background-color: var(--highlight-color-hover);
+    }
   }
 
   &__user-btn {

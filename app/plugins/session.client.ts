@@ -1,5 +1,6 @@
 export default defineNuxtPlugin(() => {
   const { isAuthenticated, isLoading } = useAuth()
+  const { isGuest } = useGuest()
   const router = useRouter()
 
   const publicRoutes = ['/', '/login', '/signup', '/forgot-password', '/reset-password']
@@ -11,7 +12,7 @@ export default defineNuxtPlugin(() => {
 
       const current = router.currentRoute.value.path
 
-      if (!authed && !publicRoutes.includes(current)) {
+      if (!authed && !isGuest.value && !publicRoutes.includes(current)) {
         navigateTo('/login', { replace: true })
       }
     },

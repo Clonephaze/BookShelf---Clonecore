@@ -155,7 +155,11 @@ export function useBookDetail(userBookId: Ref<string> | ComputedRef<string>) {
     loading.value = true
     error.value = false
     try {
-      book.value = await $fetch<BookDetail>(`/api/books/${userBookId.value}`)
+      const { isGuest } = useGuest()
+      const url = isGuest.value
+        ? `/api/guest/book/${userBookId.value}`
+        : `/api/books/${userBookId.value}`
+      book.value = await $fetch<BookDetail>(url)
     }
     catch {
       error.value = true
@@ -167,6 +171,11 @@ export function useBookDetail(userBookId: Ref<string> | ComputedRef<string>) {
 
   async function updateField(field: string, value: unknown) {
     if (!book.value) return
+    const { isGuest } = useGuest()
+    if (isGuest.value) {
+      toast.success('Sign up to track your reading progress')
+      return
+    }
     const oldValue = (book.value as Record<string, unknown>)[field]
     const oldUpdatedAt = book.value.updatedAt
     ;(book.value as Record<string, unknown>)[field] = value
@@ -437,6 +446,11 @@ export function useBookDetail(userBookId: Ref<string> | ComputedRef<string>) {
   }
 
   async function moveToShelf(shelfId: string) {
+    const { isGuest } = useGuest()
+    if (isGuest.value) {
+      toast.success('Sign up to organize your shelves')
+      return
+    }
     movingShelf.value = true
     showShelfPicker.value = false
     try {
@@ -457,6 +471,11 @@ export function useBookDetail(userBookId: Ref<string> | ComputedRef<string>) {
   }
 
   async function removeBook() {
+    const { isGuest } = useGuest()
+    if (isGuest.value) {
+      toast.success('Sign up to manage your library')
+      return false
+    }
     removing.value = true
     try {
       await $fetch(`/api/books/${userBookId.value}`, { method: 'DELETE' })

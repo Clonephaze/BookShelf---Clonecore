@@ -184,13 +184,24 @@
         <div class="settings__group">
           <h4 class="settings__group-label">Default shelf</h4>
           <p class="settings__group-hint">When adding a book, it will be placed on this shelf by default.</p>
-          <p class="settings__group-hint settings__group-hint--coming">Coming with Book Search</p>
+          <div v-if="shelvesLoading" class="settings__group-hint">Loading shelves…</div>
+          <div v-else-if="availableShelves.length" class="settings__select-wrap">
+            <select
+              v-model="selectedShelfId"
+              class="settings__select"
+              @change="saveDefaultShelf"
+            >
+              <option :value="null">None (choose each time)</option>
+              <option v-for="s in availableShelves" :key="s.id" :value="s.id">{{ s.name }}</option>
+            </select>
+            <span v-if="shelfSaveSuccess" class="settings__inline-success">Saved</span>
+          </div>
         </div>
 
         <div class="settings__group">
-          <h4 class="settings__group-label">Reading goal</h4>
-          <p class="settings__group-hint">Set a yearly reading target and track your progress.</p>
-          <p class="settings__group-hint settings__group-hint--coming">Coming with Goals</p>
+          <h4 class="settings__group-label">Reading goals</h4>
+          <p class="settings__group-hint">Set and manage yearly, monthly, and weekly targets.</p>
+          <NuxtLink to="/goals" class="settings__link">Manage reading goals &rarr;</NuxtLink>
         </div>
       </section>
 
@@ -202,7 +213,30 @@
         <div class="settings__group">
           <h4 class="settings__group-label">Email notifications</h4>
           <p class="settings__group-hint">Reading reminders, goal milestones, and weekly digests.</p>
-          <p class="settings__group-hint settings__group-hint--coming">Coming soon</p>
+          <div class="settings__toggle-row">
+            <label class="settings__toggle">
+              <input type="checkbox" disabled>
+              <span class="settings__toggle-slider" />
+              <span class="settings__toggle-label">Weekly reading digest</span>
+            </label>
+            <span class="settings__badge">Coming soon</span>
+          </div>
+          <div class="settings__toggle-row">
+            <label class="settings__toggle">
+              <input type="checkbox" disabled>
+              <span class="settings__toggle-slider" />
+              <span class="settings__toggle-label">Goal milestone alerts</span>
+            </label>
+            <span class="settings__badge">Coming soon</span>
+          </div>
+          <div class="settings__toggle-row">
+            <label class="settings__toggle">
+              <input type="checkbox" disabled>
+              <span class="settings__toggle-slider" />
+              <span class="settings__toggle-label">Reading reminders</span>
+            </label>
+            <span class="settings__badge">Coming soon</span>
+          </div>
         </div>
       </section>
 
@@ -214,13 +248,27 @@
         <div class="settings__group">
           <h4 class="settings__group-label">Profile visibility</h4>
           <p class="settings__group-hint">Choose whether your profile and reading activity are public or private.</p>
-          <p class="settings__group-hint settings__group-hint--coming">Coming with Social Sharing</p>
+          <div class="settings__toggle-row">
+            <label class="settings__toggle">
+              <input type="checkbox" disabled>
+              <span class="settings__toggle-slider" />
+              <span class="settings__toggle-label">Public profile</span>
+            </label>
+            <span class="settings__badge">Coming with Friends</span>
+          </div>
         </div>
 
         <div class="settings__group">
           <h4 class="settings__group-label">Sharing defaults</h4>
           <p class="settings__group-hint">Default privacy for reading cards and year-in-review.</p>
-          <p class="settings__group-hint settings__group-hint--coming">Coming with Social Sharing</p>
+          <div class="settings__toggle-row">
+            <label class="settings__toggle">
+              <input type="checkbox" disabled>
+              <span class="settings__toggle-slider" />
+              <span class="settings__toggle-label">Share reading activity by default</span>
+            </label>
+            <span class="settings__badge">Coming with Friends</span>
+          </div>
         </div>
       </section>
 
@@ -232,13 +280,29 @@
         <div class="settings__group">
           <h4 class="settings__group-label">Import from Goodreads</h4>
           <p class="settings__group-hint">Upload a Goodreads CSV export to migrate your library, ratings, and reading history.</p>
-          <p class="settings__group-hint settings__group-hint--coming">Coming with Goodreads Migration</p>
+          <span class="settings__badge">Coming soon</span>
         </div>
 
         <div class="settings__group">
           <h4 class="settings__group-label">Export your data</h4>
-          <p class="settings__group-hint">Download your entire Bookshelf library as JSON or CSV.</p>
-          <p class="settings__group-hint settings__group-hint--coming">Coming soon</p>
+          <p class="settings__group-hint">Download your entire Bookshelf library including shelves, ratings, notes, and dates.</p>
+          <div class="settings__export-actions">
+            <button
+              class="settings__btn settings__btn--secondary"
+              :disabled="exportLoading"
+              @click="handleExport('json')"
+            >
+              {{ exportLoading === 'json' ? 'Exporting…' : 'Download JSON' }}
+            </button>
+            <button
+              class="settings__btn settings__btn--secondary"
+              :disabled="exportLoading"
+              @click="handleExport('csv')"
+            >
+              {{ exportLoading === 'csv' ? 'Exporting…' : 'Download CSV' }}
+            </button>
+          </div>
+          <p v-if="exportError" class="settings__error" role="alert">{{ exportError }}</p>
         </div>
       </section>
 
@@ -295,6 +359,7 @@ import {
   Palette, UserCircle, BookMarked, Bell, Shield, Database, AlertTriangle,
 } from 'lucide-vue-next'
 import type { Theme } from '~/composables/useTheme'
+import { useLibraryStore } from '~/stores/library'
 
 definePageMeta({ layout: 'default' })
 
@@ -302,6 +367,7 @@ useHead({ title: 'Settings — Bookshelf' })
 
 const { user, changePassword, deleteUser, signOut, updateProfile } = useAuth()
 const { currentTheme, setTheme } = useTheme()
+const libraryStore = useLibraryStore()
 
 const activeSection = ref('appearance')
 
@@ -475,6 +541,82 @@ async function handleChangePassword() {
   }
 }
 
+// --- Reading Preferences ---
+const shelvesLoading = ref(false)
+const selectedShelfId = ref<string | null>(null)
+const shelfSaveSuccess = ref(false)
+
+const availableShelves = computed(() =>
+  libraryStore.data.map(s => ({ id: s.id, name: s.name })),
+)
+
+async function loadPreferences() {
+  shelvesLoading.value = true
+  try {
+    await libraryStore.fetch()
+    const prefs = await $fetch<{ defaultShelfId: string | null }>('/api/preferences')
+    selectedShelfId.value = prefs.defaultShelfId
+  }
+  catch {
+    // Graceful fallback
+  }
+  finally {
+    shelvesLoading.value = false
+  }
+}
+
+async function saveDefaultShelf() {
+  shelfSaveSuccess.value = false
+  try {
+    await $fetch('/api/preferences', {
+      method: 'PATCH',
+      body: { defaultShelfId: selectedShelfId.value },
+    })
+    shelfSaveSuccess.value = true
+    setTimeout(() => { shelfSaveSuccess.value = false }, 2000)
+  }
+  catch {
+    // Silently fail — value stays in select
+  }
+}
+
+// Load preferences when Reading tab is selected
+watch(activeSection, (id) => {
+  if (id === 'reading' && !libraryStore.loaded) {
+    loadPreferences()
+  }
+}, { immediate: true })
+
+// --- Data Export ---
+const exportLoading = ref<string | false>(false)
+const exportError = ref('')
+
+async function handleExport(format: 'json' | 'csv') {
+  exportError.value = ''
+  exportLoading.value = format
+  try {
+    const response = await $fetch.raw(`/api/export?format=${format}`)
+    const blob = new Blob(
+      [typeof response._data === 'string' ? response._data : JSON.stringify(response._data, null, 2)],
+      { type: format === 'json' ? 'application/json' : 'text/csv' },
+    )
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `bookshelf-export.${format}`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+  catch {
+    exportError.value = 'Export failed. Please try again.'
+  }
+  finally {
+    exportLoading.value = false
+  }
+}
+
 // Delete account
 const showDeleteConfirm = ref(false)
 const deletePassword = ref('')
@@ -645,19 +787,6 @@ async function handleDeleteAccount() {
   &__group-hint {
     @include meta-text;
     line-height: 1.5;
-
-    &--coming {
-      display: inline-block;
-      font-size: 0.7rem;
-      font-weight: $font-weight-semibold;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--highlight-color);
-      padding: 2px $spacing-xs;
-      background: var(--highlight-color-subtle);
-      border-radius: $radius-sm;
-      margin-top: $spacing-xs;
-    }
   }
 
   // Links
@@ -845,6 +974,117 @@ async function handleDeleteAccount() {
       @include button-tertiary;
       padding: $spacing-sm $spacing-md;
     }
+
+    &--secondary {
+      @include button-secondary;
+      align-self: flex-start;
+    }
+  }
+
+  // Select
+  &__select-wrap {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    margin-top: $spacing-xs;
+  }
+
+  &__select {
+    @include body-text;
+    font-size: $font-size-sm;
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid var(--border-color);
+    border-radius: $radius-md;
+    background: var(--surface-color);
+    color: var(--text-color);
+    cursor: pointer;
+    min-width: 12rem;
+    transition: border-color 0.15s ease;
+
+    &:focus {
+      outline: none;
+      border-color: var(--highlight-color);
+    }
+  }
+
+  &__inline-success {
+    font-family: $font-family-body;
+    font-size: $font-size-xs;
+    color: var(--success-color);
+    font-weight: $font-weight-medium;
+    animation: settings-fade-in 0.2s ease;
+  }
+
+  @keyframes settings-fade-in {
+    from { opacity: 0; transform: translateX(-4px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  // Toggle rows
+  &__toggle-row {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm 0;
+  }
+
+  &__toggle {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  &__toggle-slider {
+    display: inline-block;
+    width: 2.5rem;
+    height: 1.25rem;
+    background: var(--border-color);
+    border-radius: $radius-full;
+    position: relative;
+    transition: background 0.15s ease;
+    flex-shrink: 0;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: calc(1.25rem - 4px);
+      height: calc(1.25rem - 4px);
+      background: var(--surface-color);
+      border-radius: 50%;
+      transition: transform 0.15s ease;
+    }
+  }
+
+  &__toggle-label {
+    font-family: $font-family-body;
+    font-size: $font-size-sm;
+    color: var(--text-color);
+  }
+
+  // Badge
+  &__badge {
+    display: inline-block;
+    font-family: $font-family-body;
+    font-size: 0.65rem;
+    font-weight: $font-weight-semibold;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--highlight-color);
+    padding: 2px $spacing-xs;
+    background: var(--highlight-color-subtle);
+    border-radius: $radius-sm;
+    white-space: nowrap;
+  }
+
+  // Export actions
+  &__export-actions {
+    display: flex;
+    gap: $spacing-sm;
+    margin-top: $spacing-xs;
   }
 
   // Delete-specific

@@ -120,7 +120,9 @@ export function useGoals() {
     loading.value = true
     error.value = null
     try {
-      const data = await $fetch<Goal[]>('/api/goals')
+      const { isGuest } = useGuest()
+      const url = isGuest.value ? '/api/guest/goals' : '/api/goals'
+      const data = await $fetch<Goal[]>(url)
       goals.value = data
       fetched.value = true
     }

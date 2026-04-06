@@ -20,7 +20,11 @@
 
         <div class="header-nav__actions">
           <ThemeSwitcher />
-          <div v-if="user" class="header-nav__user-wrapper">
+          <template v-if="isGuest">
+            <NuxtLink to="/signup" class="header-nav__guest-cta">Sign Up</NuxtLink>
+            <NuxtLink to="/login" class="header-nav__guest-link">Log in</NuxtLink>
+          </template>
+          <div v-else-if="user" class="header-nav__user-wrapper">
             <button
               class="header-nav__user-btn"
               aria-label="User menu"
@@ -73,6 +77,7 @@ import { Search, Library, Target, BarChart3, Settings, Users } from 'lucide-vue-
 
 const route = useRoute()
 const router = useRouter()
+const { isGuest } = useGuest()
 
 defineProps<{
   user: { name: string; avatar?: string | null } | null
@@ -217,6 +222,36 @@ function isActive(path: string) {
 
   &__user-wrapper {
     position: relative;
+  }
+
+  &__guest-cta {
+    display: inline-flex;
+    align-items: center;
+    padding: $spacing-xs $spacing-md;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    font-family: $font-family-body;
+    color: #fff;
+    background-color: var(--highlight-color);
+    border-radius: $radius-md;
+    text-decoration: none;
+    transition: background-color $transition-fast;
+
+    &:hover {
+      background-color: var(--highlight-color-hover);
+    }
+  }
+
+  &__guest-link {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--text-color-muted);
+    text-decoration: none;
+    transition: color $transition-fast;
+
+    &:hover {
+      color: var(--text-color);
+    }
   }
 
   &__dropdown {

@@ -22,7 +22,9 @@ export const useShelvesStore = defineStore('shelves', () => {
 
     _fetchPromise = (async () => {
       try {
-        const data = await $fetch<ShelfItem[]>('/api/shelves')
+        const { isGuest } = useGuest()
+        const url = isGuest.value ? '/api/guest/shelves' : '/api/shelves'
+        const data = await $fetch<ShelfItem[]>(url)
         shelves.value = data
         loaded.value = true
       }

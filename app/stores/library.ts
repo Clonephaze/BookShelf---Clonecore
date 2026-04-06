@@ -39,7 +39,9 @@ export const useLibraryStore = defineStore('library', () => {
     if (loaded.value && !force) return
     loading.value = true
     try {
-      data.value = await $fetch<ShelfData[]>('/api/library')
+      const { isGuest } = useGuest()
+      const url = isGuest.value ? '/api/guest/library' : '/api/library'
+      data.value = await $fetch<ShelfData[]>(url)
       loaded.value = true
     }
     catch {
@@ -59,7 +61,9 @@ export const useLibraryStore = defineStore('library', () => {
     if (revalidating.value) return
     revalidating.value = true
     try {
-      const fresh = await $fetch<ShelfData[]>('/api/library')
+      const { isGuest } = useGuest()
+      const url = isGuest.value ? '/api/guest/library' : '/api/library'
+      const fresh = await $fetch<ShelfData[]>(url)
       // Only update if something actually changed (book counts or IDs)
       const oldSig = JSON.stringify(data.value.map(s => ({ id: s.id, bookCount: s.bookCount, books: s.books.map(b => ({ id: b.userBookId, r: b.rating, p: b.currentPage, pp: b.progressPercent, cm: b.currentMinutes, u: b.updatedAt })) })))
       const newSig = JSON.stringify(fresh.map(s => ({ id: s.id, bookCount: s.bookCount, books: s.books.map(b => ({ id: b.userBookId, r: b.rating, p: b.currentPage, pp: b.progressPercent, cm: b.currentMinutes, u: b.updatedAt })) })))

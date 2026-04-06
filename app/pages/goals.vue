@@ -210,6 +210,7 @@ const {
   pastYearlyGoals,
   fetchGoals, setGoal, updateGoal,
 } = useGoals()
+const { isGuest } = useGuest()
 const toast = useToast()
 
 const RADIUS = 50
@@ -282,6 +283,10 @@ function startEdit(goal: Goal) {
 }
 
 async function saveEdit(goalId: string) {
+  if (isGuest.value) {
+    toast.success('Sign up to set reading goals')
+    return
+  }
   if (!editTarget.value || editTarget.value < 1) return
   const ok = await updateGoal(goalId, editTarget.value)
   if (ok) {
@@ -291,6 +296,10 @@ async function saveEdit(goalId: string) {
 }
 
 async function createGoal(periodType: PeriodType) {
+  if (isGuest.value) {
+    toast.success('Sign up to set reading goals')
+    return
+  }
   const target = periodType === 'yearly' ? newYearlyTarget.value
     : periodType === 'monthly' ? newMonthlyTarget.value
       : newWeeklyTarget.value

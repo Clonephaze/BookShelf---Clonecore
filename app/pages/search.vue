@@ -11,6 +11,7 @@ const { isGuest } = useGuest()
 
 const searchStore = useSearchStore()
 const shelvesStore = useShelvesStore()
+const toast = useToast()
 
 // Track which books are currently being added (UI-only, ephemeral)
 const addingBooks = ref(new Set<string>())
@@ -20,6 +21,10 @@ const selectedBook = ref<BookSearchResult | null>(null)
 
 // Add book to shelf
 async function addBook(book: BookSearchResult, shelfId: string) {
+  if (isGuest.value) {
+    toast.success('Sign up to save books to your library')
+    return
+  }
   const bookKey = book.isbn13 || book.isbn10 || book.title
   addingBooks.value.add(bookKey)
 
