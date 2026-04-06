@@ -26,7 +26,7 @@
     </div>
 
     <!-- Goal progress widget -->
-    <GoalWidget v-if="isAuthenticated && !isGuest" />
+    <GoalWidget v-if="isAuthenticated || isGuest" />
 
     <!-- New shelf form -->
     <div v-if="showNewShelf" class="library__new-shelf animate-fade-in-scale">
@@ -159,12 +159,12 @@ watch(showNewShelf, (val) => {
   }
 })
 
-watch(isAuthenticated, (val) => {
-  if (val) libraryStore.fetch()
+watch([isAuthenticated, isGuest], ([authed, guest]) => {
+  if (authed || guest) libraryStore.fetch()
 }, { immediate: true })
 
 onMounted(() => {
-  if (isAuthenticated.value) libraryStore.revalidate()
+  if (isAuthenticated.value || isGuest.value) libraryStore.revalidate()
 })
 </script>
 
