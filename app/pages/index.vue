@@ -89,8 +89,8 @@
         <!-- Hero content (overlaying marquee) -->
         <div class="hero__content">
           <h1 class="hero__title">
-            <span class="hero__title-line">Your reading life,</span>
-            <span class="hero__title-line hero__title-line--2">beautifully organized.</span>
+            <span class="hero__title-line">Every book tells a story.</span>
+            <span class="hero__title-line hero__title-line--2">Yours starts here.</span>
           </h1>
           <p class="hero__subtitle">
             Track books, curate shelves, set goals, and discover your reading story — all in one warm, focused space.
@@ -284,12 +284,12 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'Bookshelf — Your reading life, beautifully organized.',
-  ogTitle: 'Bookshelf — Your reading life, beautifully organized.',
+  title: 'Bookshelf — Every book tells a story. Yours starts here.',
+  ogTitle: 'Bookshelf — Every book tells a story. Yours starts here.',
   ogDescription: 'Track books, set goals, time reading sessions, and discover your next great read.',
   ogUrl: 'https://bookshelf-clonecore.vercel.app',
   twitterCard: 'summary_large_image',
-  twitterTitle: 'Bookshelf — Your reading life, beautifully organized.',
+  twitterTitle: 'Bookshelf — Every book tells a story. Yours starts here.',
   twitterDescription: 'Track books, set goals, time reading sessions, and discover your next great read.',
 })
 

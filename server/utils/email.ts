@@ -49,7 +49,7 @@ function emailLayout(content: string): string {
         <tr>
           <td style="border-top:1px solid #e1d8c8;padding:20px 32px;text-align:center;">
             <a href="${SITE_URL}" style="color:#a0592a;font-size:13px;text-decoration:none;">bookshelf-clonecore.vercel.app</a>
-            <p style="color:#8a7a66;font-size:12px;margin:8px 0 0;">Your reading life, beautifully organized.</p>
+            <p style="color:#8a7a66;font-size:12px;margin:8px 0 0;">Every book tells a story. Yours starts here.</p>
           </td>
         </tr>
       </table>

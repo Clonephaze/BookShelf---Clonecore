@@ -1,6 +1,6 @@
 # Bookshelf
 
-**Your reading life, beautifully organized.**
+**Every book tells a story. Yours starts here.**
 
 A full-stack reading tracker built as a [Frontend Mentor](https://www.frontendmentor.io) Product Challenge. Search for books, organize them into shelves, track reading progress, set goals, time reading sessions, and explore rich year-in-review statistics.
 

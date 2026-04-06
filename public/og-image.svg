@@ -18,7 +18,7 @@
   <!-- Title -->
   <text x="600" y="310" text-anchor="middle" font-family="Georgia,Lora,serif" font-size="64" font-weight="700" fill="#f4ebdb">Bookshelf</text>
   <!-- Tagline -->
-  <text x="600" y="370" text-anchor="middle" font-family="Helvetica,Inter,sans-serif" font-size="24" fill="#c8844a">Your reading life, beautifully organized.</text>
+  <text x="600" y="370" text-anchor="middle" font-family="Helvetica,Inter,sans-serif" font-size="24" fill="#c8844a">Every book tells a story. Yours starts here.</text>
   <!-- Accent line -->
   <line x1="480" y1="400" x2="720" y2="400" stroke="#a0592a" stroke-width="1.5" opacity="0.6"/>
   <!-- URL -->

@@ -29,20 +29,20 @@ export default defineNuxtConfig({
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'description', content: 'Your reading life, beautifully organized.' },
+        { name: 'description', content: 'Every book tells a story. Yours starts here.' },
         { name: 'theme-color', content: '#302318' },
         { name: 'apple-mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
         // Open Graph defaults (pages override with useSeoMeta)
         { property: 'og:type', content: 'website' },
         { property: 'og:site_name', content: 'Bookshelf' },
-        { property: 'og:title', content: 'Bookshelf — Your reading life, beautifully organized.' },
+        { property: 'og:title', content: 'Bookshelf — Every book tells a story. Yours starts here.' },
         { property: 'og:description', content: 'Track books, set goals, time reading sessions, and discover your next great read.' },
         { property: 'og:image', content: 'https://bookshelf-clonecore.vercel.app/og-image.svg' },
         { property: 'og:url', content: 'https://bookshelf-clonecore.vercel.app' },
         // Twitter Card defaults
         { name: 'twitter:card', content: 'summary_large_image' },
-        { name: 'twitter:title', content: 'Bookshelf — Your reading life, beautifully organized.' },
+        { name: 'twitter:title', content: 'Bookshelf — Every book tells a story. Yours starts here.' },
         { name: 'twitter:description', content: 'Track books, set goals, time reading sessions, and discover your next great read.' },
         { name: 'twitter:image', content: 'https://bookshelf-clonecore.vercel.app/og-image.svg' },
       ],
@@ -75,7 +75,7 @@ export default defineNuxtConfig({
     manifest: {
       name: 'Bookshelf',
       short_name: 'Bookshelf',
-      description: 'Your reading life, beautifully organized.',
+      description: 'Every book tells a story. Yours starts here.',
       theme_color: '#302318',
       background_color: '#302318',
       display: 'standalone',
