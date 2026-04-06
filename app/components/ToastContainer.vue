@@ -3,9 +3,10 @@ const { toasts } = useToast()
 </script>
 
 <template>
-  <Teleport to="body">
-    <div class="toast-container" aria-live="polite">
-      <TransitionGroup name="toast">
+  <ClientOnly>
+    <Teleport to="body">
+      <div class="toast-container" aria-live="polite">
+        <TransitionGroup name="toast">
         <div
           v-for="toast in toasts"
           :key="toast.id"
@@ -15,9 +16,10 @@ const { toasts } = useToast()
         >
           {{ toast.message }}
         </div>
-      </TransitionGroup>
-    </div>
-  </Teleport>
+        </TransitionGroup>
+      </div>
+    </Teleport>
+  </ClientOnly>
 </template>
 
 <style lang="scss" scoped>

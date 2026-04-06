@@ -183,32 +183,32 @@ _Note: Book detail page layout was built in Phase 3 with placeholder sections. P
 
 ---
 
-## Phase 9 — Statistics & Year-in-Review (Design Challenge)
+## Phase 9 — Statistics & Year-in-Review (Design Challenge) ✅
 **Goal:** Reading statistics dashboard and year-in-review experience.
 
-- [ ] Stats dashboard page (`/stats`)
-- [ ] Books read per month (bar chart)
-- [ ] Genre breakdown (interactive donut chart)
-- [ ] Total pages read, average pages per book
-- [ ] Average rating, rating distribution
-- [ ] Reading pace (pages per day, books per month trend)
-- [ ] Year-in-review page (`/stats/year/[year]`)
-- [ ] Narrative/visual storytelling (not just charts)
-- [ ] Handle sparse data gracefully (3 books vs 50 books)
-- [ ] "So far this year" vs completed year views
-- [ ] Author diversity stats
+- [x] Stats dashboard page (`/stats`)
+- [x] Books read per month (bar chart)
+- [x] Genre breakdown (interactive donut chart)
+- [x] Total pages read, average pages per book
+- [x] Average rating, rating distribution
+- [x] Reading pace (pages per day, books per month trend)
+- [x] Year-in-review page (`/stats/year/[year]`)
+- [x] Narrative/visual storytelling (not just charts)
+- [x] Handle sparse data gracefully (3 books vs 50 books)
+- [x] "So far this year" vs completed year views
+- [x] Author diversity stats
 
 **Deliverable:** Comprehensive stats dashboard and shareable year-in-review.
 
 ---
 
-## Phase 10 — Stretch Features
+## Phase 10 — Stretch Features ✅
 **Goal:** Polish and depth.
 
-- [ ] Progressive Web App (`@vite-pwa/nuxt`: manifest, service worker, offline shell, install prompt)
-- [ ] Goodreads CSV import (parse, preview, map shelves, conflict resolution)
-- [ ] Library search (search own books, debounced, Cmd+K shortcut)
-- [ ] Command palette for power users
+- [x] Progressive Web App (`@vite-pwa/nuxt`: manifest, service worker, offline shell, install prompt)
+- [x] Goodreads CSV import (parse, preview, map shelves, conflict resolution)
+- [x] Library search (search own books, debounced, Cmd+K shortcut)
+- [x] Command palette for power users
 
 ---
 

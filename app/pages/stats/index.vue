@@ -1,8 +1,23 @@
 <template>
   <div class="stats">
     <header class="stats__header">
-      <h1 class="stats__title">Statistics</h1>
-      <p class="stats__subtitle">Your reading journey at a glance</p>
+      <div class="stats__header-row">
+        <div>
+          <h1 class="stats__title">Statistics</h1>
+          <p class="stats__subtitle">Your reading journey at a glance</p>
+        </div>
+        <div v-if="!loading && overview && overview.totalBooks > 0" class="stats__year-filter">
+          <button
+            v-for="y in availableYears"
+            :key="y"
+            class="stats__year-btn"
+            :class="{ 'stats__year-btn--active': y === selectedYear }"
+            @click="selectedYear = y"
+          >
+            {{ y }}
+          </button>
+        </div>
+      </div>
     </header>
 
     <!-- Loading state -->
@@ -261,6 +276,101 @@
             <p>Finish books to see your most-read authors</p>
           </div>
         </section>
+
+        <!-- Genre breakdown (donut chart) -->
+        <section class="stats__chart-card">
+          <h2 class="stats__chart-title">Genre Breakdown</h2>
+          <div v-if="genres && genres.genres.length > 0" class="stats__genre">
+            <div class="stats__genre-donut" aria-hidden="true">
+              <svg viewBox="0 0 200 200" class="stats__genre-svg">
+                <circle
+                  v-for="(seg, i) in donutSegments"
+                  :key="seg.genre"
+                  cx="100" cy="100" r="70"
+                  fill="none"
+                  :stroke="genreColor(i)"
+                  stroke-width="28"
+                  :stroke-dasharray="`${seg.arc} ${440 - seg.arc}`"
+                  :stroke-dashoffset="-seg.offset"
+                  class="stats__genre-arc"
+                  :class="{ 'stats__genre-arc--hover': hoveredGenre === seg.genre }"
+                  @mouseenter="hoveredGenre = seg.genre"
+                  @mouseleave="hoveredGenre = null"
+                />
+                <text x="100" y="95" text-anchor="middle" class="stats__genre-center-value">
+                  {{ genres.genres.length }}
+                </text>
+                <text x="100" y="115" text-anchor="middle" class="stats__genre-center-label">
+                  genres
+                </text>
+              </svg>
+            </div>
+            <ol class="stats__genre-legend">
+              <li
+                v-for="(g, i) in genres.genres.slice(0, 8)"
+                :key="g.genre"
+                class="stats__genre-item"
+                :class="{ 'stats__genre-item--hover': hoveredGenre === g.genre }"
+                @mouseenter="hoveredGenre = g.genre"
+                @mouseleave="hoveredGenre = null"
+              >
+                <span class="stats__genre-dot" :style="{ background: genreColor(i) }" />
+                <span class="stats__genre-name">{{ g.genre }}</span>
+                <span class="stats__genre-count">{{ g.count }}</span>
+              </li>
+            </ol>
+          </div>
+          <div v-else class="stats__chart-empty">
+            <p>Finish books with genres to see your breakdown</p>
+          </div>
+        </section>
+
+        <!-- Reading pace -->
+        <section class="stats__chart-card">
+          <h2 class="stats__chart-title">
+            Reading Pace
+            <span v-if="pace" class="stats__chart-year">{{ pace.year }}</span>
+          </h2>
+          <div v-if="pace && pace.totalBooks > 0" class="stats__pace">
+            <div class="stats__pace-metrics">
+              <div class="stats__pace-metric">
+                <span class="stats__pace-value">{{ pace.booksPerMonthAvg }}</span>
+                <span class="stats__pace-label">books / month</span>
+              </div>
+              <div v-if="pace.pagesPerDay" class="stats__pace-metric">
+                <span class="stats__pace-value">{{ pace.pagesPerDay }}</span>
+                <span class="stats__pace-label">pages / day</span>
+              </div>
+              <div class="stats__pace-metric">
+                <span class="stats__pace-value stats__pace-value--trend">
+                  <svg v-if="pace.trend === 'up'" class="stats__pace-trend-icon stats__pace-trend-icon--up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+                  <svg v-else-if="pace.trend === 'down'" class="stats__pace-trend-icon stats__pace-trend-icon--down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                  <svg v-else class="stats__pace-trend-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14"/></svg>
+                  {{ pace.trend === 'up' ? 'Speeding up' : pace.trend === 'down' ? 'Slowing down' : 'Steady' }}
+                </span>
+                <span class="stats__pace-label">3-month trend</span>
+              </div>
+            </div>
+            <p v-if="paceProjection" class="stats__pace-projection">
+              At this rate, you'll finish ~<strong>{{ paceProjection }}</strong> books by December.
+            </p>
+          </div>
+          <div v-else class="stats__chart-empty">
+            <p>Finish books to track your reading pace</p>
+          </div>
+        </section>
+
+        <!-- Year-in-review link -->
+        <section v-if="overview && overview.totalBooks >= 3" class="stats__review-cta" data-reveal>
+          <NuxtLink :to="`/stats/year/${selectedYear}`" class="stats__review-link">
+            <span class="stats__review-icon" aria-hidden="true">📖</span>
+            <div class="stats__review-text">
+              <strong>{{ selectedYear }} Year in Review</strong>
+              <span>See your reading story unfold — month by month</span>
+            </div>
+            <svg class="stats__review-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </NuxtLink>
+        </section>
       </div>
     </template>
   </div>
@@ -297,6 +407,28 @@ interface Pages { distribution: PageBucket[]; shortest: BookRef | null; longest:
 
 interface HeatmapData { year: number; days: Record<string, number> }
 
+interface GenreEntry { genre: string; count: number; percentage: number }
+interface Genres { genres: GenreEntry[]; totalBooks: number }
+
+interface Pace {
+  year: number
+  totalBooks: number
+  totalPages: number
+  pagesPerDay: number | null
+  booksPerMonthAvg: number
+  booksPerMonth: number[]
+  trend: 'up' | 'down' | 'steady'
+}
+
+// --- Year filter ---
+const currentYear = new Date().getFullYear()
+const availableYears = computed(() => {
+  const years = [currentYear]
+  if (currentYear > 2025) years.push(currentYear - 1)
+  return years
+})
+const selectedYear = ref(currentYear)
+
 // --- Data fetching ---
 const loading = ref(true)
 const overview = ref<Overview | null>(null)
@@ -305,21 +437,27 @@ const ratings = ref<Ratings | null>(null)
 const authors = ref<Authors | null>(null)
 const pages = ref<Pages | null>(null)
 const heatmap = ref<HeatmapData | null>(null)
+const genres = ref<Genres | null>(null)
+const pace = ref<Pace | null>(null)
 
 const hoveredBar = ref<TimelineEntry | null>(null)
+const hoveredGenre = ref<string | null>(null)
 
 async function fetchStats() {
   loading.value = true
   try {
     const { isGuest } = useGuest()
     const base = isGuest.value ? '/api/guest/stats' : '/api/stats'
-    const [o, t, r, a, p, h] = await Promise.all([
+    const yearQ = `?year=${selectedYear.value}`
+    const [o, t, r, a, p, h, g, pc] = await Promise.all([
       $fetch<Overview>(`${base}/overview`),
       $fetch<Timeline>(`${base}/timeline`),
       $fetch<Ratings>(`${base}/ratings`),
       $fetch<Authors>(`${base}/authors`),
       $fetch<Pages>(`${base}/pages`),
-      $fetch<HeatmapData>(`${base}/heatmap`),
+      $fetch<HeatmapData>(`${base}/heatmap${yearQ}`),
+      $fetch<Genres>(`${base}/genres`).catch(() => null),
+      $fetch<Pace>(`${base}/pace${yearQ}`).catch(() => null),
     ])
     overview.value = o
     timeline.value = t
@@ -327,6 +465,8 @@ async function fetchStats() {
     authors.value = a
     pages.value = p
     heatmap.value = h
+    genres.value = g
+    pace.value = pc
   }
   catch {
     // Graceful fallback — show empty state
@@ -448,6 +588,49 @@ const mostGivenRating = computed(() => {
   if (sorted.length < 2) return null // only show if there's a meaningful "most"
   return sorted[0] ?? null
 })
+
+// --- Genre donut chart ---
+const genreColors = [
+  'var(--progress-color)',
+  'var(--rating-color)',
+  'color-mix(in srgb, var(--progress-color) 65%, var(--rating-color))',
+  'color-mix(in srgb, var(--rating-color) 60%, var(--text-color-muted))',
+  'color-mix(in srgb, var(--progress-color) 40%, var(--text-color-muted))',
+  'var(--text-color-muted)',
+  'color-mix(in srgb, var(--progress-color) 30%, var(--sub-bg-color))',
+  'color-mix(in srgb, var(--rating-color) 30%, var(--sub-bg-color))',
+]
+
+function genreColor(i: number): string {
+  return genreColors[i % genreColors.length]
+}
+
+const donutSegments = computed(() => {
+  if (!genres.value) return []
+  const total = genres.value.genres.reduce((s, g) => s + g.count, 0)
+  if (total === 0) return []
+  const circumference = 2 * Math.PI * 70 // ~440
+  let offset = 0
+  return genres.value.genres.slice(0, 8).map(g => {
+    const arc = (g.count / total) * circumference
+    const seg = { genre: g.genre, arc, offset }
+    offset += arc
+    return seg
+  })
+})
+
+// --- Pace projection ---
+const paceProjection = computed(() => {
+  if (!pace.value || pace.value.booksPerMonthAvg <= 0) return null
+  const now = new Date()
+  if (pace.value.year !== now.getFullYear()) return null
+  const monthsLeft = 12 - now.getMonth()
+  const projected = Math.round(pace.value.totalBooks + pace.value.booksPerMonthAvg * monthsLeft)
+  return projected
+})
+
+// --- Year filter watcher ---
+watch(selectedYear, () => fetchStats())
 
 // Non-blocking fetch
 fetchStats()
@@ -1095,6 +1278,253 @@ fetchStats()
     font-family: $font-family-body;
     font-size: $font-size-xs;
     color: var(--text-color-muted);
+  }
+
+  // --- Header with year filter ---
+  &__header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: $spacing-md;
+    flex-wrap: wrap;
+  }
+
+  &__year-filter {
+    display: flex;
+    gap: $spacing-xs;
+    background: var(--sub-bg-color);
+    border-radius: $radius-md;
+    padding: 3px;
+  }
+
+  &__year-btn {
+    @include button-base;
+    padding: $spacing-xs $spacing-md;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--text-color-muted);
+    background: transparent;
+    border: none;
+    border-radius: $radius-sm;
+
+    &--active {
+      background: var(--surface-color);
+      color: var(--text-color);
+      box-shadow: var(--shadow-sm);
+    }
+
+    &:hover:not(&--active) {
+      color: var(--text-color);
+    }
+  }
+
+  // --- Genre donut chart ---
+  &__genre {
+    display: flex;
+    align-items: center;
+    gap: $spacing-lg;
+
+    @include respond-below($breakpoint-sm) {
+      flex-direction: column;
+    }
+  }
+
+  &__genre-donut {
+    flex-shrink: 0;
+    width: 10rem;
+    height: 10rem;
+  }
+
+  &__genre-svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+
+  &__genre-arc {
+    transition: opacity 0.2s ease, stroke-width 0.2s ease;
+    cursor: default;
+
+    &--hover {
+      stroke-width: 34;
+    }
+  }
+
+  &__genre-center-value {
+    font-family: $font-family-heading;
+    font-size: 2rem;
+    font-weight: $font-weight-bold;
+    fill: var(--text-color);
+    transform: rotate(90deg);
+    transform-origin: 100px 100px;
+  }
+
+  &__genre-center-label {
+    font-family: $font-family-body;
+    font-size: 0.75rem;
+    fill: var(--text-color-muted);
+    transform: rotate(90deg);
+    transform-origin: 100px 100px;
+  }
+
+  &__genre-legend {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    @include flex-column;
+    gap: $spacing-xs;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__genre-item {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: 3px $spacing-xs;
+    border-radius: $radius-sm;
+    transition: background 0.15s ease;
+    cursor: default;
+
+    &--hover {
+      background: var(--sub-bg-color);
+    }
+  }
+
+  &__genre-dot {
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: $radius-full;
+    flex-shrink: 0;
+  }
+
+  &__genre-name {
+    font-family: $font-family-body;
+    font-size: $font-size-sm;
+    color: var(--text-color);
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__genre-count {
+    font-family: $font-family-body;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    color: var(--text-color-muted);
+  }
+
+  // --- Reading pace ---
+  &__pace {
+    @include flex-column;
+    gap: $spacing-lg;
+  }
+
+  &__pace-metrics {
+    display: flex;
+    gap: $spacing-lg;
+    flex-wrap: wrap;
+  }
+
+  &__pace-metric {
+    @include flex-column;
+    gap: 2px;
+  }
+
+  &__pace-value {
+    font-family: $font-family-heading;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: var(--text-color);
+
+    &--trend {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      font-size: $font-size-base;
+    }
+  }
+
+  &__pace-label {
+    font-family: $font-family-body;
+    font-size: $font-size-xs;
+    color: var(--text-color-muted);
+  }
+
+  &__pace-trend-icon {
+    width: 1rem;
+    height: 1rem;
+
+    &--up { color: #4caf50; }
+    &--down { color: #ef5350; }
+  }
+
+  &__pace-projection {
+    font-family: $font-family-body;
+    font-size: $font-size-sm;
+    color: var(--text-color-secondary);
+    line-height: 1.5;
+    padding-top: $spacing-sm;
+    border-top: 1px solid var(--border-color);
+
+    strong {
+      color: var(--progress-color);
+      font-weight: $font-weight-semibold;
+    }
+  }
+
+  // --- Year-in-review CTA ---
+  &__review-cta {
+    grid-column: 1 / -1;
+  }
+
+  &__review-link {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    @include card-base;
+    padding: $spacing-lg $spacing-xl;
+    text-decoration: none;
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--highlight-color);
+    }
+  }
+
+  &__review-icon {
+    font-size: 1.75rem;
+    flex-shrink: 0;
+  }
+
+  &__review-text {
+    @include flex-column;
+    gap: 2px;
+    flex: 1;
+
+    strong {
+      font-family: $font-family-heading;
+      font-size: $font-size-base;
+      font-weight: $font-weight-semibold;
+      color: var(--text-color);
+    }
+
+    span {
+      font-family: $font-family-body;
+      font-size: $font-size-sm;
+      color: var(--text-color-muted);
+    }
+  }
+
+  &__review-arrow {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--text-color-muted);
+    flex-shrink: 0;
   }
 }
 </style>

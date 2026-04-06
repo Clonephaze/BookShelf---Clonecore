@@ -1100,6 +1100,212 @@
           "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780062024039-M.jpg"
         }
       ]
+    },
+    "genres": {
+      "genres": [
+        { "genre": "Fiction", "count": 12, "percentage": 80 },
+        { "genre": "Fantasy", "count": 3, "percentage": 20 },
+        { "genre": "Literary Fiction", "count": 5, "percentage": 33 },
+        { "genre": "Science Fiction", "count": 2, "percentage": 13 },
+        { "genre": "Romance", "count": 2, "percentage": 13 },
+        { "genre": "Historical Fiction", "count": 2, "percentage": 13 },
+        { "genre": "Self-Help", "count": 1, "percentage": 7 },
+        { "genre": "Young Adult", "count": 1, "percentage": 7 },
+        { "genre": "Mystery", "count": 1, "percentage": 7 },
+        { "genre": "Dystopian", "count": 1, "percentage": 7 }
+      ],
+      "totalBooks": 15
+    },
+    "pace": {
+      "year": 2026,
+      "totalBooks": 5,
+      "totalPages": 2126,
+      "pagesPerDay": 60.7,
+      "booksPerMonthAvg": 2.5,
+      "booksPerMonth": [4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      "trend": "down"
+    }
+  },
+  "yearReviews": {
+    "2025": {
+      "year": 2025,
+      "isCurrentYear": false,
+      "summary": {
+        "totalBooks": 10,
+        "totalPages": 4245,
+        "avgRating": 4.5,
+        "avgPages": 425,
+        "uniqueAuthors": 10
+      },
+      "months": [
+        { "month": 1, "count": 0 },
+        { "month": 2, "count": 0 },
+        { "month": 3, "count": 0 },
+        { "month": 4, "count": 0 },
+        { "month": 5, "count": 0 },
+        { "month": 6, "count": 0 },
+        { "month": 7, "count": 1 },
+        { "month": 8, "count": 0 },
+        { "month": 9, "count": 3 },
+        { "month": 10, "count": 1 },
+        { "month": 11, "count": 3 },
+        { "month": 12, "count": 2 }
+      ],
+      "bestMonth": { "month": 9, "count": 3 },
+      "topRated": [
+        {
+          "title": "The Name of the Wind",
+          "author": "Patrick Rothfuss",
+          "rating": 5,
+          "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780756404741-M.jpg"
+        },
+        {
+          "title": "Dune",
+          "author": "Frank Herbert",
+          "rating": 5,
+          "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780441013593-M.jpg"
+        },
+        {
+          "title": "The Midnight Library",
+          "author": "Matt Haig",
+          "rating": 5,
+          "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780593321201-M.jpg"
+        },
+        {
+          "title": "Project Hail Mary",
+          "author": "Andy Weir",
+          "rating": 5,
+          "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780593135204-M.jpg"
+        },
+        {
+          "title": "To Kill a Mockingbird",
+          "author": "Harper Lee",
+          "rating": 5,
+          "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780061120084-M.jpg"
+        }
+      ],
+      "genres": [
+        { "genre": "Fiction", "count": 8 },
+        { "genre": "Fantasy", "count": 2 },
+        { "genre": "Science Fiction", "count": 2 },
+        { "genre": "Literary Fiction", "count": 3 },
+        { "genre": "Young Adult", "count": 1 },
+        { "genre": "Romance", "count": 1 }
+      ],
+      "fastestRead": {
+        "title": "Normal People",
+        "author": "Sally Rooney",
+        "days": 20,
+        "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9781984822185-M.jpg"
+      },
+      "firstBook": {
+        "title": "Normal People",
+        "author": "Sally Rooney",
+        "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9781984822185-M.jpg",
+        "dateFinished": "July 08"
+      },
+      "lastBook": {
+        "title": "The Midnight Library",
+        "author": "Matt Haig",
+        "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780593321201-M.jpg",
+        "dateFinished": "December 15"
+      },
+      "shortestBook": {
+        "title": "The Alchemist",
+        "pageCount": 197,
+        "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780062315007-M.jpg"
+      },
+      "longestBook": {
+        "title": "Dune",
+        "pageCount": 688,
+        "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780441013593-M.jpg"
+      }
+    },
+    "2026": {
+      "year": 2026,
+      "isCurrentYear": true,
+      "summary": {
+        "totalBooks": 5,
+        "totalPages": 2126,
+        "avgRating": 4.4,
+        "avgPages": 425,
+        "uniqueAuthors": 5
+      },
+      "months": [
+        { "month": 1, "count": 4 },
+        { "month": 2, "count": 1 },
+        { "month": 3, "count": 0 },
+        { "month": 4, "count": 0 }
+      ],
+      "bestMonth": { "month": 1, "count": 4 },
+      "topRated": [
+        {
+          "title": "Circe",
+          "author": "Madeline Miller",
+          "rating": 5,
+          "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780316556347-M.jpg"
+        },
+        {
+          "title": "Babel",
+          "author": "R.F. Kuang",
+          "rating": 5,
+          "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780593230572-M.jpg"
+        },
+        {
+          "title": "A Gentleman in Moscow",
+          "author": "Amor Towles",
+          "rating": 4,
+          "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780143110439-M.jpg"
+        },
+        {
+          "title": "Atomic Habits",
+          "author": "James Clear",
+          "rating": 4,
+          "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780735211292-M.jpg"
+        },
+        {
+          "title": "Where the Crawdads Sing",
+          "author": "Delia Owens",
+          "rating": 4,
+          "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780062060624-M.jpg"
+        }
+      ],
+      "genres": [
+        { "genre": "Fiction", "count": 4 },
+        { "genre": "Historical Fiction", "count": 2 },
+        { "genre": "Fantasy", "count": 1 },
+        { "genre": "Literary Fiction", "count": 2 },
+        { "genre": "Self-Help", "count": 1 },
+        { "genre": "Mystery", "count": 1 }
+      ],
+      "fastestRead": {
+        "title": "Circe",
+        "author": "Madeline Miller",
+        "days": 20,
+        "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780316556347-M.jpg"
+      },
+      "firstBook": {
+        "title": "Circe",
+        "author": "Madeline Miller",
+        "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780316556347-M.jpg",
+        "dateFinished": "January 05"
+      },
+      "lastBook": {
+        "title": "Where the Crawdads Sing",
+        "author": "Delia Owens",
+        "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780062060624-M.jpg",
+        "dateFinished": "February 04"
+      },
+      "shortestBook": {
+        "title": "Atomic Habits",
+        "pageCount": 320,
+        "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780735211292-M.jpg"
+      },
+      "longestBook": {
+        "title": "Babel",
+        "pageCount": 560,
+        "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780593230572-M.jpg"
+      }
     }
   },
   "bookDetails": {

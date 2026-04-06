@@ -116,7 +116,7 @@ const readRatings = [5, 5, 5, 4, 4, 5, 5, 4, 4, 5, 4, 4, 5, 4, 3]
 
 // ---- Build library shelf entries ----
 function makeShelfBook(book, opts = {}) {
-  const { rating, notes: n, dateAdded, dateStarted, dateFinished, currentPage, progressPercent } = opts
+  const { rating, dateAdded, dateFinished, currentPage, progressPercent } = opts
   return {
     userBookId: userBookIds.get(book.title),
     bookId: bookIds.get(book.title),
@@ -310,7 +310,7 @@ const shortest = readBooks.reduce((a, b) => a.pages < b.pages ? a : b)
 const longest = readBooks.reduce((a, b) => a.pages > b.pages ? a : b)
 
 // Top authors for stats
-const topAuthors = readBooks.map((b, i) => ({
+const topAuthors = readBooks.map((b) => ({
   author: b.author,
   bookCount: 1,
   coverUrlSmall: coverM(b),
@@ -326,7 +326,6 @@ readShelfBooks.forEach(b => {
 // Add some reading activity days
 currentShelfBooks.forEach(b => {
   if (b.dateAdded && b.dateAdded.startsWith('2026')) {
-    const startDate = new Date(b.dateAdded)
     for (let d = 0; d < 5; d++) {
       const activityDate = addDays(b.dateAdded, d * 3 + Math.floor(Math.random() * 3))
       if (activityDate.startsWith('2026')) {

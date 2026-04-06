@@ -4,6 +4,7 @@
     <div class="header-nav__top">
       <div class="header-nav__top-inner">
         <NuxtLink to="/library" class="header-nav__brand">
+          <BookshelfLogo :size="64" no-bg />
           <span class="header-nav__logo">Bookshelf</span>
         </NuxtLink>
 
@@ -143,6 +144,9 @@ function isActive(path: string) {
   }
 
   &__brand {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
     text-decoration: none;
     flex-shrink: 0;
   }

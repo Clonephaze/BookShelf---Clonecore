@@ -25,6 +25,19 @@
       </button>
     </div>
 
+    <!-- Library search -->
+    <div v-if="libraryStore.loaded && libraryStore.data.length > 0" class="library__search">
+      <SearchBar
+        v-model="searchQuery"
+        placeholder="Search your library..."
+        @search="() => {}"
+      />
+      <p v-if="isFiltering" class="library__search-results">
+        {{ totalMatches }} {{ totalMatches === 1 ? 'book' : 'books' }} matching "{{ searchQuery.trim() }}"
+        <button class="library__search-clear" @click="clearSearch">Clear</button>
+      </p>
+    </div>
+
     <!-- Goal progress widget -->
     <GoalWidget v-if="isAuthenticated || isGuest" />
 
@@ -65,8 +78,14 @@
 
     <!-- Shelves -->
     <div v-else-if="libraryStore.data.length" class="library__shelves">
+      <template v-if="isFiltering && filteredShelves.length === 0">
+        <div class="library__search-empty">
+          <p>No books match "{{ searchQuery.trim() }}"</p>
+          <button class="library__search-clear" @click="clearSearch">Clear search</button>
+        </div>
+      </template>
       <ShelfRow
-        v-for="shelf in libraryStore.data"
+        v-for="shelf in filteredShelves"
         :key="shelf.id"
         :name="shelf.name"
         :slug="shelf.slug"
@@ -108,6 +127,11 @@ const { isGuest } = useGuest()
 
 const libraryStore = useLibraryStore()
 const shelvesStore = useShelvesStore()
+
+// Library search
+const { query: searchQuery, filteredShelves, totalMatches, isFiltering, clear: clearSearch } = useLibrarySearch(
+  computed(() => libraryStore.data),
+)
 
 // New shelf form
 const showNewShelf = ref(false)
@@ -236,6 +260,43 @@ onMounted(() => {
     font-size: $font-size-sm;
     padding: $spacing-xs $spacing-md;
     gap: $spacing-xs;
+  }
+
+  // --- Library search ---
+  &__search {
+    margin-bottom: $spacing-lg;
+  }
+
+  &__search-results {
+    @include meta-text;
+    margin-top: $spacing-sm;
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+
+  &__search-clear {
+    background: none;
+    border: none;
+    color: var(--progress-color);
+    font-family: $font-family-body;
+    font-size: $font-size-xs;
+    cursor: pointer;
+    padding: 0;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__search-empty {
+    text-align: center;
+    padding: $spacing-2xl $spacing-md;
+    color: var(--text-color-muted);
+    font-family: $font-family-body;
+    @include flex-column;
+    align-items: center;
+    gap: $spacing-sm;
   }
 
   // --- New shelf form ---

@@ -2,6 +2,7 @@
   <div class="layout-auth">
     <main class="auth-container">
       <NuxtLink to="/" class="auth-brand" aria-label="Back to home">
+        <BookshelfLogo :size="40" />
         <h1>Bookshelf</h1>
       </NuxtLink>
       <NuxtLink to="/" class="auth-back">&larr; Back to home</NuxtLink>
@@ -26,9 +27,11 @@
 }
 
 .auth-brand {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-sm;
   margin-bottom: $spacing-sm;
-  text-align: center;
   text-decoration: none;
 
   h1 {

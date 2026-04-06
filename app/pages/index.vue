@@ -266,7 +266,10 @@
 
       <!-- ===================== FOOTER ===================== -->
       <footer class="landing__footer">
-        <span class="landing__footer-brand">Bookshelf</span>
+        <span class="landing__footer-brand">
+          <BookshelfLogo :size="18" bg="transparent" :rounded="false" />
+          Bookshelf
+        </span>
         <NuxtLink to="/privacy" class="landing__footer-link">Privacy Policy</NuxtLink>
       </footer>
     </div>
@@ -388,7 +391,7 @@ onMounted(() => {
 
   const observer = new IntersectionObserver(
     ([entry]) => {
-      if (entry.isIntersecting) {
+      if (entry?.isIntersecting) {
         statsVisible.value = true
         animateValue(0, targetStats.books, 1500, (v) => { animatedStats.books = Math.round(v) })
         animateValue(0, targetStats.pages, 1800, (v) => { animatedStats.pages = Math.round(v) })
@@ -1036,6 +1039,9 @@ $marquee-duration: 60s;
   border-top: 1px solid var(--border-color-subtle);
 
   &-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-xs;
     font-family: $font-family-heading;
     font-size: $font-size-sm;
     font-weight: $font-weight-semibold;

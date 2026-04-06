@@ -280,7 +280,113 @@
         <div class="settings__group">
           <h4 class="settings__group-label">Import from Goodreads</h4>
           <p class="settings__group-hint">Upload a Goodreads CSV export to migrate your library, ratings, and reading history.</p>
-          <span class="settings__badge">Coming soon</span>
+
+          <!-- Step 1: Upload -->
+          <div v-if="importStore.step === 'idle'" class="settings__import-upload">
+            <label class="settings__import-dropzone" tabindex="0" @keydown.enter="($refs.csvInput as HTMLInputElement)?.click()">
+              <input
+                ref="csvInput"
+                type="file"
+                accept=".csv,text/csv"
+                class="settings__import-file-input"
+                @change="handleFileUpload"
+              >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="settings__import-icon" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span class="settings__import-dropzone-text">Choose a CSV file or drag it here</span>
+              <span class="settings__import-dropzone-hint">Goodreads → My Books → Export</span>
+            </label>
+            <p v-if="importStore.error" class="settings__error" role="alert">{{ importStore.error }}</p>
+          </div>
+
+          <!-- Step 2: Preview -->
+          <div v-if="importStore.step === 'preview'" class="settings__import-preview">
+            <div class="settings__import-stats">
+              <div class="settings__import-stat">
+                <span class="settings__import-stat-value">{{ importStore.preview?.totalParsed ?? 0 }}</span>
+                <span class="settings__import-stat-label">Found</span>
+              </div>
+              <div class="settings__import-stat">
+                <span class="settings__import-stat-value">{{ importStore.preview?.totalNew ?? 0 }}</span>
+                <span class="settings__import-stat-label">New</span>
+              </div>
+              <div class="settings__import-stat">
+                <span class="settings__import-stat-value">{{ importStore.preview?.totalExisting ?? 0 }}</span>
+                <span class="settings__import-stat-label">Already in library</span>
+              </div>
+            </div>
+
+            <ul v-if="importStore.preview?.issues?.length" class="settings__import-issues">
+              <li v-for="(issue, idx) in importStore.preview.issues" :key="idx">{{ issue }}</li>
+            </ul>
+
+            <div class="settings__import-book-list">
+              <div
+                v-for="book in importStore.previewDisplay"
+                :key="book.index"
+                class="settings__import-book"
+                :class="{ 'settings__import-book--existing': book.existsInLibrary }"
+              >
+                <div class="settings__import-book-info">
+                  <span class="settings__import-book-title">{{ book.title }}</span>
+                  <span class="settings__import-book-author">{{ book.author }}</span>
+                </div>
+                <span class="settings__import-book-shelf">{{ shelfLabel(book.targetShelf) }}</span>
+                <span v-if="book.existsInLibrary" class="settings__badge">Exists</span>
+                <span v-if="book.rating" class="settings__import-book-rating">{{ '★'.repeat(book.rating) }}</span>
+              </div>
+              <p v-if="importStore.preview && importStore.preview.books.length > 20" class="settings__group-hint">
+                Showing 20 of {{ importStore.preview.books.length }} books
+              </p>
+            </div>
+
+            <div class="settings__import-actions">
+              <button
+                class="settings__btn settings__btn--primary"
+                :disabled="importStore.loading"
+                @click="importStore.executeImport()"
+              >
+                {{ importStore.loading ? 'Importing…' : `Import ${importStore.preview?.totalNew ?? 0} books` }}
+              </button>
+              <button class="settings__btn settings__btn--ghost" @click="importStore.reset()">Cancel</button>
+            </div>
+            <p v-if="importStore.error" class="settings__error" role="alert">{{ importStore.error }}</p>
+          </div>
+
+          <!-- Step 3: Importing progress -->
+          <div v-if="importStore.step === 'importing'" class="settings__import-progress">
+            <div class="settings__import-progress-bar">
+              <div class="settings__import-progress-fill" />
+            </div>
+            <p class="settings__group-hint">Importing books and enriching metadata from Open Library & Google Books. This may take a moment for larger libraries…</p>
+          </div>
+
+          <!-- Step 4: Results -->
+          <div v-if="importStore.step === 'done'" class="settings__import-done">
+            <!-- Timeout / unknown outcome -->
+            <div v-if="!importStore.result && importStore.error" class="settings__import-timeout">
+              <p class="settings__error" role="alert">{{ importStore.error }}</p>
+            </div>
+            <!-- Normal result stats -->
+            <div v-else-if="importStore.result" class="settings__import-stats">
+              <div class="settings__import-stat settings__import-stat--success">
+                <span class="settings__import-stat-value">{{ importStore.result.imported }}</span>
+                <span class="settings__import-stat-label">Imported</span>
+              </div>
+              <div v-if="importStore.result.enriched" class="settings__import-stat">
+                <span class="settings__import-stat-value">{{ importStore.result.enriched }}</span>
+                <span class="settings__import-stat-label">Enriched via API</span>
+              </div>
+              <div v-if="importStore.result.skippedExisting" class="settings__import-stat">
+                <span class="settings__import-stat-value">{{ importStore.result.skippedExisting }}</span>
+                <span class="settings__import-stat-label">Skipped (existing)</span>
+              </div>
+              <div v-if="importStore.result.skippedError" class="settings__import-stat settings__import-stat--error">
+                <span class="settings__import-stat-value">{{ importStore.result.skippedError }}</span>
+                <span class="settings__import-stat-label">Errors</span>
+              </div>
+            </div>
+            <button class="settings__btn settings__btn--secondary" @click="importStore.reset()">Import another</button>
+          </div>
         </div>
 
         <div class="settings__group">
@@ -615,6 +721,25 @@ async function handleExport(format: 'json' | 'csv') {
   finally {
     exportLoading.value = false
   }
+}
+
+// --- Goodreads Import ---
+const importStore = useImportStore()
+
+function shelfLabel(slug: string): string {
+  const labels: Record<string, string> = {
+    'want-to-read': 'Want to Read',
+    'currently-reading': 'Currently Reading',
+    'read': 'Read',
+  }
+  return labels[slug] ?? slug
+}
+
+async function handleFileUpload(e: Event) {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  await importStore.uploadCsv(file)
 }
 
 // Delete account
@@ -1085,6 +1210,203 @@ async function handleDeleteAccount() {
     display: flex;
     gap: $spacing-sm;
     margin-top: $spacing-xs;
+  }
+
+  // Import (Goodreads)
+  &__import-file-input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    opacity: 0;
+  }
+
+  &__import-dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-xl $spacing-lg;
+    border: 2px dashed var(--border-color);
+    border-radius: $radius-lg;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    text-align: center;
+
+    &:hover,
+    &:focus-within {
+      border-color: var(--highlight-color);
+      background: var(--highlight-color-subtle);
+    }
+  }
+
+  &__import-icon {
+    width: 2rem;
+    height: 2rem;
+    color: var(--text-color-muted);
+  }
+
+  &__import-dropzone-text {
+    @include body-text;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--text-color);
+  }
+
+  &__import-dropzone-hint {
+    @include meta-text;
+    font-size: $font-size-xs;
+  }
+
+  &__import-stats {
+    display: flex;
+    gap: $spacing-lg;
+    padding: $spacing-md 0;
+  }
+
+  &__import-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    &--success &-value {
+      color: var(--success-color, #3d7c4f);
+    }
+
+    &--error &-value {
+      color: var(--error-color, #c0392b);
+    }
+  }
+
+  &__import-stat-value {
+    @include heading($font-size-xl);
+  }
+
+  &__import-stat-label {
+    @include meta-text;
+    font-size: $font-size-xs;
+  }
+
+  &__import-issues {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+
+    li {
+      @include body-text;
+      font-size: $font-size-sm;
+      color: var(--text-color-muted);
+      padding-left: $spacing-md;
+      position: relative;
+
+      &::before {
+        content: '•';
+        position: absolute;
+        left: 0;
+        color: var(--highlight-color);
+      }
+    }
+  }
+
+  &__import-book-list {
+    max-height: 20rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    border: 1px solid var(--border-color-subtle);
+    border-radius: $radius-md;
+    margin-top: $spacing-sm;
+  }
+
+  &__import-book {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    background: var(--surface-color);
+
+    &--existing {
+      opacity: 0.5;
+    }
+  }
+
+  &__import-book-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__import-book-title {
+    @include body-text;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__import-book-author {
+    @include meta-text;
+    font-size: $font-size-xs;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__import-book-shelf {
+    @include meta-text;
+    font-size: $font-size-xs;
+    white-space: nowrap;
+  }
+
+  &__import-book-rating {
+    font-size: $font-size-xs;
+    color: var(--rating-color, var(--highlight-color));
+    white-space: nowrap;
+  }
+
+  &__import-actions {
+    display: flex;
+    gap: $spacing-sm;
+    margin-top: $spacing-md;
+  }
+
+  &__import-progress {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+    padding: $spacing-md 0;
+  }
+
+  &__import-progress-bar {
+    height: 4px;
+    background: var(--border-color);
+    border-radius: $radius-full;
+    overflow: hidden;
+  }
+
+  &__import-progress-fill {
+    height: 100%;
+    background: var(--highlight-color);
+    border-radius: $radius-full;
+    animation: import-progress-indeterminate 1.5s ease-in-out infinite;
+  }
+
+  @keyframes import-progress-indeterminate {
+    0% { width: 0%; margin-left: 0; }
+    50% { width: 40%; margin-left: 30%; }
+    100% { width: 0%; margin-left: 100%; }
+  }
+
+  &__import-done {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
   }
 
   // Delete-specific

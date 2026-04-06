@@ -7,6 +7,7 @@
     <!-- Mobile topbar (phone only) -->
     <header class="topbar">
       <NuxtLink to="/library" class="topbar__brand">
+        <BookshelfLogo :size="64" no-bg />
         <span class="topbar__logo">Bookshelf</span>
       </NuxtLink>
       <div class="topbar__actions">
@@ -111,6 +112,9 @@ async function handleSignOut() {
   }
 
   &__brand {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
     text-decoration: none;
   }
 

@@ -1,7 +1,8 @@
 <template>
-  <Teleport to="body">
-    <Transition name="sheet">
-      <div v-if="open" class="more-sheet" @click.self="emit('close')">
+  <ClientOnly>
+    <Teleport to="body">
+      <Transition name="sheet">
+        <div v-if="open" class="more-sheet" @click.self="emit('close')">
         <div class="more-sheet__panel" role="dialog" aria-label="More options">
           <div class="more-sheet__handle" aria-hidden="true" />
 
@@ -18,10 +19,11 @@
               <ChevronRight :size="16" class="more-sheet__chevron" />
             </NuxtLink>
           </nav>
+          </div>
         </div>
-      </div>
-    </Transition>
-  </Teleport>
+      </Transition>
+    </Teleport>
+  </ClientOnly>
 </template>
 
 <script setup lang="ts">

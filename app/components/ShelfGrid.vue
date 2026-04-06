@@ -53,6 +53,14 @@ const emit = defineEmits<{
   gap: $spacing-lg $spacing-md;
   padding: $spacing-md 0;
 
+  @include respond-to($breakpoint-md) {
+    grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  }
+
+  @include respond-to($breakpoint-xl) {
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  }
+
   &--row {
     display: flex;
     overflow-x: auto;
