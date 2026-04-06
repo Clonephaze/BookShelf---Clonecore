@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { Library, Search, Target, BarChart3, MoreHorizontal } from 'lucide-vue-next'
+import { Library, Search, Target, BarChart3, MoreHorizontal, Sparkles } from 'lucide-vue-next'
 
 defineProps<{ moreOpen: boolean }>()
 const emit = defineEmits<{ 'toggle-more': [] }>()
@@ -78,6 +78,7 @@ const leftItems = [
 const centerAction = { to: '/search', label: 'Search', icon: Search }
 
 const rightItems = [
+  { to: '/discover', label: 'Discover', icon: Sparkles },
   { to: '/stats', label: 'Stats', icon: BarChart3 },
 ]
 

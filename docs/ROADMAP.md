@@ -260,16 +260,16 @@ _Note: Book detail page layout was built in Phase 3 with placeholder sections. P
 
 ---
 
-## Phase 14 — "Because You Read…" Engine
+## Phase 14 — "Because You Read…" Engine ✅
 **Goal:** Book recommendations based on reading history — no AI, human-curated data.
 
-- [ ] "Because you read [Book A]" → suggested books (based on shared shelves across users, genre overlap, author connections)
-- [ ] Collaborative filtering: "Readers who rated [Book A] highly also rated [Book B] highly"
-- [ ] Genre affinity scoring: surface under-explored genres
-- [ ] Author discovery: "You've read 3 books by [Author] — here are their others"
-- [ ] Recommendation source transparency: always show _why_ a book is recommended
-- [ ] Dismissable recommendations ("Not interested" feeds back into model)
-- [ ] Cold-start handling: recommendations improve as library grows, graceful empty state
+- [x] "Because you read [Book A]" → suggested books (based on shared shelves across users, genre overlap, author connections)
+- [x] Collaborative filtering: "Readers who rated [Book A] highly also rated [Book B] highly"
+- [x] Genre affinity scoring: surface under-explored genres
+- [x] Author discovery: "You've read 3 books by [Author] — here are their others"
+- [x] Recommendation source transparency: always show _why_ a book is recommended
+- [x] Dismissable recommendations ("Not interested" feeds back into model)
+- [x] Cold-start handling: recommendations improve as library grows, graceful empty state
 
 **Deliverable:** Data-driven book recommendations without AI dependency.
 

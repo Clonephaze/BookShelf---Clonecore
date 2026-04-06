@@ -153,7 +153,7 @@ onUnmounted(() => {
                 </div>
               </template>
 
-              <template #footer>
+              <template #after-header>
                 <NuxtLink
                   :to="`/library/book/${userBookId}`"
                   class="detail-panel__full-page"

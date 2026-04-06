@@ -145,6 +145,8 @@ function handleClearTimeTracking() {
       </div>
     </div>
 
+    <slot name="after-header" />
+
     <!-- Description -->
     <p v-if="book.description" class="bdc__description">
       {{ book.description }}

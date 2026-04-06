@@ -244,3 +244,17 @@ export const activityLog = pgTable('activity_log', {
   index('activity_log_user_idx').on(table.userId, table.createdAt),
   index('activity_log_created_idx').on(table.createdAt),
 ])
+
+// ============================================
+// Recommendations
+// ============================================
+
+export const recommendationDismissals = pgTable('recommendation_dismissals', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  bookId: uuid('book_id').notNull().references(() => books.id, { onDelete: 'cascade' }),
+  dismissedAt: timestamp('dismissed_at').notNull().defaultNow(),
+}, (table) => [
+  unique('rec_dismissals_user_book_unique').on(table.userId, table.bookId),
+  index('rec_dismissals_user_idx').on(table.userId),
+])

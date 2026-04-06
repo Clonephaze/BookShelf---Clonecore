@@ -875,39 +875,84 @@
         "action": "finished_reading",
         "metadata": null,
         "createdAt": "2026-04-05T18:00:00Z",
-        "user": { "id": "user-emma", "name": "Emma Chen", "username": "emmareads", "avatar": "avatar-1" },
-        "book": { "title": "Intermezzo", "author": "Sally Rooney", "coverUrlSmall": null }
+        "user": {
+          "id": "user-emma",
+          "name": "Emma Chen",
+          "username": "emmareads",
+          "avatar": "avatar-1"
+        },
+        "book": {
+          "title": "Intermezzo",
+          "author": "Sally Rooney",
+          "coverUrlSmall": null
+        }
       },
       {
         "id": "act-002",
         "action": "rated_book",
-        "metadata": { "rating": 5 },
+        "metadata": {
+          "rating": 5
+        },
         "createdAt": "2026-04-04T20:15:00Z",
-        "user": { "id": "user-marcus", "name": "Marcus Brown", "username": "marcusb", "avatar": "avatar-2" },
-        "book": { "title": "Project Hail Mary", "author": "Andy Weir", "coverUrlSmall": null }
+        "user": {
+          "id": "user-marcus",
+          "name": "Marcus Brown",
+          "username": "marcusb",
+          "avatar": "avatar-2"
+        },
+        "book": {
+          "title": "Project Hail Mary",
+          "author": "Andy Weir",
+          "coverUrlSmall": null
+        }
       },
       {
         "id": "act-003",
         "action": "started_reading",
         "metadata": null,
         "createdAt": "2026-04-03T09:00:00Z",
-        "user": { "id": "user-sophia", "name": "Sophia Martinez", "username": "sophiawrites", "avatar": null },
-        "book": { "title": "The Midnight Library", "author": "Matt Haig", "coverUrlSmall": null }
+        "user": {
+          "id": "user-sophia",
+          "name": "Sophia Martinez",
+          "username": "sophiawrites",
+          "avatar": null
+        },
+        "book": {
+          "title": "The Midnight Library",
+          "author": "Matt Haig",
+          "coverUrlSmall": null
+        }
       },
       {
         "id": "act-004",
         "action": "added_book",
         "metadata": null,
         "createdAt": "2026-04-02T16:30:00Z",
-        "user": { "id": "user-emma", "name": "Emma Chen", "username": "emmareads", "avatar": "avatar-1" },
-        "book": { "title": "Tomorrow, and Tomorrow, and Tomorrow", "author": "Gabrielle Zevin", "coverUrlSmall": null }
+        "user": {
+          "id": "user-emma",
+          "name": "Emma Chen",
+          "username": "emmareads",
+          "avatar": "avatar-1"
+        },
+        "book": {
+          "title": "Tomorrow, and Tomorrow, and Tomorrow",
+          "author": "Gabrielle Zevin",
+          "coverUrlSmall": null
+        }
       },
       {
         "id": "act-005",
         "action": "hit_goal",
-        "metadata": { "target": 24 },
+        "metadata": {
+          "target": 24
+        },
         "createdAt": "2026-04-01T12:00:00Z",
-        "user": { "id": "user-marcus", "name": "Marcus Brown", "username": "marcusb", "avatar": "avatar-2" },
+        "user": {
+          "id": "user-marcus",
+          "name": "Marcus Brown",
+          "username": "marcusb",
+          "avatar": "avatar-2"
+        },
         "book": null
       }
     ]
@@ -1449,16 +1494,56 @@
     },
     "genres": {
       "genres": [
-        { "genre": "Fiction", "count": 12, "percentage": 80 },
-        { "genre": "Fantasy", "count": 3, "percentage": 20 },
-        { "genre": "Literary Fiction", "count": 5, "percentage": 33 },
-        { "genre": "Science Fiction", "count": 2, "percentage": 13 },
-        { "genre": "Romance", "count": 2, "percentage": 13 },
-        { "genre": "Historical Fiction", "count": 2, "percentage": 13 },
-        { "genre": "Self-Help", "count": 1, "percentage": 7 },
-        { "genre": "Young Adult", "count": 1, "percentage": 7 },
-        { "genre": "Mystery", "count": 1, "percentage": 7 },
-        { "genre": "Dystopian", "count": 1, "percentage": 7 }
+        {
+          "genre": "Fiction",
+          "count": 12,
+          "percentage": 80
+        },
+        {
+          "genre": "Fantasy",
+          "count": 3,
+          "percentage": 20
+        },
+        {
+          "genre": "Literary Fiction",
+          "count": 5,
+          "percentage": 33
+        },
+        {
+          "genre": "Science Fiction",
+          "count": 2,
+          "percentage": 13
+        },
+        {
+          "genre": "Romance",
+          "count": 2,
+          "percentage": 13
+        },
+        {
+          "genre": "Historical Fiction",
+          "count": 2,
+          "percentage": 13
+        },
+        {
+          "genre": "Self-Help",
+          "count": 1,
+          "percentage": 7
+        },
+        {
+          "genre": "Young Adult",
+          "count": 1,
+          "percentage": 7
+        },
+        {
+          "genre": "Mystery",
+          "count": 1,
+          "percentage": 7
+        },
+        {
+          "genre": "Dystopian",
+          "count": 1,
+          "percentage": 7
+        }
       ],
       "totalBooks": 15
     },
@@ -1468,7 +1553,20 @@
       "totalPages": 2126,
       "pagesPerDay": 60.7,
       "booksPerMonthAvg": 2.5,
-      "booksPerMonth": [4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      "booksPerMonth": [
+        4,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
       "trend": "down"
     }
   },
@@ -1484,20 +1582,59 @@
         "uniqueAuthors": 10
       },
       "months": [
-        { "month": 1, "count": 0 },
-        { "month": 2, "count": 0 },
-        { "month": 3, "count": 0 },
-        { "month": 4, "count": 0 },
-        { "month": 5, "count": 0 },
-        { "month": 6, "count": 0 },
-        { "month": 7, "count": 1 },
-        { "month": 8, "count": 0 },
-        { "month": 9, "count": 3 },
-        { "month": 10, "count": 1 },
-        { "month": 11, "count": 3 },
-        { "month": 12, "count": 2 }
+        {
+          "month": 1,
+          "count": 0
+        },
+        {
+          "month": 2,
+          "count": 0
+        },
+        {
+          "month": 3,
+          "count": 0
+        },
+        {
+          "month": 4,
+          "count": 0
+        },
+        {
+          "month": 5,
+          "count": 0
+        },
+        {
+          "month": 6,
+          "count": 0
+        },
+        {
+          "month": 7,
+          "count": 1
+        },
+        {
+          "month": 8,
+          "count": 0
+        },
+        {
+          "month": 9,
+          "count": 3
+        },
+        {
+          "month": 10,
+          "count": 1
+        },
+        {
+          "month": 11,
+          "count": 3
+        },
+        {
+          "month": 12,
+          "count": 2
+        }
       ],
-      "bestMonth": { "month": 9, "count": 3 },
+      "bestMonth": {
+        "month": 9,
+        "count": 3
+      },
       "topRated": [
         {
           "title": "The Name of the Wind",
@@ -1531,12 +1668,30 @@
         }
       ],
       "genres": [
-        { "genre": "Fiction", "count": 8 },
-        { "genre": "Fantasy", "count": 2 },
-        { "genre": "Science Fiction", "count": 2 },
-        { "genre": "Literary Fiction", "count": 3 },
-        { "genre": "Young Adult", "count": 1 },
-        { "genre": "Romance", "count": 1 }
+        {
+          "genre": "Fiction",
+          "count": 8
+        },
+        {
+          "genre": "Fantasy",
+          "count": 2
+        },
+        {
+          "genre": "Science Fiction",
+          "count": 2
+        },
+        {
+          "genre": "Literary Fiction",
+          "count": 3
+        },
+        {
+          "genre": "Young Adult",
+          "count": 1
+        },
+        {
+          "genre": "Romance",
+          "count": 1
+        }
       ],
       "fastestRead": {
         "title": "Normal People",
@@ -1578,12 +1733,27 @@
         "uniqueAuthors": 5
       },
       "months": [
-        { "month": 1, "count": 4 },
-        { "month": 2, "count": 1 },
-        { "month": 3, "count": 0 },
-        { "month": 4, "count": 0 }
+        {
+          "month": 1,
+          "count": 4
+        },
+        {
+          "month": 2,
+          "count": 1
+        },
+        {
+          "month": 3,
+          "count": 0
+        },
+        {
+          "month": 4,
+          "count": 0
+        }
       ],
-      "bestMonth": { "month": 1, "count": 4 },
+      "bestMonth": {
+        "month": 1,
+        "count": 4
+      },
       "topRated": [
         {
           "title": "Circe",
@@ -1617,12 +1787,30 @@
         }
       ],
       "genres": [
-        { "genre": "Fiction", "count": 4 },
-        { "genre": "Historical Fiction", "count": 2 },
-        { "genre": "Fantasy", "count": 1 },
-        { "genre": "Literary Fiction", "count": 2 },
-        { "genre": "Self-Help", "count": 1 },
-        { "genre": "Mystery", "count": 1 }
+        {
+          "genre": "Fiction",
+          "count": 4
+        },
+        {
+          "genre": "Historical Fiction",
+          "count": 2
+        },
+        {
+          "genre": "Fantasy",
+          "count": 1
+        },
+        {
+          "genre": "Literary Fiction",
+          "count": 2
+        },
+        {
+          "genre": "Self-Help",
+          "count": 1
+        },
+        {
+          "genre": "Mystery",
+          "count": 1
+        }
       ],
       "fastestRead": {
         "title": "Circe",
@@ -2495,5 +2683,149 @@
       "publishedDate": "2018",
       "isbn13": "9780062457714"
     }
-  }
+  },
+  "recommendations": [
+    {
+      "bookId": "rec-001",
+      "title": "The Song of Achilles",
+      "author": "Madeline Miller",
+      "coverUrl": "https://covers.openlibrary.org/b/isbn/9780062060624-L.jpg",
+      "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780062060624-M.jpg",
+      "genres": [
+        "Fiction",
+        "Mythology",
+        "Historical Fiction"
+      ],
+      "pageCount": 378,
+      "publishedDate": "2012",
+      "description": "A tale of gods, kings, immortal fame, and the human heart.",
+      "score": 8.5,
+      "reasons": [
+        {
+          "type": "author",
+          "label": "By Madeline Miller, whose work you've read",
+          "sourceAuthor": "Madeline Miller"
+        }
+      ]
+    },
+    {
+      "bookId": "rec-002",
+      "title": "Refactoring",
+      "author": "Martin Fowler",
+      "coverUrl": "https://covers.openlibrary.org/b/isbn/9780134757599-L.jpg",
+      "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780134757599-M.jpg",
+      "genres": [
+        "Programming",
+        "Software Engineering"
+      ],
+      "pageCount": 448,
+      "publishedDate": "2018",
+      "description": "Improving the design of existing code.",
+      "score": 7.2,
+      "reasons": [
+        {
+          "type": "genre",
+          "label": "Based on your interest in Programming",
+          "sourceGenre": "Programming"
+        }
+      ]
+    },
+    {
+      "bookId": "rec-003",
+      "title": "Invisible Man",
+      "author": "Ralph Ellison",
+      "coverUrl": "https://covers.openlibrary.org/b/isbn/9780679732761-L.jpg",
+      "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780679732761-M.jpg",
+      "genres": [
+        "Fiction",
+        "Classics",
+        "African American Literature"
+      ],
+      "pageCount": 581,
+      "publishedDate": "1952",
+      "description": "A landmark novel about identity and invisibility in America.",
+      "score": 7.8,
+      "reasons": [
+        {
+          "type": "collaborative",
+          "label": "Readers who liked \"Beloved\" also liked this",
+          "sourceBookTitle": "Beloved"
+        }
+      ]
+    },
+    {
+      "bookId": "rec-004",
+      "title": "Thinking, Fast and Slow",
+      "author": "Daniel Kahneman",
+      "coverUrl": "https://covers.openlibrary.org/b/isbn/9780374533557-L.jpg",
+      "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780374533557-M.jpg",
+      "genres": [
+        "Psychology",
+        "Non-Fiction",
+        "Economics"
+      ],
+      "pageCount": 499,
+      "publishedDate": "2011",
+      "description": "A groundbreaking tour of the mind and the two systems that drive the way we think.",
+      "score": 6.9,
+      "reasons": [
+        {
+          "type": "genre",
+          "label": "Based on your interest in Psychology",
+          "sourceGenre": "Psychology"
+        }
+      ]
+    },
+    {
+      "bookId": "rec-005",
+      "title": "The Design of Everyday Things",
+      "author": "Don Norman",
+      "coverUrl": "https://covers.openlibrary.org/b/isbn/9780465050659-L.jpg",
+      "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780465050659-M.jpg",
+      "genres": [
+        "Design",
+        "Non-Fiction",
+        "Psychology"
+      ],
+      "pageCount": 368,
+      "publishedDate": "2013",
+      "description": "The ultimate guide to human-centered design.",
+      "score": 6.5,
+      "reasons": [
+        {
+          "type": "genre",
+          "label": "Based on your interest in Non-Fiction",
+          "sourceGenre": "Non-Fiction"
+        },
+        {
+          "type": "collaborative",
+          "label": "Readers who liked \"Clean Code\" also liked this",
+          "sourceBookTitle": "Clean Code"
+        }
+      ]
+    },
+    {
+      "bookId": "rec-006",
+      "title": "Their Eyes Were Watching God",
+      "author": "Zora Neale Hurston",
+      "coverUrl": "https://covers.openlibrary.org/b/isbn/9780061120060-L.jpg",
+      "coverUrlSmall": "https://covers.openlibrary.org/b/isbn/9780061120060-M.jpg",
+      "genres": [
+        "Fiction",
+        "Classics",
+        "African American Literature"
+      ],
+      "pageCount": 219,
+      "publishedDate": "1937",
+      "description": "A woman's quest for identity and self-fulfillment.",
+      "score": 6.2,
+      "reasons": [
+        {
+          "type": "collaborative",
+          "label": "Readers who liked \"To Kill a Mockingbird\" also liked this",
+          "sourceBookTitle": "To Kill a Mockingbird"
+        }
+      ]
+    }
+  ]
 }

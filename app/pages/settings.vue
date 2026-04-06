@@ -616,7 +616,7 @@ onMounted(() => {
   readHash()
 })
 
-const themeOptions: { value: Theme; label: string; preview: Record<string, any> }[] = [
+const themeOptions: { value: Theme; label: string; preview: Record<string, string> | { light: Record<string, string>; dark: Record<string, string> } }[] = [
   {
     value: 'system', label: 'System',
     preview: {

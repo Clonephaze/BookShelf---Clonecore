@@ -54,6 +54,8 @@ function handleClick() {
     emit('open', props.userBookId, bookEl.value)
   }
 }
+
+const { simpleShelfView } = useAppearance()
 </script>
 
 <template>
