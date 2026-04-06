@@ -7,8 +7,8 @@
       </div>
     </header>
 
-    <!-- Active session -->
-    <ReadingSessionTimer @completed="onSessionEnded" @abandoned="onSessionEnded" />
+    <!-- Active session (authenticated users only) -->
+    <ReadingSessionTimer v-if="!isGuest" @completed="onSessionEnded" @abandoned="onSessionEnded" />
 
     <!-- Stats summary -->
     <div v-if="stats && stats.totalSessions > 0" class="sessions__stats-grid">
@@ -41,8 +41,8 @@
       </div>
     </div>
 
-    <!-- No active session — start prompt -->
-    <div v-if="!sessionStore.active && !sessionStore.loading" class="sessions__start-section">
+    <!-- No active session — start prompt (authenticated users only) -->
+    <div v-if="!isGuest && !sessionStore.active && !sessionStore.loading" class="sessions__start-section">
       <h2 class="sessions__section-title">Start a Session</h2>
       <p class="sessions__section-desc">Choose a book you're currently reading to start a timed session.</p>
       <div v-if="currentlyReading.length > 0" class="sessions__book-picker">
@@ -126,8 +126,9 @@
       </p>
     </div>
 
-    <!-- Start session modal -->
+    <!-- Start session modal (authenticated users only) -->
     <SessionStartModal
+      v-if="!isGuest"
       :open="showStartModal"
       :user-book-id="selectedBook?.userBookId ?? ''"
       :book-title="selectedBook?.title ?? ''"
@@ -148,6 +149,7 @@ import type { ShelfBook } from '~/stores/library'
 
 definePageMeta({ layout: 'default' })
 
+const { isGuest } = useGuest()
 const sessionStore = useSessionStore()
 const libraryStore = useLibraryStore()
 
@@ -179,7 +181,8 @@ async function onSessionEnded() {
 }
 
 async function fetchHistory(offset = 0) {
-  const rows = await $fetch<SessionHistoryItem[]>('/api/sessions', {
+  const url = isGuest.value ? '/api/guest/sessions' : '/api/sessions'
+  const rows = await $fetch<SessionHistoryItem[]>(url, {
     params: { limit: 20, offset },
   })
   if (offset === 0) {
@@ -193,7 +196,8 @@ async function fetchHistory(offset = 0) {
 
 async function fetchStats() {
   try {
-    stats.value = await $fetch<SessionStats>('/api/sessions/stats')
+    const url = isGuest.value ? '/api/guest/sessions/stats' : '/api/sessions/stats'
+    stats.value = await $fetch<SessionStats>(url)
   }
   catch {
     // Non-critical
@@ -241,7 +245,9 @@ function formatDate(dateStr: string): string {
 
 onMounted(async () => {
   await libraryStore.fetch()
-  await sessionStore.fetchActive()
+  if (!isGuest.value) {
+    await sessionStore.fetchActive()
+  }
   await Promise.all([fetchHistory(), fetchStats()])
   loading.value = false
 })
