@@ -1,43 +1,36 @@
-import { readFileSync } from 'fs'
-import { resolve, dirname } from 'path'
-import { fileURLToPath } from 'url'
-
-let guestData: Record<string, unknown> | null = null
+let guestDataCache: Record<string, unknown> | null = null
 
 /**
- * Load and cache guest data from the static JSON file.
- * Tries multiple resolution strategies to work in both dev and production.
+ * Load and cache guest data.
+ * Uses Nitro's useStorage (server assets) so it works on Vercel serverless.
+ * Falls back to the public/ copy in dev if the asset isn't found.
  */
-export function getGuestData(): Record<string, unknown> | null {
-  if (guestData) return guestData
+export async function getGuestData(): Promise<Record<string, unknown> | null> {
+  if (guestDataCache) return guestDataCache
 
-  const candidates = [
-    resolve(process.cwd(), 'public/guest-data.json'),
-    resolve(process.cwd(), '.output/public/guest-data.json'),
-  ]
-
-  // In dev, Nitro's CWD may differ — try dirname of this file
   try {
-    const thisDir = dirname(fileURLToPath(import.meta.url))
-    candidates.push(resolve(thisDir, '../../public/guest-data.json'))
-    candidates.push(resolve(thisDir, '../../../public/guest-data.json'))
+    // Nitro bundles server/assets/ into the production build
+    const data = await useStorage('assets:server').getItem<Record<string, unknown>>('guest-data.json')
+    if (data) {
+      guestDataCache = data
+      return guestDataCache
+    }
   }
   catch {
-    // import.meta.url may not resolve in all environments
+    // Storage not available — try filesystem fallback (dev)
   }
 
-  for (const filePath of candidates) {
-    try {
-      const raw = readFileSync(filePath, 'utf-8')
-      guestData = JSON.parse(raw)
-      return guestData
-    }
-    catch {
-      continue
-    }
+  // Dev fallback: read from public/ via filesystem
+  try {
+    const { readFileSync } = await import('fs')
+    const { resolve } = await import('path')
+    const raw = readFileSync(resolve(process.cwd(), 'public/guest-data.json'), 'utf-8')
+    guestDataCache = JSON.parse(raw)
+    return guestDataCache
   }
-
-  return null
+  catch {
+    return null
+  }
 }
 
 /**

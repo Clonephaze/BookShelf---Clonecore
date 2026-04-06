@@ -485,11 +485,14 @@ const guestData = {
   }])),
 }
 
-// Write output
+// Write output to both public (optional client use) and server/assets (Nitro bundled)
+const output = JSON.stringify(guestData, null, 2)
 mkdirSync(join(root, 'public'), { recursive: true })
-writeFileSync(join(root, 'public/guest-data.json'), JSON.stringify(guestData, null, 2))
+mkdirSync(join(root, 'server/assets'), { recursive: true })
+writeFileSync(join(root, 'public/guest-data.json'), output)
+writeFileSync(join(root, 'server/assets/guest-data.json'), output)
 
-console.log('✓ Generated public/guest-data.json')
+console.log('✓ Generated guest-data.json (public/ + server/assets/)')
 console.log(`  ${allUserBooks.length} books across ${shelves.length} shelves`)
 console.log(`  ${finishedBooks.length} finished, ${currentlyReading.length} in progress, ${wantToRead.length + remaining.length} want to read`)
 console.log(`  Goals: ${goals[0].targetBooks} target / ${goals[0].booksCompleted} complete`)

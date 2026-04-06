@@ -1,9 +1,9 @@
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
   if (!isGuestRequest(event)) {
     throw createError({ statusCode: 401, statusMessage: 'Not a guest session' })
   }
 
-  const data = getGuestData()
+  const data = await getGuestData()
   if (!data) {
     throw createError({ statusCode: 500, statusMessage: 'Guest data unavailable' })
   }
