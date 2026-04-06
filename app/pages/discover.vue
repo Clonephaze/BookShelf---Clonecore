@@ -5,6 +5,10 @@ import type { Recommendation } from '~/composables/useRecommendations'
 
 definePageMeta({ layout: 'default' })
 useHead({ title: 'Discover — Bookshelf' })
+useSeoMeta({
+  ogTitle: 'Discover Books — Bookshelf',
+  ogDescription: 'Personalized book recommendations based on your reading history.',
+})
 
 const { isGuest } = useGuest()
 const { recommendations, loading, fetchRecommendations, dismiss } = useRecommendations()

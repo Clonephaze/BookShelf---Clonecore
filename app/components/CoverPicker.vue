@@ -99,6 +99,8 @@ onMounted(fetchCovers)
           :src="cover.url"
           :alt="cover.label"
           class="cover-picker__img"
+          width="120"
+          height="180"
           loading="lazy"
           @error="onImageError(cover.url)"
         >

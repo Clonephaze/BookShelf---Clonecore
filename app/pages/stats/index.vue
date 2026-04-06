@@ -157,6 +157,8 @@
                   :src="pages.shortest.coverUrlSmall"
                   :alt="pages.shortest.title"
                   class="stats__pages-cover"
+                  width="40"
+                  height="60"
                   loading="lazy"
                 >
                 <div class="stats__pages-extreme-info">
@@ -171,6 +173,8 @@
                   :src="pages.longest.coverUrlSmall"
                   :alt="pages.longest.title"
                   class="stats__pages-cover"
+                  width="40"
+                  height="60"
                   loading="lazy"
                 >
                 <div class="stats__pages-extreme-info">
@@ -269,6 +273,8 @@
                   :src="a.coverUrlSmall"
                   :alt="a.author"
                   class="stats__author-cover"
+                  width="36"
+                  height="54"
                   loading="lazy"
                 >
                 <div v-else class="stats__author-cover stats__author-cover--placeholder">
@@ -504,6 +510,8 @@
                   :src="velocity.fastest.coverUrlSmall"
                   :alt="`Cover of ${velocity.fastest.title}`"
                   class="stats__velocity-extreme-cover"
+                  width="40"
+                  height="60"
                   loading="lazy"
                 >
                 <div>
@@ -520,6 +528,8 @@
                   :src="velocity.slowest.coverUrlSmall"
                   :alt="`Cover of ${velocity.slowest.title}`"
                   class="stats__velocity-extreme-cover"
+                  width="40"
+                  height="60"
                   loading="lazy"
                 >
                 <div>
@@ -577,6 +587,10 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 useHead({ title: 'Statistics — Bookshelf' })
+useSeoMeta({
+  ogTitle: 'Reading Statistics — Bookshelf',
+  ogDescription: 'Charts, trends, and insights about your reading habits.',
+})
 
 // --- Types ---
 interface Overview {

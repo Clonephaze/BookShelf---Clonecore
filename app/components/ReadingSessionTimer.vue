@@ -9,6 +9,9 @@
           :src="session.active.bookCoverSmall || session.active.bookCover!"
           :alt="session.active.bookTitle"
           class="session-timer__ambient-cover"
+          width="80"
+          height="120"
+          loading="lazy"
         >
         <span class="session-timer__ambient-time">{{ session.displayTime }}</span>
         <span class="session-timer__ambient-title">{{ session.active.bookTitle }}</span>
@@ -28,6 +31,9 @@
               :src="session.active.bookCoverSmall"
               :alt="session.active.bookTitle"
               class="session-timer__cover"
+              width="48"
+              height="72"
+              loading="lazy"
             >
             <div class="session-timer__meta">
               <span class="session-timer__book-title">{{ session.active.bookTitle }}</span>

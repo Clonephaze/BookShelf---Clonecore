@@ -283,6 +283,16 @@ definePageMeta({
   layout: false,
 })
 
+useSeoMeta({
+  title: 'Bookshelf — Your reading life, beautifully organized.',
+  ogTitle: 'Bookshelf — Your reading life, beautifully organized.',
+  ogDescription: 'Track books, set goals, time reading sessions, and discover your next great read.',
+  ogUrl: 'https://bookshelf-clonecore.vercel.app',
+  twitterCard: 'summary_large_image',
+  twitterTitle: 'Bookshelf — Your reading life, beautifully organized.',
+  twitterDescription: 'Track books, set goals, time reading sessions, and discover your next great read.',
+})
+
 const { isAuthenticated, isLoading } = useAuth()
 const { enterGuestMode } = useGuest()
 const { containerRef } = useScrollReveal()

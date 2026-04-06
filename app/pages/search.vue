@@ -5,6 +5,10 @@ definePageMeta({
 })
 
 useHead({ title: 'Search — Bookshelf' })
+useSeoMeta({
+  ogTitle: 'Search Books — Bookshelf',
+  ogDescription: 'Search millions of books by title, author, or ISBN.',
+})
 
 const { isAuthenticated } = useAuth()
 const { isGuest } = useGuest()

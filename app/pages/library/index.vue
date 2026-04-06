@@ -121,6 +121,10 @@
 definePageMeta({ layout: 'default' })
 
 useHead({ title: 'Library — Bookshelf' })
+useSeoMeta({
+  ogTitle: 'My Library — Bookshelf',
+  ogDescription: 'Browse and organize your personal book collection.',
+})
 
 const { isAuthenticated } = useAuth()
 const { isGuest } = useGuest()

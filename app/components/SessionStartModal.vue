@@ -10,6 +10,9 @@
             :src="bookCover"
             :alt="bookTitle"
             class="start-session__cover"
+            width="60"
+            height="90"
+            loading="lazy"
           >
           <div class="start-session__book-meta">
             <span class="start-session__book-title">{{ bookTitle }}</span>

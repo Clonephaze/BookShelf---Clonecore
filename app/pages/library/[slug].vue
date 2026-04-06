@@ -144,6 +144,10 @@ const shelfName = computed(() => shelf.value?.name ?? '')
 useHead({
   title: computed(() => shelfName.value ? `${shelfName.value} — Bookshelf` : 'Shelf — Bookshelf'),
 })
+useSeoMeta({
+  ogTitle: computed(() => shelfName.value ? `${shelfName.value} — Bookshelf` : 'Shelf — Bookshelf'),
+  ogDescription: computed(() => shelfName.value ? `Books on my ${shelfName.value} shelf.` : 'A bookshelf collection.'),
+})
 
 const sortedBooks = computed(() => {
   const arr = [...books.value]

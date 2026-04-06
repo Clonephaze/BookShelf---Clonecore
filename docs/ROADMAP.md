@@ -280,7 +280,7 @@ _Note: Book detail page layout was built in Phase 3 with placeholder sections. P
 
 ### Animated Shelf & Cover Interactions
 - [x] Cover tilt on hover (3D perspective)
-- [ ] Shelf visual metaphor (bookshelf backdrop) (deferred — design-first)
+- [ ] ~~Shelf visual metaphor (bookshelf backdrop)~~ (skipped — existing theming sufficient)
 - [x] Micro-interactions (scale, easing, confetti)
 - [x] Layout transitions (filter/sort reflow via TransitionGroup FLIP)
 - [x] `prefers-reduced-motion` respect
@@ -324,10 +324,11 @@ _Note: Book detail page layout was built in Phase 3 with placeholder sections. P
 **Goal:** Production-ready quality.
 
 - [ ] Lighthouse scores: Performance > 85, Accessibility > 90, Best Practices > 90
-- [ ] Error handling audit (all API errors, edge cases)
-- [ ] Loading/empty state audit (every view)
+- [x] Error handling audit (all API errors, edge cases)
+- [x] Loading/empty state audit (every view)
 - [ ] Responsive audit (mobile → ultrawide)
 - [ ] Cross-browser testing
-- [ ] SEO meta tags, Open Graph tags
-- [ ] Favicon + app icons
+- [x] SEO meta tags, Open Graph tags
+- [x] Favicon + app icons
+- [x] Custom error page (404 with literary easter egg + generic error)
 - [ ] README with screenshots, tech stack, Lighthouse scores

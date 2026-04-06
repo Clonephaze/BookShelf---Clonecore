@@ -643,6 +643,10 @@ import { useLibraryStore } from '~/stores/library'
 definePageMeta({ layout: 'default' })
 
 useHead({ title: 'Settings — Bookshelf' })
+useSeoMeta({
+  ogTitle: 'Settings — Bookshelf',
+  ogDescription: 'Manage your account, appearance, and privacy settings.',
+})
 
 const { user, changePassword, deleteUser, signOut, updateProfile } = useAuth()
 const { currentTheme, setTheme } = useTheme()

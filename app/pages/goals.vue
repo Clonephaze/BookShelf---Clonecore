@@ -201,6 +201,10 @@ import type { Goal, PeriodType } from '~/composables/useGoals'
 
 definePageMeta({ layout: 'default' })
 useHead({ title: 'Goals — Bookshelf' })
+useSeoMeta({
+  ogTitle: 'Reading Goals — Bookshelf',
+  ogDescription: 'Set yearly, monthly, and weekly reading goals and track your pace.',
+})
 
 const {
   loading, currentYear, currentMonth, currentWeek,

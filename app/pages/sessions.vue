@@ -57,6 +57,8 @@
             :src="book.coverUrlSmall"
             :alt="book.title"
             class="sessions__book-cover"
+            width="48"
+            height="72"
           >
           <div v-else class="sessions__book-cover sessions__book-cover--placeholder">
             {{ book.title.charAt(0) }}
@@ -94,6 +96,9 @@
             :src="s.bookCoverSmall"
             :alt="s.bookTitle"
             class="sessions__history-cover"
+            width="40"
+            height="60"
+            loading="lazy"
           >
           <div class="sessions__history-info">
             <span class="sessions__history-book">{{ s.bookTitle }}</span>
@@ -157,6 +162,12 @@ import type { SessionHistoryItem, SessionStats } from '~/stores/session'
 import type { ShelfBook } from '~/stores/library'
 
 definePageMeta({ layout: 'default' })
+
+useHead({ title: 'Reading Sessions — Bookshelf' })
+useSeoMeta({
+  ogTitle: 'Reading Sessions — Bookshelf',
+  ogDescription: 'Time your reading sessions, track pages per hour, and build reading streaks.',
+})
 
 const { isGuest } = useGuest()
 const sessionStore = useSessionStore()

@@ -66,6 +66,8 @@ watchEffect(() => {
       class="book-cover__image"
       :class="{ 'book-cover__image--loaded': loaded }"
       loading="lazy"
+      width="160"
+      height="240"
       @load="onLoad"
       @error="onError"
     >

@@ -916,6 +916,27 @@ useHead({
   title: computed(() => book.value ? `${book.value.title} — Bookshelf` : 'Book — Bookshelf'),
 })
 
+useSeoMeta({
+  ogType: 'book',
+  ogTitle: computed(() => book.value ? `${book.value.title} by ${book.value.author}` : 'Book — Bookshelf'),
+  ogDescription: computed(() => {
+    if (!book.value) return ''
+    const parts: string[] = []
+    if (book.value.rating) parts.push(`Rated ${book.value.rating}/5`)
+    if (book.value.pageCount) parts.push(`${book.value.pageCount} pages`)
+    if (book.value.genres?.length) parts.push(book.value.genres.slice(0, 3).join(', '))
+    return parts.length ? parts.join(' · ') : (book.value.description?.slice(0, 160) ?? '')
+  }),
+  ogImage: computed(() => book.value?.coverUrl ?? 'https://bookshelf-clonecore.vercel.app/og-image.svg'),
+  twitterCard: 'summary',
+  twitterTitle: computed(() => book.value ? `${book.value.title} by ${book.value.author}` : 'Book — Bookshelf'),
+  twitterDescription: computed(() => {
+    if (!book.value) return ''
+    return book.value.description?.slice(0, 160) ?? ''
+  }),
+  twitterImage: computed(() => book.value?.coverUrl ?? 'https://bookshelf-clonecore.vercel.app/og-image.svg'),
+})
+
 function formatDate(date: string | Date | null | undefined): string {
   if (!date) return '—'
   return new Date(date).toLocaleDateString('en-US', {

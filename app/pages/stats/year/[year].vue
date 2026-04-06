@@ -102,6 +102,8 @@
             :src="data.firstBook.coverUrlSmall"
             :alt="data.firstBook.title"
             class="review__moment-cover"
+            width="60"
+            height="90"
             loading="lazy"
           >
           <div class="review__moment-info">
@@ -128,6 +130,8 @@
               :src="book.coverUrlSmall"
               :alt="book.title"
               class="review__top-cover"
+              width="60"
+              height="90"
               loading="lazy"
             >
             <div v-else class="review__top-cover review__top-cover--placeholder">
@@ -205,6 +209,8 @@
             :src="data.lastBook.coverUrlSmall"
             :alt="data.lastBook.title"
             class="review__moment-cover"
+            width="60"
+            height="90"
             loading="lazy"
           >
           <div class="review__moment-info">
@@ -254,6 +260,14 @@ const year = Number(route.params.year) || new Date().getFullYear()
 const currentYear = new Date().getFullYear()
 
 useHead({ title: `${year} Year in Review — Bookshelf` })
+
+useSeoMeta({
+  ogTitle: `${year} Year in Review — Bookshelf`,
+  ogDescription: `My ${year} reading journey on Bookshelf.`,
+  twitterCard: 'summary_large_image',
+  twitterTitle: `${year} Year in Review — Bookshelf`,
+  twitterDescription: `My ${year} reading journey on Bookshelf.`,
+})
 
 const { containerRef, refresh } = useScrollReveal()
 

@@ -12,7 +12,7 @@
       <!-- Header -->
       <header class="profile__header">
         <div class="profile__avatar" :data-initial="(profile.name || '?').charAt(0)">
-          <img v-if="profile.avatar" :src="`/avatars/${profile.avatar}.svg`" :alt="profile.name" class="profile__avatar-img">
+          <img v-if="profile.avatar" :src="`/avatars/${profile.avatar}.svg`" :alt="profile.name" class="profile__avatar-img" width="64" height="64">
         </div>
         <div class="profile__header-info">
           <h1 class="profile__name">{{ profile.name }}</h1>
@@ -32,6 +32,8 @@
               :src="book.coverUrlSmall"
               :alt="book.title"
               class="profile__book-cover"
+              width="48"
+              height="72"
               loading="lazy"
             >
             <div class="profile__book-info">
@@ -165,6 +167,19 @@ const profile = ref<UserProfile | null>(null)
 const error = ref<{ statusCode: number } | null>(null)
 
 useHead({ title: computed(() => profile.value ? `${profile.value.name} — Bookshelf` : 'Profile — Bookshelf') })
+
+useSeoMeta({
+  ogTitle: computed(() => profile.value ? `${profile.value.name} on Bookshelf` : 'Profile — Bookshelf'),
+  ogDescription: computed(() => {
+    if (!profile.value) return ''
+    const parts: string[] = []
+    const total = profile.value.shelves.reduce((sum, s) => sum + s.bookCount, 0)
+    if (total) parts.push(`${total} books`)
+    if (profile.value.currentlyReading?.length) parts.push(`Reading: ${profile.value.currentlyReading[0].title}`)
+    return parts.join(' · ') || 'Reader on Bookshelf'
+  }),
+  twitterCard: 'summary',
+})
 
 async function loadProfile() {
   try {

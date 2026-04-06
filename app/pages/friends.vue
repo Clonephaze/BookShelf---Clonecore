@@ -33,7 +33,7 @@
       <div v-if="showDropdown && searchResults.length > 0" class="friends__search-results">
         <div v-for="u in searchResults" :key="u.id" class="friends__search-item">
           <div class="friends__avatar" :data-initial="(u.name || u.username || '?').charAt(0)">
-            <img v-if="u.avatar" :src="`/avatars/${u.avatar}.svg`" :alt="u.name" class="friends__avatar-img">
+            <img v-if="u.avatar" :src="`/avatars/${u.avatar}.svg`" :alt="u.name" class="friends__avatar-img" width="32" height="32">
           </div>
           <div class="friends__search-info">
             <span class="friends__search-name">{{ u.name }}</span>
@@ -69,7 +69,7 @@
       <div class="friends__request-list">
         <div v-for="req in receivedRequests" :key="req.id" class="friends__request-card">
           <div class="friends__avatar" :data-initial="(req.user.name || '?').charAt(0)">
-            <img v-if="req.user.avatar" :src="`/avatars/${req.user.avatar}.svg`" :alt="req.user.name" class="friends__avatar-img">
+            <img v-if="req.user.avatar" :src="`/avatars/${req.user.avatar}.svg`" :alt="req.user.name" class="friends__avatar-img" width="32" height="32">
           </div>
           <div class="friends__request-info">
             <span class="friends__request-name">{{ req.user.name }}</span>
@@ -109,7 +109,7 @@
           class="friends__card"
         >
           <div class="friends__avatar friends__avatar--lg" :data-initial="(friend.name || '?').charAt(0)">
-            <img v-if="friend.avatar" :src="`/avatars/${friend.avatar}.svg`" :alt="friend.name" class="friends__avatar-img">
+            <img v-if="friend.avatar" :src="`/avatars/${friend.avatar}.svg`" :alt="friend.name" class="friends__avatar-img" width="40" height="40">
           </div>
           <div class="friends__card-info">
             <span class="friends__card-name">{{ friend.name }}</span>
@@ -125,7 +125,7 @@
       <div class="friends__activity">
         <div v-for="item in activityFeed" :key="item.id" class="friends__activity-item">
           <div class="friends__avatar friends__avatar--sm" :data-initial="(item.user.name || '?').charAt(0)">
-            <img v-if="item.user.avatar" :src="`/avatars/${item.user.avatar}.svg`" :alt="item.user.name" class="friends__avatar-img">
+            <img v-if="item.user.avatar" :src="`/avatars/${item.user.avatar}.svg`" :alt="item.user.name" class="friends__avatar-img" width="24" height="24">
           </div>
           <div class="friends__activity-content">
             <p class="friends__activity-text">
@@ -146,6 +146,8 @@
             :src="item.book.coverUrlSmall"
             :alt="item.book.title"
             class="friends__activity-cover"
+            width="40"
+            height="60"
             loading="lazy"
           >
         </div>
@@ -160,6 +162,10 @@ import type { UserSearchResult } from '~/composables/useFriends'
 
 definePageMeta({ layout: 'default' })
 useHead({ title: 'Friends — Bookshelf' })
+useSeoMeta({
+  ogTitle: 'Friends — Bookshelf',
+  ogDescription: 'Connect with fellow readers and see what your friends are reading.',
+})
 
 const { isGuest } = useGuest()
 const {

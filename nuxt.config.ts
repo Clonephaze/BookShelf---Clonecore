@@ -33,10 +33,23 @@ export default defineNuxtConfig({
         { name: 'theme-color', content: '#302318' },
         { name: 'apple-mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
+        // Open Graph defaults (pages override with useSeoMeta)
+        { property: 'og:type', content: 'website' },
+        { property: 'og:site_name', content: 'Bookshelf' },
+        { property: 'og:title', content: 'Bookshelf — Your reading life, beautifully organized.' },
+        { property: 'og:description', content: 'Track books, set goals, time reading sessions, and discover your next great read.' },
+        { property: 'og:image', content: 'https://bookshelf-clonecore.vercel.app/og-image.svg' },
+        { property: 'og:url', content: 'https://bookshelf-clonecore.vercel.app' },
+        // Twitter Card defaults
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:title', content: 'Bookshelf — Your reading life, beautifully organized.' },
+        { name: 'twitter:description', content: 'Track books, set goals, time reading sessions, and discover your next great read.' },
+        { name: 'twitter:image', content: 'https://bookshelf-clonecore.vercel.app/og-image.svg' },
       ],
       link: [
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+        { rel: 'preconnect', href: 'https://covers.openlibrary.org' },
         { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap' },
         { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
         { rel: 'apple-touch-icon', href: '/pwa-192x192.svg' },

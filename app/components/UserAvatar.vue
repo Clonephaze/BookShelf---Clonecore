@@ -9,6 +9,9 @@
       :src="avatarSrc"
       :alt="name || 'User avatar'"
       class="user-avatar__img"
+      width="40"
+      height="40"
+      loading="lazy"
     >
     <span v-else class="user-avatar__initial">{{ initial }}</span>
   </div>
