@@ -225,13 +225,28 @@
             {{ data.summary.totalBooks }} {{ data.summary.totalBooks === 1 ? 'book' : 'books' }}, {{ formatNumber(data.summary.totalPages) }} pages, one incredible year of reading.
           </template>
         </p>
-        <NuxtLink to="/stats" class="review__closing-cta">Back to Statistics</NuxtLink>
+        <div class="review__closing-actions">
+          <button class="review__share-btn" @click="showShareModal = true">
+            <Share2 :size="16" />
+            Share your year
+          </button>
+          <NuxtLink to="/stats" class="review__closing-cta">Back to Statistics</NuxtLink>
+        </div>
       </section>
+
+      <ShareCardModal
+        :open="showShareModal"
+        :year-review-data="shareData"
+        @close="showShareModal = false"
+      />
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
+import { Share2 } from 'lucide-vue-next'
+import type { YearReviewData } from '~/composables/useShareCard'
+
 definePageMeta({ layout: 'default' })
 
 const route = useRoute()
@@ -284,6 +299,22 @@ async function fetchData() {
     refresh()
   }
 }
+
+const showShareModal = ref(false)
+
+const shareData = computed<YearReviewData | undefined>(() => {
+  if (!data.value) return undefined
+  const topGenreEntry = data.value.genres[0]
+  const topRatedEntry = data.value.topRated[0]
+  return {
+    year,
+    totalBooks: data.value.summary.totalBooks,
+    totalPages: data.value.summary.totalPages,
+    avgRating: data.value.summary.avgRating,
+    topGenre: topGenreEntry?.genre ?? null,
+    topAuthor: topRatedEntry?.author ?? null,
+  }
+})
 
 function formatNumber(n: number): string {
   if (n >= 10000) return `${(n / 1000).toFixed(1)}k`
@@ -821,9 +852,37 @@ fetchData()
     margin-inline: auto;
   }
 
+  &__closing-actions {
+    display: flex;
+    gap: $spacing-md;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
   &__closing-cta {
     @include button-secondary;
     text-decoration: none;
+  }
+
+  &__share-btn {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    padding: $spacing-sm $spacing-lg;
+    background: var(--highlight-color);
+    color: white;
+    border: none;
+    border-radius: $radius-md;
+    font-family: $font-family-body;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    cursor: pointer;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: var(--highlight-color-hover);
+    }
   }
 
   // --- Scroll reveal transitions ---

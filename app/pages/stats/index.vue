@@ -417,6 +417,120 @@
           </NuxtLink>
         </section>
 
+        <!-- Year-over-Year Comparison -->
+        <section v-if="comparison && comparison.previous.totalBooks > 0" class="stats__chart-card" data-reveal>
+          <h2 class="stats__chart-title">{{ comparison.year }} vs {{ comparison.previousYear }}</h2>
+          <div class="stats__comparison-grid">
+            <div class="stats__comparison-item">
+              <span class="stats__comparison-label">Books</span>
+              <span class="stats__comparison-current">{{ comparison.current.totalBooks }}</span>
+              <span class="stats__comparison-prev">{{ comparison.previous.totalBooks }}</span>
+              <span v-if="comparison.deltas.totalBooks != null" class="stats__comparison-delta" :class="comparison.deltas.totalBooks >= 0 ? 'stats__comparison-delta--up' : 'stats__comparison-delta--down'">
+                {{ comparison.deltas.totalBooks >= 0 ? '+' : '' }}{{ comparison.deltas.totalBooks }}%
+              </span>
+            </div>
+            <div class="stats__comparison-item">
+              <span class="stats__comparison-label">Pages</span>
+              <span class="stats__comparison-current">{{ formatNumber(comparison.current.totalPages) }}</span>
+              <span class="stats__comparison-prev">{{ formatNumber(comparison.previous.totalPages) }}</span>
+              <span v-if="comparison.deltas.totalPages != null" class="stats__comparison-delta" :class="comparison.deltas.totalPages >= 0 ? 'stats__comparison-delta--up' : 'stats__comparison-delta--down'">
+                {{ comparison.deltas.totalPages >= 0 ? '+' : '' }}{{ comparison.deltas.totalPages }}%
+              </span>
+            </div>
+            <div class="stats__comparison-item">
+              <span class="stats__comparison-label">Avg rating</span>
+              <span class="stats__comparison-current">{{ comparison.current.avgRating ?? '—' }}</span>
+              <span class="stats__comparison-prev">{{ comparison.previous.avgRating ?? '—' }}</span>
+              <span v-if="comparison.deltas.avgRating != null" class="stats__comparison-delta" :class="comparison.deltas.avgRating >= 0 ? 'stats__comparison-delta--up' : 'stats__comparison-delta--down'">
+                {{ comparison.deltas.avgRating >= 0 ? '+' : '' }}{{ comparison.deltas.avgRating }}%
+              </span>
+            </div>
+            <div class="stats__comparison-item">
+              <span class="stats__comparison-label">Avg pages</span>
+              <span class="stats__comparison-current">{{ comparison.current.avgPages }}</span>
+              <span class="stats__comparison-prev">{{ comparison.previous.avgPages }}</span>
+              <span v-if="comparison.deltas.avgPages != null" class="stats__comparison-delta" :class="comparison.deltas.avgPages >= 0 ? 'stats__comparison-delta--up' : 'stats__comparison-delta--down'">
+                {{ comparison.deltas.avgPages >= 0 ? '+' : '' }}{{ comparison.deltas.avgPages }}%
+              </span>
+            </div>
+            <div v-if="comparison.current.avgDaysToFinish || comparison.previous.avgDaysToFinish" class="stats__comparison-item">
+              <span class="stats__comparison-label">Avg days to finish</span>
+              <span class="stats__comparison-current">{{ comparison.current.avgDaysToFinish ?? '—' }}</span>
+              <span class="stats__comparison-prev">{{ comparison.previous.avgDaysToFinish ?? '—' }}</span>
+              <span v-if="comparison.deltas.avgDaysToFinish != null" class="stats__comparison-delta" :class="comparison.deltas.avgDaysToFinish <= 0 ? 'stats__comparison-delta--up' : 'stats__comparison-delta--down'">
+                {{ comparison.deltas.avgDaysToFinish >= 0 ? '+' : '' }}{{ comparison.deltas.avgDaysToFinish }}%
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Reading Velocity -->
+        <section v-if="velocity && velocity.totalTracked > 0" class="stats__chart-card" data-reveal>
+          <h2 class="stats__chart-title">Reading Velocity</h2>
+          <div class="stats__velocity-summary">
+            <div v-if="velocity.avgDays != null" class="stats__velocity-stat">
+              <span class="stats__velocity-value">{{ velocity.avgDays }}</span>
+              <span class="stats__velocity-label">avg days to finish</span>
+            </div>
+            <div v-if="velocity.avgPagesPerDay != null" class="stats__velocity-stat">
+              <span class="stats__velocity-value">{{ velocity.avgPagesPerDay }}</span>
+              <span class="stats__velocity-label">avg pages/day</span>
+            </div>
+            <div class="stats__velocity-stat">
+              <span class="stats__velocity-value">{{ velocity.totalTracked }}</span>
+              <span class="stats__velocity-label">books tracked</span>
+            </div>
+          </div>
+
+          <div v-if="velocity.distribution.length > 0" class="stats__velocity-dist">
+            <h3 class="stats__chart-subtitle">Time to finish</h3>
+            <div class="stats__velocity-bars">
+              <div v-for="bucket in velocity.distribution" :key="bucket.label" class="stats__velocity-bar-row">
+                <span class="stats__velocity-bar-label">{{ bucket.label }}</span>
+                <div class="stats__velocity-bar-track">
+                  <div class="stats__velocity-bar-fill" :style="{ width: `${velocityBarWidth(bucket.count)}%` }" />
+                </div>
+                <span class="stats__velocity-bar-count">{{ bucket.count }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="velocity.fastest || velocity.slowest" class="stats__velocity-extremes">
+            <div v-if="velocity.fastest" class="stats__velocity-extreme">
+              <span class="stats__velocity-extreme-badge">Fastest</span>
+              <div class="stats__velocity-extreme-book">
+                <img
+                  v-if="velocity.fastest.coverUrlSmall"
+                  :src="velocity.fastest.coverUrlSmall"
+                  :alt="`Cover of ${velocity.fastest.title}`"
+                  class="stats__velocity-extreme-cover"
+                  loading="lazy"
+                >
+                <div>
+                  <span class="stats__velocity-extreme-title">{{ velocity.fastest.title }}</span>
+                  <span class="stats__velocity-extreme-meta">{{ velocity.fastest.days }} days &middot; {{ velocity.fastest.pagesPerDay }} pages/day</span>
+                </div>
+              </div>
+            </div>
+            <div v-if="velocity.slowest" class="stats__velocity-extreme">
+              <span class="stats__velocity-extreme-badge stats__velocity-extreme-badge--slow">Slowest</span>
+              <div class="stats__velocity-extreme-book">
+                <img
+                  v-if="velocity.slowest.coverUrlSmall"
+                  :src="velocity.slowest.coverUrlSmall"
+                  :alt="`Cover of ${velocity.slowest.title}`"
+                  class="stats__velocity-extreme-cover"
+                  loading="lazy"
+                >
+                <div>
+                  <span class="stats__velocity-extreme-title">{{ velocity.slowest.title }}</span>
+                  <span class="stats__velocity-extreme-meta">{{ velocity.slowest.days }} days &middot; {{ velocity.slowest.pagesPerDay }} pages/day</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- Progress Intelligence insights -->
         <section v-if="insightsVisible.length > 0" class="stats__chart-card">
           <h2 class="stats__chart-title">Insights</h2>
@@ -441,8 +555,22 @@
             <svg class="stats__review-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
           </NuxtLink>
         </section>
+
+        <!-- Share monthly recap -->
+        <section v-if="overview && overview.totalBooks > 0" class="stats__share-section" data-reveal>
+          <button class="stats__share-btn" @click="showShareModal = true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
+            Share monthly recap
+          </button>
+        </section>
       </div>
     </template>
+
+    <ShareCardModal
+      :open="showShareModal"
+      :monthly-recap-data="monthlyRecapData"
+      @close="showShareModal = false"
+    />
   </div>
 </template>
 
@@ -503,6 +631,43 @@ interface SessionStatsData {
   longestStreak: number
 }
 
+interface ComparisonSide {
+  totalBooks: number
+  totalPages: number
+  avgRating: number | null
+  avgPages: number
+  avgDaysToFinish: number | null
+}
+
+interface Comparison {
+  year: number
+  previousYear: number
+  current: ComparisonSide
+  previous: ComparisonSide
+  deltas: {
+    totalBooks: number | null
+    totalPages: number | null
+    avgRating: number | null
+    avgPages: number | null
+    avgDaysToFinish: number | null
+  }
+}
+
+interface VelocityBucket { label: string; count: number }
+interface VelocityBookRef { title: string; author: string; pageCount: number | null; coverUrlSmall: string | null; days: number; pagesPerDay: number | null }
+interface VelocityMonth { month: number; label: string; avgDays: number | null; count: number }
+
+interface Velocity {
+  year: number
+  totalTracked: number
+  avgDays: number | null
+  avgPagesPerDay: number | null
+  distribution: VelocityBucket[]
+  fastest: VelocityBookRef | null
+  slowest: VelocityBookRef | null
+  monthlyTrend: VelocityMonth[]
+}
+
 // --- Year filter ---
 const currentYear = new Date().getFullYear()
 const availableYears = computed(() => {
@@ -526,6 +691,8 @@ const heatmap = ref<HeatmapData | null>(null)
 const genres = ref<Genres | null>(null)
 const pace = ref<Pace | null>(null)
 const sessionStats = ref<SessionStatsData | null>(null)
+const comparison = ref<Comparison | null>(null)
+const velocity = ref<Velocity | null>(null)
 
 const hoveredBar = ref<TimelineEntry | null>(null)
 const hoveredGenre = ref<string | null>(null)
@@ -536,7 +703,7 @@ async function fetchStats() {
     const { isGuest } = useGuest()
     const base = isGuest.value ? '/api/guest/stats' : '/api/stats'
     const yearQ = `?year=${selectedYear.value}`
-    const [o, t, r, a, p, h, g, pc, ss] = await Promise.all([
+    const [o, t, r, a, p, h, g, pc, ss, cmp, vel] = await Promise.all([
       $fetch<Overview>(`${base}/overview${yearQ}`),
       $fetch<Timeline>(`${base}/timeline${yearQ}`),
       $fetch<Ratings>(`${base}/ratings${yearQ}`),
@@ -546,6 +713,8 @@ async function fetchStats() {
       $fetch<Genres>(`${base}/genres${yearQ}`).catch(() => null),
       $fetch<Pace>(`${base}/pace${yearQ}`).catch(() => null),
       $fetch<SessionStatsData>(`${isGuest.value ? '/api/guest/sessions/stats' : '/api/sessions/stats'}${yearQ}`).catch(() => null),
+      isGuest.value ? Promise.resolve(null) : $fetch<Comparison>(`${base}/comparison${yearQ}`).catch(() => null),
+      isGuest.value ? Promise.resolve(null) : $fetch<Velocity>(`${base}/velocity${yearQ}`).catch(() => null),
     ])
     overview.value = o
     timeline.value = t
@@ -556,6 +725,8 @@ async function fetchStats() {
     genres.value = g
     pace.value = pc
     sessionStats.value = ss
+    comparison.value = cmp
+    velocity.value = vel
   }
   catch {
     // Graceful fallback — show empty state
@@ -663,6 +834,12 @@ function formatSessionTime(seconds: number): string {
   return `${m}m`
 }
 
+function velocityBarWidth(count: number): number {
+  if (!velocity.value) return 0
+  const max = Math.max(...velocity.value.distribution.map(b => b.count), 1)
+  return Math.round((count / max) * 100)
+}
+
 // --- Monthly activity grid ---
 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
@@ -755,6 +932,25 @@ const paceProjection = computed(() => {
 
 // --- Year filter watcher ---
 watch(selectedYear, () => fetchStats())
+
+// --- Monthly recap share ---
+const showShareModal = ref(false)
+
+const monthlyRecapData = computed(() => {
+  if (!overview.value || !heatmap.value) return undefined
+  const now = new Date()
+  const monthIdx = now.getMonth()
+  const activity = monthlyActivity.value
+  const currentMonth = activity[monthIdx]
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+  return {
+    month: monthNames[monthIdx] ?? 'Unknown',
+    year: selectedYear.value,
+    booksRead: currentMonth?.count ?? 0,
+    pagesRead: overview.value.totalPages,
+    topBook: null as string | null,
+  }
+})
 
 // Non-blocking fetch
 fetchStats()
@@ -1730,6 +1926,33 @@ fetchInsights()
     grid-column: 1 / -1;
   }
 
+  &__share-section {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+  }
+
+  &__share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-xs;
+    padding: $spacing-sm $spacing-lg;
+    font-family: $font-family-body;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--highlight-color);
+    background: transparent;
+    border: 1px solid var(--highlight-color);
+    border-radius: $radius-md;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: var(--highlight-color);
+      color: #fff;
+    }
+  }
+
   &__review-link {
     display: flex;
     align-items: center;
@@ -1780,6 +2003,181 @@ fetchInsights()
     height: 1.25rem;
     color: var(--text-color-muted);
     flex-shrink: 0;
+  }
+
+  // --- Year-over-Year Comparison ---
+  &__comparison-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: $spacing-md;
+  }
+
+  &__comparison-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: $spacing-sm;
+    background: var(--sub-bg-color);
+    border-radius: $radius-md;
+  }
+
+  &__comparison-label {
+    font-size: $font-size-xs;
+    color: var(--text-color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: $font-weight-semibold;
+  }
+
+  &__comparison-current {
+    font-family: $font-family-heading;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: var(--text-color);
+  }
+
+  &__comparison-prev {
+    font-size: $font-size-sm;
+    color: var(--text-color-muted);
+
+    &::before {
+      content: 'prev: ';
+    }
+  }
+
+  &__comparison-delta {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+
+    &--up { color: var(--success-color); }
+    &--down { color: var(--error-color); }
+  }
+
+  // --- Reading Velocity ---
+  &__velocity-summary {
+    display: flex;
+    gap: $spacing-xl;
+    flex-wrap: wrap;
+    margin-bottom: $spacing-lg;
+  }
+
+  &__velocity-stat {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__velocity-value {
+    font-family: $font-family-heading;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: var(--text-color);
+  }
+
+  &__velocity-label {
+    font-size: $font-size-sm;
+    color: var(--text-color-muted);
+  }
+
+  &__velocity-dist {
+    margin-bottom: $spacing-lg;
+  }
+
+  &__velocity-bars {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+    margin-top: $spacing-sm;
+  }
+
+  &__velocity-bar-row {
+    display: grid;
+    grid-template-columns: 100px 1fr 30px;
+    gap: $spacing-sm;
+    align-items: center;
+  }
+
+  &__velocity-bar-label {
+    font-size: $font-size-sm;
+    color: var(--text-color-secondary);
+    text-align: right;
+  }
+
+  &__velocity-bar-track {
+    height: 8px;
+    background: var(--border-color);
+    border-radius: $radius-full;
+    overflow: hidden;
+  }
+
+  &__velocity-bar-fill {
+    height: 100%;
+    background: var(--highlight-color);
+    border-radius: $radius-full;
+    transition: width 0.5s ease;
+  }
+
+  &__velocity-bar-count {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: var(--text-color);
+  }
+
+  &__velocity-extremes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-md;
+
+    @media (max-width: $breakpoint-sm) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__velocity-extreme {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+    padding: $spacing-md;
+    background: var(--sub-bg-color);
+    border-radius: $radius-md;
+  }
+
+  &__velocity-extreme-badge {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--success-color);
+
+    &--slow {
+      color: var(--text-color-muted);
+    }
+  }
+
+  &__velocity-extreme-book {
+    display: flex;
+    gap: $spacing-sm;
+    align-items: center;
+  }
+
+  &__velocity-extreme-cover {
+    width: 32px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  &__velocity-extreme-title {
+    display: block;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--text-color);
+  }
+
+  &__velocity-extreme-meta {
+    display: block;
+    font-size: $font-size-xs;
+    color: var(--text-color-muted);
   }
 }
 </style>

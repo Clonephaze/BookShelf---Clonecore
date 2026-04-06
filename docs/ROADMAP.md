@@ -280,44 +280,43 @@ _Note: Book detail page layout was built in Phase 3 with placeholder sections. P
 
 ### Animated Shelf & Cover Interactions
 - [x] Cover tilt on hover (3D perspective)
-- [ ] Drag-and-drop between shelves
-- [ ] Shelf visual metaphor (bookshelf backdrop)
-- [ ] Micro-interactions (scale, easing, confetti)
-- [ ] Layout transitions (filter/sort reflow)
-- [ ] `prefers-reduced-motion` respect
+- [ ] Shelf visual metaphor (bookshelf backdrop) (deferred — design-first)
+- [x] Micro-interactions (scale, easing, confetti)
+- [x] Layout transitions (filter/sort reflow via TransitionGroup FLIP)
+- [x] `prefers-reduced-motion` respect
 
 ### Social Sharing & Reading Cards
-- [ ] Year-in-review shareable card
-- [ ] Monthly recap cards
-- [ ] Book review cards
-- [ ] Canvas API or server-side image generation
-- [ ] Multiple templates, social media dimensions
-- [ ] Preview and download
+- [x] Year-in-review shareable card
+- [x] Monthly recap cards
+- [x] Book review cards
+- [x] Canvas API image generation (useShareCard composable)
+- [x] Multiple templates, social media dimensions (square/story/landscape)
+- [x] Preview and download (ShareCardModal + Web Share API)
 
 ### Goodreads Data Migration (Enhanced)
-- [ ] Full CSV parsing with all edge cases
-- [ ] Fuzzy match against book APIs
-- [ ] Import preview with conflict resolution
-- [ ] Progress indicator for large imports
-- [ ] Import statistics dashboard
+- [x] Full CSV parsing with all edge cases
+- [x] Fuzzy match against book APIs
+- [x] Import preview with conflict resolution
+- [x] Progress indicator for large imports (estimated progress bar)
+- [x] Import statistics dashboard (success rate, enrichment stats)
 
 ### Reading Statistics Dashboard (Enhanced)
-- [ ] Reading heatmap (GitHub contribution graph style)
-- [ ] Time-to-finish analysis
-- [ ] Page count distribution histogram
-- [ ] Rating patterns over time
-- [ ] Comparative stats (year over year)
-- [ ] Interactive charts (hover, click to filter)
+- [x] Reading heatmap (GitHub contribution graph style)
+- [x] Time-to-finish analysis (velocity endpoint + UI)
+- [x] Page count distribution histogram
+- [x] Rating patterns over time
+- [x] Comparative stats (year over year comparison endpoint + UI)
+- [x] Interactive charts (hover, click to filter)
 
 ### Accessibility-First
-- [ ] Full screen reader experience (ARIA landmarks, live regions)
-- [ ] High contrast mode (WCAG AAA)
-- [ ] Dyslexia-friendly font option
-- [ ] Customizable font size and line height
-- [ ] Skip links, logical heading hierarchy
-- [ ] Color-blind safe indicators
-- [ ] Keyboard workflow optimization
-- [ ] Accessibility statement page
+- [x] Full screen reader experience (ARIA landmarks, live regions)
+- [x] High contrast mode (WCAG AAA)
+- [x] Dyslexia-friendly font option
+- [x] Customizable font size and line height
+- [x] Skip links, logical heading hierarchy
+- [x] Color-blind safe indicators
+- [x] Keyboard workflow optimization
+- [x] Accessibility statement page (/accessibility)
 
 ---
 

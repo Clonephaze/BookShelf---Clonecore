@@ -471,7 +471,21 @@
           </div>
         </div>
       </section>
+
+      <!-- Share card -->
+      <section v-if="book.rating" class="book-detail__section book-detail__share-section">
+        <button class="book-detail__share-btn" @click="showShareModal = true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
+          Share review card
+        </button>
+      </section>
     </template>
+
+    <ShareCardModal
+      :open="showShareModal"
+      :book-review-data="bookReviewData"
+      @close="showShareModal = false"
+    />
   </div>
 </template>
 
@@ -516,11 +530,24 @@ const movingShelf = ref(false)
 const confirmingRemove = ref(false)
 const removing = ref(false)
 const showCoverPicker = ref(false)
+const showShareModal = ref(false)
 
 function onCoverUpdated(newUrl: string) {
   if (book.value) book.value.coverUrl = newUrl
   showCoverPicker.value = false
 }
+
+const bookReviewData = computed(() => {
+  if (!book.value) return undefined
+  return {
+    title: book.value.title,
+    author: book.value.author,
+    rating: book.value.rating ?? null,
+    coverUrl: book.value.coverUrl ?? null,
+    review: book.value.notes ?? null,
+    pagesRead: book.value.pageCount ?? null,
+  }
+})
 
 // Phase 4: interactive rating / notes / dates
 const hoverRating = ref(0)
@@ -1760,6 +1787,32 @@ onMounted(() => {
     &::-webkit-calendar-picker-indicator {
       filter: var(--calendar-icon-filter, invert(0.5));
       cursor: pointer;
+    }
+  }
+
+  &__share-section {
+    display: flex;
+    justify-content: center;
+  }
+
+  &__share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-xs;
+    padding: $spacing-sm $spacing-lg;
+    font-family: $font-family-body;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    color: var(--highlight-color);
+    background: transparent;
+    border: 1px solid var(--highlight-color);
+    border-radius: $radius-md;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: var(--highlight-color);
+      color: #fff;
     }
   }
 }

@@ -103,18 +103,38 @@
 
         <div class="settings__group">
           <h4 class="settings__group-label">Accessibility</h4>
-          <div class="settings__toggle-row">
-            <label class="settings__toggle">
-              <input
-                type="checkbox"
-                :checked="appearanceComfort"
-                @change="handleSetComfort(($event.target as HTMLInputElement).checked)"
+
+          <div class="settings__sub-group">
+            <span class="settings__sub-label">Font size</span>
+            <div class="settings__segmented">
+              <button
+                v-for="opt in fontSizeOptions"
+                :key="opt.value"
+                class="settings__segmented-btn"
+                :class="{ 'settings__segmented-btn--active': appearanceFontSize === opt.value }"
+                :aria-pressed="appearanceFontSize === opt.value"
+                @click="handleSetFontSize(opt.value)"
               >
-              <span class="settings__toggle-slider" />
-              <span class="settings__toggle-label">Reading comfort</span>
-            </label>
+                {{ opt.label }}
+              </button>
+            </div>
           </div>
-          <p class="settings__group-hint">Increases letter spacing and line height for easier reading.</p>
+
+          <div class="settings__sub-group">
+            <span class="settings__sub-label">Line height</span>
+            <div class="settings__segmented">
+              <button
+                v-for="opt in lineHeightOptions"
+                :key="opt.value"
+                class="settings__segmented-btn"
+                :class="{ 'settings__segmented-btn--active': appearanceLineHeight === opt.value }"
+                :aria-pressed="appearanceLineHeight === opt.value"
+                @click="handleSetLineHeight(opt.value)"
+              >
+                {{ opt.label }}
+              </button>
+            </div>
+          </div>
 
           <div class="settings__toggle-row">
             <label class="settings__toggle">
@@ -128,6 +148,32 @@
             </label>
           </div>
           <p class="settings__group-hint">Disables 3D book animations for a cleaner, flatter layout.</p>
+
+          <div class="settings__toggle-row">
+            <label class="settings__toggle">
+              <input
+                type="checkbox"
+                :checked="appearanceHighContrast"
+                @change="handleSetHighContrast(($event.target as HTMLInputElement).checked)"
+              >
+              <span class="settings__toggle-slider" />
+              <span class="settings__toggle-label">High contrast</span>
+            </label>
+          </div>
+          <p class="settings__group-hint">Increases text and border contrast to meet WCAG AAA standards.</p>
+
+          <div class="settings__toggle-row">
+            <label class="settings__toggle">
+              <input
+                type="checkbox"
+                :checked="appearanceColorBlind"
+                @change="handleSetColorBlind(($event.target as HTMLInputElement).checked)"
+              >
+              <span class="settings__toggle-slider" />
+              <span class="settings__toggle-label">Color-blind safe mode</span>
+            </label>
+          </div>
+          <p class="settings__group-hint">Replaces red/green indicators with blue/orange for deuteranopia and protanopia.</p>
         </div>
 
         <p v-if="appearanceSaved" class="settings__save-note">Saved</p>
@@ -457,9 +503,16 @@
           <!-- Step 3: Importing progress -->
           <div v-if="importStore.step === 'importing'" class="settings__import-progress">
             <div class="settings__import-progress-bar">
-              <div class="settings__import-progress-fill" />
+              <div
+                class="settings__import-progress-fill"
+                :style="{ width: `${importStore.estimatedProgress}%` }"
+              />
             </div>
-            <p class="settings__group-hint">Importing books and enriching metadata from Open Library & Google Books. This may take a moment for larger libraries…</p>
+            <div class="settings__import-progress-info">
+              <span class="settings__import-progress-pct">{{ importStore.estimatedProgress }}%</span>
+              <span class="settings__import-progress-msg">{{ importStore.progressMessage }}</span>
+            </div>
+            <p class="settings__group-hint">Enriching metadata from Open Library &amp; Google Books. This may take a moment for larger libraries…</p>
           </div>
 
           <!-- Step 4: Results -->
@@ -469,22 +522,40 @@
               <p class="settings__error" role="alert">{{ importStore.error }}</p>
             </div>
             <!-- Normal result stats -->
-            <div v-else-if="importStore.result" class="settings__import-stats">
-              <div class="settings__import-stat settings__import-stat--success">
-                <span class="settings__import-stat-value">{{ importStore.result.imported }}</span>
-                <span class="settings__import-stat-label">Imported</span>
+            <div v-else-if="importStore.result" class="settings__import-dashboard">
+              <div class="settings__import-summary">
+                <span class="settings__import-summary-number">{{ importStore.result.imported }}</span>
+                <span class="settings__import-summary-label">books imported successfully</span>
               </div>
-              <div v-if="importStore.result.enriched" class="settings__import-stat">
-                <span class="settings__import-stat-value">{{ importStore.result.enriched }}</span>
-                <span class="settings__import-stat-label">Enriched via API</span>
+
+              <div class="settings__import-stats">
+                <div class="settings__import-stat settings__import-stat--success">
+                  <span class="settings__import-stat-value">{{ importStore.result.imported }}</span>
+                  <span class="settings__import-stat-label">Imported</span>
+                </div>
+                <div v-if="importStore.result.enriched" class="settings__import-stat">
+                  <span class="settings__import-stat-value">{{ importStore.result.enriched }}</span>
+                  <span class="settings__import-stat-label">Enriched via API</span>
+                </div>
+                <div v-if="importStore.result.skippedExisting" class="settings__import-stat">
+                  <span class="settings__import-stat-value">{{ importStore.result.skippedExisting }}</span>
+                  <span class="settings__import-stat-label">Already in library</span>
+                </div>
+                <div v-if="importStore.result.notMatched" class="settings__import-stat">
+                  <span class="settings__import-stat-value">{{ importStore.result.notMatched }}</span>
+                  <span class="settings__import-stat-label">Not matched (CSV only)</span>
+                </div>
+                <div v-if="importStore.result.skippedError" class="settings__import-stat settings__import-stat--error">
+                  <span class="settings__import-stat-value">{{ importStore.result.skippedError }}</span>
+                  <span class="settings__import-stat-label">Errors</span>
+                </div>
               </div>
-              <div v-if="importStore.result.skippedExisting" class="settings__import-stat">
-                <span class="settings__import-stat-value">{{ importStore.result.skippedExisting }}</span>
-                <span class="settings__import-stat-label">Skipped (existing)</span>
-              </div>
-              <div v-if="importStore.result.skippedError" class="settings__import-stat settings__import-stat--error">
-                <span class="settings__import-stat-value">{{ importStore.result.skippedError }}</span>
-                <span class="settings__import-stat-label">Errors</span>
+
+              <div v-if="importSuccessRate < 100" class="settings__import-rate">
+                <div class="settings__import-rate-bar">
+                  <div class="settings__import-rate-fill" :style="{ width: `${importSuccessRate}%` }" />
+                </div>
+                <span class="settings__import-rate-label">{{ importSuccessRate }}% success rate</span>
               </div>
             </div>
             <button class="settings__btn settings__btn--secondary" @click="importStore.reset()">Import another</button>
@@ -566,7 +637,7 @@ import {
   Palette, UserCircle, BookMarked, Bell, Shield, Database, AlertTriangle,
 } from 'lucide-vue-next'
 import type { Theme } from '~/composables/useTheme'
-import type { FontFamily, AccentColor } from '~/composables/useAppearance'
+import type { FontFamily, AccentColor, FontSizeLevel, LineHeightLevel } from '~/composables/useAppearance'
 import { useLibraryStore } from '~/stores/library'
 
 definePageMeta({ layout: 'default' })
@@ -578,9 +649,13 @@ const { currentTheme, setTheme } = useTheme()
 const {
   fontFamily: appearanceFont,
   accentColor: appearanceAccent,
-  readingComfort: appearanceComfort,
   simpleShelfView: appearanceSimpleShelf,
-  setFont, setAccent, setReadingComfort, setSimpleShelfView,
+  fontSize: appearanceFontSize,
+  lineHeight: appearanceLineHeight,
+  highContrast: appearanceHighContrast,
+  colorBlindMode: appearanceColorBlind,
+  setFont, setAccent, setSimpleShelfView,
+  setFontSize, setLineHeight, setHighContrast, setColorBlindMode,
 } = useAppearance()
 const libraryStore = useLibraryStore()
 
@@ -652,8 +727,11 @@ function saveAppearanceToServer() {
     body: {
       fontFamily: appearanceFont.value,
       accentColor: appearanceAccent.value,
-      readingComfort: appearanceComfort.value,
       simpleShelfView: appearanceSimpleShelf.value,
+      fontSize: appearanceFontSize.value,
+      lineHeight: appearanceLineHeight.value,
+      highContrast: appearanceHighContrast.value,
+      colorBlindMode: appearanceColorBlind.value,
     },
   }).then(() => {
     appearanceSaved.value = true
@@ -671,15 +749,44 @@ function handleSetAccent(accent: AccentColor) {
   if (user.value) saveAppearanceToServer()
 }
 
-function handleSetComfort(on: boolean) {
-  setReadingComfort(on)
-  if (user.value) saveAppearanceToServer()
-}
-
 function handleSetSimpleShelf(on: boolean) {
   setSimpleShelfView(on)
   if (user.value) saveAppearanceToServer()
 }
+
+function handleSetFontSize(size: FontSizeLevel) {
+  setFontSize(size)
+  if (user.value) saveAppearanceToServer()
+}
+
+function handleSetLineHeight(height: LineHeightLevel) {
+  setLineHeight(height)
+  if (user.value) saveAppearanceToServer()
+}
+
+function handleSetHighContrast(on: boolean) {
+  setHighContrast(on)
+  if (user.value) saveAppearanceToServer()
+}
+
+function handleSetColorBlind(on: boolean) {
+  setColorBlindMode(on)
+  if (user.value) saveAppearanceToServer()
+}
+
+const fontSizeOptions: { value: FontSizeLevel; label: string }[] = [
+  { value: 'small', label: 'Small' },
+  { value: 'default', label: 'Default' },
+  { value: 'large', label: 'Large' },
+  { value: 'x-large', label: 'Extra Large' },
+]
+
+const lineHeightOptions: { value: LineHeightLevel; label: string }[] = [
+  { value: 'compact', label: 'Compact' },
+  { value: 'default', label: 'Default' },
+  { value: 'relaxed', label: 'Relaxed' },
+  { value: 'spacious', label: 'Spacious' },
+]
 
 const memberSince = computed(() => {
   if (!user.value?.createdAt) return '—'
@@ -939,6 +1046,13 @@ async function handleExport(format: 'json' | 'csv') {
 
 // --- Goodreads Import ---
 const importStore = useImportStore()
+
+const importSuccessRate = computed(() => {
+  const r = importStore.result
+  if (!r) return 100
+  const total = r.imported + r.skippedExisting + r.skippedError
+  return total > 0 ? Math.round((r.imported / total) * 100) : 100
+})
 
 function shelfLabel(slug: string): string {
   const labels: Record<string, string> = {
@@ -1574,6 +1688,57 @@ async function handleDeleteAccount() {
     color: var(--text-color);
   }
 
+  // Sub-group for segmented controls
+  &__sub-group {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    padding: $spacing-sm 0;
+  }
+
+  &__sub-label {
+    font-family: $font-family-body;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--text-color-secondary);
+  }
+
+  // Segmented button group
+  &__segmented {
+    display: flex;
+    border: 1px solid var(--border-color);
+    border-radius: $radius-md;
+    overflow: hidden;
+    width: fit-content;
+  }
+
+  &__segmented-btn {
+    @include body-text;
+    font-size: $font-size-sm;
+    padding: $spacing-xs $spacing-md;
+    border: none;
+    background: transparent;
+    color: var(--text-color-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+
+    &:not(:last-child) {
+      border-right: 1px solid var(--border-color);
+    }
+
+    &:hover {
+      background: var(--sub-bg-color);
+      color: var(--text-color);
+    }
+
+    &--active {
+      background: var(--highlight-color-subtle);
+      color: var(--highlight-color);
+      font-weight: $font-weight-semibold;
+    }
+  }
+
   &__save-note {
     font-size: $font-size-sm;
     color: var(--highlight-color);
@@ -1784,19 +1949,81 @@ async function handleDeleteAccount() {
     height: 100%;
     background: var(--highlight-color);
     border-radius: $radius-full;
-    animation: import-progress-indeterminate 1.5s ease-in-out infinite;
+    transition: width 0.3s ease;
   }
 
-  @keyframes import-progress-indeterminate {
-    0% { width: 0%; margin-left: 0; }
-    50% { width: 40%; margin-left: 30%; }
-    100% { width: 0%; margin-left: 100%; }
+  &__import-progress-info {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+
+  &__import-progress-pct {
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: var(--highlight-color);
+    min-width: 3ch;
+  }
+
+  &__import-progress-msg {
+    font-size: $font-size-sm;
+    color: var(--text-color-secondary);
   }
 
   &__import-done {
     display: flex;
     flex-direction: column;
     gap: $spacing-md;
+  }
+
+  &__import-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-lg;
+  }
+
+  &__import-summary {
+    display: flex;
+    align-items: baseline;
+    gap: $spacing-sm;
+  }
+
+  &__import-summary-number {
+    font-family: $font-family-heading;
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: var(--highlight-color);
+  }
+
+  &__import-summary-label {
+    @include body-text;
+    color: var(--text-color-secondary);
+  }
+
+  &__import-rate {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+  }
+
+  &__import-rate-bar {
+    height: 6px;
+    background: var(--border-color);
+    border-radius: $radius-full;
+    overflow: hidden;
+  }
+
+  &__import-rate-fill {
+    height: 100%;
+    background: var(--success-color);
+    border-radius: $radius-full;
+    transition: width 0.5s ease;
+  }
+
+  &__import-rate-label {
+    font-size: $font-size-sm;
+    color: var(--text-color-muted);
   }
 
   // Delete-specific

@@ -33,6 +33,8 @@ const navigationCommands = computed<Command[]>(() => {
     { id: 'nav-stats', label: 'Statistics', hint: 'Reading insights & charts', icon: 'chart', section: 'navigation', action: () => router.push('/stats') },
     { id: 'nav-goals', label: 'Goals', hint: 'Reading goals & progress', icon: 'target', section: 'navigation', action: () => router.push('/goals') },
     { id: 'nav-friends', label: 'Friends', hint: 'Social & reading circles', icon: 'users', section: 'navigation', action: () => router.push('/friends') },
+    { id: 'nav-discover', label: 'Discover', hint: 'Book recommendations', icon: 'compass', section: 'navigation', action: () => router.push('/discover') },
+    { id: 'nav-sessions', label: 'Reading Sessions', hint: 'Timed reading tracker', icon: 'timer', section: 'navigation', action: () => router.push('/sessions') },
     { id: 'nav-settings', label: 'Settings', hint: 'Account & preferences', icon: 'settings', section: 'navigation', action: () => router.push('/settings') },
   ]
   if (isAuthenticated.value || isGuest.value) {
@@ -182,6 +184,8 @@ function iconPath(icon: string): string {
     sparkles: 'M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3z',
     book: 'M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20',
     plus: 'M5 12h14M12 5v14',
+    compass: 'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z',
+    timer: 'M10 2h4M12 14l2-2M12 22a8 8 0 1 0 0-16 8 8 0 0 0 0 16z',
   }
   return icons[icon] ?? icons.search!
 }

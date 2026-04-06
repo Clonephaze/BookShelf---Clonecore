@@ -1,5 +1,11 @@
 <template>
-  <div v-if="books.length" class="shelf-grid" :class="{ 'shelf-grid--row': layout === 'row' }">
+  <TransitionGroup
+    v-if="books.length"
+    name="shelf-move"
+    tag="div"
+    class="shelf-grid"
+    :class="{ 'shelf-grid--row': layout === 'row' }"
+  >
     <BookOnShelf
       v-for="(book, i) in books"
       :key="book.userBookId"
@@ -8,7 +14,7 @@
       :style="{ '--turn': '0', '--stagger-index': i }"
       @open="(id, el) => emit('open', id, el)"
     />
-  </div>
+  </TransitionGroup>
   <div v-else class="shelf-grid__empty">
     <p>{{ emptyMessage }}</p>
   </div>
@@ -108,6 +114,37 @@ const emit = defineEmits<{
   to {
     opacity: 1;
     transform: rotateY(0deg) scale(1);
+  }
+}
+
+// FLIP layout transition for sort/filter reflow
+.shelf-move-move {
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.shelf-move-enter-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.shelf-move-leave-active {
+  transition: opacity 0.2s ease;
+  position: absolute;
+}
+
+.shelf-move-enter-from {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.shelf-move-leave-to {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shelf-move-move,
+  .shelf-move-enter-active,
+  .shelf-move-leave-active {
+    transition: none;
   }
 }
 </style>

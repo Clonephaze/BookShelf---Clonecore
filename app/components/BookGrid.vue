@@ -21,7 +21,12 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div v-if="books.length" class="book-grid">
+  <TransitionGroup
+    v-if="books.length"
+    name="grid-move"
+    tag="div"
+    class="book-grid"
+  >
     <BookCard
       v-for="(book, i) in books"
       :key="book.userBookId"
@@ -30,7 +35,7 @@ const emit = defineEmits<{
       :style="{ '--stagger-index': i }"
       @open="emit('open', $event)"
     />
-  </div>
+  </TransitionGroup>
   <div v-else class="book-grid__empty">
     <slot name="empty">
       <p class="book-grid__empty-text">No books yet</p>
@@ -67,6 +72,36 @@ const emit = defineEmits<{
 
   &__empty-text {
     @include meta-text;
+  }
+}
+
+.grid-move-move {
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.grid-move-enter-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.grid-move-leave-active {
+  transition: opacity 0.2s ease;
+  position: absolute;
+}
+
+.grid-move-enter-from {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.grid-move-leave-to {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grid-move-move,
+  .grid-move-enter-active,
+  .grid-move-leave-active {
+    transition: none;
   }
 }
 </style>
