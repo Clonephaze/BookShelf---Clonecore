@@ -47,7 +47,7 @@ function onClear() {
 }
 
 onMounted(() => {
-  inputRef.value?.focus()
+  clearTimeout(debounceTimer)
 })
 
 onUnmounted(() => {

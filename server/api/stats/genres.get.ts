@@ -8,6 +8,9 @@ export default defineEventHandler(async (event) => {
   const db = useDB()
   const userId = session.user.id
 
+  const query = getQuery(event)
+  const year = Number(query.year) || null
+
   // Unnest genres array, group by genre, count finished books
   const rows = await db
     .select({
@@ -21,6 +24,7 @@ export default defineEventHandler(async (event) => {
       isNotNull(userBooks.dateFinished),
       sql`${books.genres} is not null`,
       sql`array_length(${books.genres}, 1) > 0`,
+      ...(year ? [sql`extract(year from ${userBooks.dateFinished})::int = ${year}`] : []),
     ))
     .groupBy(sql`unnest(${books.genres})`)
     .orderBy(sql`count(distinct ${userBooks.id}) desc`)

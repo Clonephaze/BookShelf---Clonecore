@@ -7,12 +7,17 @@ export default defineEventHandler(async (event) => {
   const session = await requireServerSession(event)
   const db = useDB()
   const userId = session.user.id
-  const now = new Date()
-  const currentYear = now.getFullYear()
+  const query = getQuery(event)
+  const year = Number(query.year) || new Date().getFullYear()
 
   const finishedFilter = and(
     eq(userBooks.userId, userId),
     isNotNull(userBooks.dateFinished),
+  )
+
+  const yearFilter = and(
+    finishedFilter,
+    sql`extract(year from ${userBooks.dateFinished})::int = ${year}`,
   )
 
   // Run all aggregate queries in parallel
@@ -20,8 +25,9 @@ export default defineEventHandler(async (event) => {
     [totals],
     [thisYear],
     [avgDays],
+    [allTime],
   ] = await Promise.all([
-    // Total books, pages, avg rating, avg pages
+    // Total books, pages, avg rating, avg pages (for selected year)
     db
       .select({
         totalBooks: sql<number>`count(*)::int`,
@@ -31,20 +37,17 @@ export default defineEventHandler(async (event) => {
       })
       .from(userBooks)
       .innerJoin(books, eq(books.id, userBooks.bookId))
-      .where(finishedFilter),
+      .where(yearFilter),
 
-    // Books finished this year
+    // Books finished this year (same as totals for selected year)
     db
       .select({
         count: sql<number>`count(*)::int`,
       })
       .from(userBooks)
-      .where(and(
-        finishedFilter,
-        sql`extract(year from ${userBooks.dateFinished})::int = ${currentYear}`,
-      )),
+      .where(yearFilter),
 
-    // Average days to finish (only where both dates exist)
+    // Average days to finish (for selected year)
     db
       .select({
         avgDays: sql<number | null>`round(avg(
@@ -53,30 +56,36 @@ export default defineEventHandler(async (event) => {
       })
       .from(userBooks)
       .where(and(
-        finishedFilter,
+        yearFilter,
         isNotNull(userBooks.dateStarted),
         sql`${userBooks.dateFinished} > ${userBooks.dateStarted}`,
       )),
+
+    // All-time finished count (for empty state detection)
+    db
+      .select({
+        count: sql<number>`count(*)::int`,
+      })
+      .from(userBooks)
+      .where(finishedFilter),
   ])
 
-  // Books per month this year (for sparkline)
+  // Books per month for selected year (for sparkline)
+  const now = new Date()
   const booksPerMonthThisYear = await db
     .select({
       month: sql<number>`extract(month from ${userBooks.dateFinished})::int`,
       count: sql<number>`count(*)::int`,
     })
     .from(userBooks)
-    .where(and(
-      finishedFilter,
-      sql`extract(year from ${userBooks.dateFinished})::int = ${currentYear}`,
-    ))
+    .where(yearFilter)
     .groupBy(sql`extract(month from ${userBooks.dateFinished})`)
     .orderBy(sql`extract(month from ${userBooks.dateFinished})`)
 
-  // Fill in all months up to current
-  const currentMonth = now.getMonth() + 1
+  // Fill in all months up to current (or 12 if viewing past year)
+  const maxMonth = year === now.getFullYear() ? now.getMonth() + 1 : 12
   const sparkline: number[] = []
-  for (let m = 1; m <= currentMonth; m++) {
+  for (let m = 1; m <= maxMonth; m++) {
     const found = booksPerMonthThisYear.find(r => r.month === m)
     sparkline.push(found?.count ?? 0)
   }
@@ -88,7 +97,8 @@ export default defineEventHandler(async (event) => {
     avgPages: totals?.avgPages ? Number(totals.avgPages) : null,
     avgDaysToFinish: avgDays?.avgDays ? Number(avgDays.avgDays) : null,
     booksThisYear: thisYear?.count ?? 0,
-    currentYear,
+    allTimeTotalBooks: allTime?.count ?? 0,
+    currentYear: year,
     sparkline,
   }
 })

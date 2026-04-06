@@ -8,9 +8,13 @@ export default defineEventHandler(async (event) => {
   const db = useDB()
   const userId = session.user.id
 
+  const query = getQuery(event)
+  const year = Number(query.year) || null
+
   const ratedFilter = and(
     eq(userBooks.userId, userId),
     isNotNull(userBooks.rating),
+    ...(year ? [sql`extract(year from ${userBooks.dateFinished})::int = ${year}`] : []),
   )
 
   // Rating distribution (1-5), avg rating, total books, highest rated author

@@ -708,7 +708,7 @@ $marquee-duration: 60s;
   &__number {
     position: absolute;
     top: -$spacing-sm;
-    right: -$spacing-sm;
+    left: -$spacing-sm;
     width: 1.6rem;
     height: 1.6rem;
     border-radius: 50%;

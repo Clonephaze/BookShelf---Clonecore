@@ -6,7 +6,7 @@
           <h1 class="stats__title">Statistics</h1>
           <p class="stats__subtitle">Your reading journey at a glance</p>
         </div>
-        <div v-if="!loading && overview && overview.totalBooks > 0" class="stats__year-filter">
+        <div v-if="!loading && overview && overview.allTimeTotalBooks > 0" class="stats__year-filter">
           <button
             v-for="y in availableYears"
             :key="y"
@@ -32,7 +32,7 @@
     </div>
 
     <!-- Empty state (0 finished books) -->
-    <div v-else-if="overview && overview.totalBooks === 0" class="stats__empty">
+    <div v-else-if="overview && overview.allTimeTotalBooks === 0" class="stats__empty">
       <div class="stats__empty-icon" aria-hidden="true">📊</div>
       <h2 class="stats__empty-title">Your reading story starts here</h2>
       <p class="stats__empty-text">
@@ -41,14 +41,23 @@
       <NuxtLink to="/search" class="stats__empty-cta">Find your next book</NuxtLink>
     </div>
 
+    <!-- Year-empty state (has books, but none in selected year) -->
+    <div v-else-if="overview && overview.totalBooks === 0" class="stats__empty">
+      <div class="stats__empty-icon" aria-hidden="true">📅</div>
+      <h2 class="stats__empty-title">No books finished in {{ selectedYear }}</h2>
+      <p class="stats__empty-text">
+        Try selecting a different year, or start reading to fill this one up.
+      </p>
+    </div>
+
     <template v-else-if="overview">
       <!-- Hero summary cards -->
       <div class="stats__hero-grid">
         <div class="stats__hero-card">
           <span class="stats__hero-value">{{ overview.booksThisYear }}</span>
           <span class="stats__hero-label">Books in {{ overview.currentYear }}</span>
-          <div v-if="overview.sparkline.length > 1" class="stats__sparkline" aria-hidden="true">
-            <svg :viewBox="`0 0 ${sparklineWidth} ${sparklineHeight}`" preserveAspectRatio="none">
+          <div v-if="overview.sparkline.length > 1" ref="sparklineEl" class="stats__sparkline" aria-hidden="true">
+            <svg v-if="sparklineWidth > 0" :viewBox="`0 0 ${sparklineWidth} ${sparklineHeight}`">
               <defs>
                 <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stop-color="var(--progress-color)" stop-opacity="0.35" />
@@ -307,16 +316,16 @@
             </div>
             <ol class="stats__genre-legend">
               <li
-                v-for="(g, i) in genres.genres.slice(0, 8)"
-                :key="g.genre"
+                v-for="(seg, i) in donutSegments"
+                :key="seg.genre"
                 class="stats__genre-item"
-                :class="{ 'stats__genre-item--hover': hoveredGenre === g.genre }"
-                @mouseenter="hoveredGenre = g.genre"
+                :class="{ 'stats__genre-item--hover': hoveredGenre === seg.genre }"
+                @mouseenter="hoveredGenre = seg.genre"
                 @mouseleave="hoveredGenre = null"
               >
                 <span class="stats__genre-dot" :style="{ background: genreColor(i) }" />
-                <span class="stats__genre-name">{{ g.genre }}</span>
-                <span class="stats__genre-count">{{ g.count }}</span>
+                <span class="stats__genre-name">{{ seg.genre }}</span>
+                <span class="stats__genre-count">{{ seg.count }}</span>
               </li>
             </ol>
           </div>
@@ -388,6 +397,7 @@ interface Overview {
   avgPages: number | null
   avgDaysToFinish: number | null
   booksThisYear: number
+  allTimeTotalBooks: number
   currentYear: number
   sparkline: number[]
 }
@@ -450,13 +460,13 @@ async function fetchStats() {
     const base = isGuest.value ? '/api/guest/stats' : '/api/stats'
     const yearQ = `?year=${selectedYear.value}`
     const [o, t, r, a, p, h, g, pc] = await Promise.all([
-      $fetch<Overview>(`${base}/overview`),
-      $fetch<Timeline>(`${base}/timeline`),
-      $fetch<Ratings>(`${base}/ratings`),
-      $fetch<Authors>(`${base}/authors`),
-      $fetch<Pages>(`${base}/pages`),
+      $fetch<Overview>(`${base}/overview${yearQ}`),
+      $fetch<Timeline>(`${base}/timeline${yearQ}`),
+      $fetch<Ratings>(`${base}/ratings${yearQ}`),
+      $fetch<Authors>(`${base}/authors${yearQ}`),
+      $fetch<Pages>(`${base}/pages${yearQ}`),
       $fetch<HeatmapData>(`${base}/heatmap${yearQ}`),
-      $fetch<Genres>(`${base}/genres`).catch(() => null),
+      $fetch<Genres>(`${base}/genres${yearQ}`).catch(() => null),
       $fetch<Pace>(`${base}/pace${yearQ}`).catch(() => null),
     ])
     overview.value = o
@@ -476,19 +486,38 @@ async function fetchStats() {
   }
 }
 
-// --- Computed helpers ---
-const sparklineWidth = 120
-const sparklineHeight = 32
+// --- Sparkline sizing ---
+const sparklineEl = useTemplateRef<HTMLElement>('sparklineEl')
+const sparklineWidth = ref(0)
+const sparklineHeight = ref(0)
 const sparklinePad = 4
+
+let sparklineRO: ResizeObserver | null = null
+onMounted(() => {
+  sparklineRO = new ResizeObserver(([entry]) => {
+    if (entry) {
+      sparklineWidth.value = Math.round(entry.contentRect.width)
+      sparklineHeight.value = Math.round(entry.contentRect.height)
+    }
+  })
+  if (sparklineEl.value) sparklineRO.observe(sparklineEl.value)
+})
+watch(sparklineEl, (el, _, onCleanup) => {
+  if (el && sparklineRO) sparklineRO.observe(el)
+  onCleanup(() => { if (el && sparklineRO) sparklineRO.unobserve(el) })
+})
+onUnmounted(() => sparklineRO?.disconnect())
 
 const sparklineCoords = computed(() => {
   if (!overview.value) return []
   const data = overview.value.sparkline
   const max = Math.max(...data, 1)
-  const step = (sparklineWidth - sparklinePad * 2) / Math.max(data.length - 1, 1)
+  const w = sparklineWidth.value
+  const h = sparklineHeight.value
+  const step = (w - sparklinePad * 2) / Math.max(data.length - 1, 1)
   return data.map((v, i) => ({
     x: sparklinePad + i * step,
-    y: sparklineHeight - sparklinePad - (v / max) * (sparklineHeight - sparklinePad * 2),
+    y: h - sparklinePad - (v / max) * (h - sparklinePad * 2),
   }))
 })
 
@@ -500,7 +529,7 @@ const sparklineArea = computed(() => {
   const pts = sparklineCoords.value
   if (pts.length < 2) return ''
   const linePart = pts.map(p => `L${p.x},${p.y}`).join(' ')
-  return `M${pts[0]!.x},${sparklineHeight} ${linePart} L${pts[pts.length - 1]!.x},${sparklineHeight} Z`
+  return `M${pts[0]!.x},${sparklineHeight.value} ${linePart} L${pts[pts.length - 1]!.x},${sparklineHeight.value} Z`
 })
 
 const sparklineLastX = computed(() => {
@@ -599,6 +628,7 @@ const genreColors = [
   'var(--text-color-muted)',
   'color-mix(in srgb, var(--progress-color) 30%, var(--sub-bg-color))',
   'color-mix(in srgb, var(--rating-color) 30%, var(--sub-bg-color))',
+  'var(--border-color)',
 ]
 
 function genreColor(i: number): string {
@@ -610,13 +640,21 @@ const donutSegments = computed(() => {
   const total = genres.value.genres.reduce((s, g) => s + g.count, 0)
   if (total === 0) return []
   const circumference = 2 * Math.PI * 70 // ~440
+  const top = genres.value.genres.slice(0, 8)
+  const topTotal = top.reduce((s, g) => s + g.count, 0)
+  const otherCount = total - topTotal
   let offset = 0
-  return genres.value.genres.slice(0, 8).map(g => {
+  const segments = top.map(g => {
     const arc = (g.count / total) * circumference
-    const seg = { genre: g.genre, arc, offset }
+    const seg = { genre: g.genre, count: g.count, arc, offset }
     offset += arc
     return seg
   })
+  if (otherCount > 0) {
+    const arc = (otherCount / total) * circumference
+    segments.push({ genre: 'Other', count: otherCount, arc, offset })
+  }
+  return segments
 })
 
 // --- Pace projection ---
@@ -641,8 +679,13 @@ fetchStats()
 
 .stats {
   @include container;
-  padding-top: $spacing-2xl;
-  padding-bottom: $spacing-3xl;
+  padding-top: $spacing-lg;
+  padding-bottom: $spacing-2xl;
+
+  @include respond-to($breakpoint-md) {
+    padding-top: $spacing-2xl;
+    padding-bottom: $spacing-3xl;
+  }
 
   // --- Header ---
   &__header {
@@ -724,12 +767,19 @@ fetchStats()
   // --- Hero summary cards ---
   &__hero-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: $spacing-lg;
-    margin-bottom: $spacing-lg;
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-md;
+
+    @include respond-to($breakpoint-sm) {
+      gap: $spacing-md;
+      margin-bottom: $spacing-lg;
+    }
 
     @include respond-to($breakpoint-md) {
       grid-template-columns: repeat(4, 1fr);
+      gap: $spacing-lg;
+      margin-bottom: $spacing-lg;
     }
   }
 
@@ -738,10 +788,14 @@ fetchStats()
     @include flex-column;
     align-items: center;
     text-align: center;
-    padding: $spacing-lg $spacing-md;
+    padding: $spacing-md $spacing-sm;
     gap: $spacing-xs;
     position: relative;
     overflow: hidden;
+
+    @include respond-to($breakpoint-sm) {
+      padding: $spacing-lg $spacing-md;
+    }
 
     &--skeleton {
       min-height: 6rem;
@@ -787,9 +841,11 @@ fetchStats()
     bottom: 0;
     left: 0;
     right: 0;
+    height: 3rem;
     pointer-events: none;
 
     svg {
+      display: block;
       width: 100%;
       height: 100%;
     }
@@ -799,7 +855,11 @@ fetchStats()
   &__charts {
     display: grid;
     grid-template-columns: 1fr;
-    gap: $spacing-lg;
+    gap: $spacing-md;
+
+    @include respond-to($breakpoint-sm) {
+      gap: $spacing-lg;
+    }
 
     @include respond-to($breakpoint-md) {
       grid-template-columns: repeat(2, 1fr);
@@ -808,7 +868,11 @@ fetchStats()
 
   &__chart-card {
     @include card-base;
-    padding: $spacing-lg;
+    padding: $spacing-md;
+
+    @include respond-to($breakpoint-sm) {
+      padding: $spacing-lg;
+    }
 
     &--wide {
       @include respond-to($breakpoint-md) {
@@ -847,13 +911,26 @@ fetchStats()
   &__bar-chart {
     display: flex;
     align-items: flex-end;
-    gap: 2px;
-    height: 10rem;
+    gap: 1px;
+    height: 7rem;
     padding-top: $spacing-sm;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+
+    @include respond-to($breakpoint-sm) {
+      gap: 2px;
+      height: 8rem;
+    }
+
+    @include respond-to($breakpoint-md) {
+      height: 10rem;
+      overflow-x: visible;
+    }
   }
 
   &__bar-col {
     flex: 1;
+    min-width: 1.25rem;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1023,13 +1100,22 @@ fetchStats()
 
   &__rating-stars {
     display: flex;
-    min-width: 5.5rem;
+    min-width: 3.5rem;
     justify-content: flex-end;
+
+    @include respond-to($breakpoint-sm) {
+      min-width: 5.5rem;
+    }
   }
 
   &__rating-star {
-    width: 0.875rem;
-    height: 0.875rem;
+    width: 0.625rem;
+    height: 0.625rem;
+
+    @include respond-to($breakpoint-sm) {
+      width: 0.875rem;
+      height: 0.875rem;
+    }
   }
 
   &__rating-bar-track {
@@ -1231,8 +1317,12 @@ fetchStats()
 
   &__pages-extremes {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: $spacing-md;
+
+    @include respond-to($breakpoint-sm) {
+      grid-template-columns: 1fr 1fr;
+    }
   }
 
   &__pages-extreme {
@@ -1321,18 +1411,25 @@ fetchStats()
   // --- Genre donut chart ---
   &__genre {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: $spacing-lg;
+    gap: $spacing-md;
 
-    @include respond-below($breakpoint-sm) {
-      flex-direction: column;
+    @include respond-to($breakpoint-sm) {
+      flex-direction: row;
+      gap: $spacing-lg;
     }
   }
 
   &__genre-donut {
     flex-shrink: 0;
-    width: 10rem;
-    height: 10rem;
+    width: 8rem;
+    height: 8rem;
+
+    @include respond-to($breakpoint-sm) {
+      width: 10rem;
+      height: 10rem;
+    }
   }
 
   &__genre-svg {
@@ -1423,9 +1520,15 @@ fetchStats()
   }
 
   &__pace-metrics {
-    display: flex;
-    gap: $spacing-lg;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
+    gap: $spacing-md;
+
+    @include respond-to($breakpoint-sm) {
+      display: flex;
+      gap: $spacing-lg;
+      flex-wrap: wrap;
+    }
   }
 
   &__pace-metric {
@@ -1483,10 +1586,15 @@ fetchStats()
   &__review-link {
     display: flex;
     align-items: center;
-    gap: $spacing-md;
+    gap: $spacing-sm;
     @include card-base;
-    padding: $spacing-lg $spacing-xl;
+    padding: $spacing-md;
     text-decoration: none;
+
+    @include respond-to($breakpoint-sm) {
+      gap: $spacing-md;
+      padding: $spacing-lg $spacing-xl;
+    }
     transition: all 0.2s ease;
 
     &:hover {

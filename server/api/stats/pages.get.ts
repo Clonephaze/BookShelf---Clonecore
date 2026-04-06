@@ -8,11 +8,15 @@ export default defineEventHandler(async (event) => {
   const db = useDB()
   const userId = session.user.id
 
+  const query = getQuery(event)
+  const year = Number(query.year) || null
+
   const finishedWithPages = and(
     eq(userBooks.userId, userId),
     isNotNull(userBooks.dateFinished),
     isNotNull(books.pageCount),
     sql`${books.pageCount} > 0`,
+    ...(year ? [sql`extract(year from ${userBooks.dateFinished})::int = ${year}`] : []),
   )
 
   const [buckets, shortest, longest] = await Promise.all([
