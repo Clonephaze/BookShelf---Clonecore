@@ -317,6 +317,14 @@ const marqueeRow1 = [
   { cover: isbn('9780593321201'), title: 'The Midnight Library' },
   { cover: isbn('9781635577020'), title: 'A Court of Thorns and Roses' },
   { cover: isbn('9780593135204'), title: 'Project Hail Mary' },
+  { cover: isbn('9780316769488'), title: 'The Catcher in the Rye' },
+  { cover: isbn('9780060935467'), title: 'To Kill a Mockingbird' },
+  { cover: isbn('9780451524935'), title: '1984' },
+  { cover: isbn('9780547928227'), title: 'The Hobbit' },
+  { cover: isbn('9780743273565'), title: 'The Great Gatsby' },
+  { cover: isbn('9780061120084'), title: 'To Kill a Mockingbird (Harper)' },
+  { cover: isbn('9780593099322'), title: 'Recursion' },
+  { cover: isbn('9780593395943'), title: 'The Atlas Six' },
 ]
 
 const marqueeRow2 = [
@@ -328,6 +336,14 @@ const marqueeRow2 = [
   { cover: isbn('9780593230572'), title: 'Babel' },
   { cover: isbn('9781250178633'), title: 'The Women' },
   { cover: isbn('9780525559474'), title: 'The Vanishing Half' },
+  { cover: isbn('9780374529260'), title: 'Brave New World' },
+  { cover: isbn('9780062316110'), title: 'Sapiens' },
+  { cover: isbn('9780553380163'), title: 'A Game of Thrones' },
+  { cover: isbn('9780062457714'), title: 'The Song of Achilles' },
+  { cover: isbn('9780593334836'), title: 'The Love Hypothesis' },
+  { cover: isbn('9780062561022'), title: 'The Seven Husbands of Evelyn Hugo' },
+  { cover: isbn('9780593139134'), title: 'The Invisible Life of Addie LaRue' },
+  { cover: isbn('9780593187685'), title: 'Mexican Gothic' },
 ]
 
 const marqueeRow3 = [
@@ -339,6 +355,14 @@ const marqueeRow3 = [
   { cover: isbn('9780062315007'), title: 'The Alchemist' },
   { cover: isbn('9780143110439'), title: 'A Gentleman in Moscow' },
   { cover: isbn('9781984822185'), title: 'Normal People' },
+  { cover: isbn('9780385333481'), title: 'The Handmaid\'s Tale' },
+  { cover: isbn('9780062498533'), title: 'The Girl on the Train' },
+  { cover: isbn('9780062963673'), title: 'The House in the Cerulean Sea' },
+  { cover: isbn('9780593355305'), title: 'Piranesi' },
+  { cover: isbn('9780062873712'), title: 'Educated' },
+  { cover: isbn('9780593337585'), title: 'Anxious People' },
+  { cover: isbn('9780062390851'), title: 'Dark Matter' },
+  { cover: isbn('9780593321485'), title: 'The Thursday Murder Club' },
 ]
 
 const ctaBooks = [
