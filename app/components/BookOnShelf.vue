@@ -60,6 +60,7 @@ function handleClick() {
   <button
     ref="bookEl"
     class="book-on-shelf"
+    :class="{ 'book-on-shelf--simple': simpleShelfView }"
     type="button"
     :aria-label="`Open ${title} by ${author}`"
     :style="spineColor"
@@ -289,7 +290,7 @@ $spine-w: 2.25rem;
     writing-mode: vertical-rl;
     text-orientation: mixed;
     transform: rotate(180deg);
-    font-family: $font-family-heading;
+    font-family: var(--font-heading);
     font-size: 0.55rem;
     font-weight: $font-weight-bold;
     color: rgba(255, 255, 255, 0.9);
@@ -305,7 +306,7 @@ $spine-w: 2.25rem;
     writing-mode: vertical-rl;
     text-orientation: mixed;
     transform: rotate(180deg);
-    font-family: $font-family-body;
+    font-family: var(--font-body);
     font-size: 0.4rem;
     color: rgba(255, 255, 255, 0.55);
     letter-spacing: 0.01em;
@@ -332,6 +333,30 @@ $spine-w: 2.25rem;
       #ddd7cb 100%
     );
     backface-visibility: hidden;
+  }
+
+  // --- Simple mode (flat covers, no 3D) ---
+  &--simple {
+    perspective: none;
+    width: var(--bw);
+
+    .book-on-shelf__box {
+      transform-style: flat;
+      transform: none;
+    }
+
+    .book-on-shelf__cover {
+      transform: none;
+      border-radius: $radius-sm;
+      box-shadow: var(--shadow-book);
+
+      &::before { display: none; }
+    }
+
+    .book-on-shelf__spine,
+    .book-on-shelf__top {
+      display: none;
+    }
   }
 }
 </style>

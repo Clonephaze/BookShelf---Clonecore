@@ -62,9 +62,11 @@
 const { user, signOut, isAuthenticated } = useAuth()
 const { isGuest } = useGuest()
 const { initTheme } = useTheme()
+const { initAppearance } = useAppearance()
 
 onMounted(() => {
   initTheme()
+  initAppearance()
 })
 
 const shelvesStore = useShelvesStore()

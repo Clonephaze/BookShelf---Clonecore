@@ -24,6 +24,10 @@
     --#{$key}: #{$value};
   }
   color-scheme: var(--color-scheme);
+
+  // Font custom properties (overridden by appearance classes)
+  --font-heading: #{$font-family-heading};
+  --font-body: #{$font-family-body};
 }
 
 // System preference: auto dark mode when no theme class

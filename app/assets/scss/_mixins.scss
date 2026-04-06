@@ -79,14 +79,14 @@
 // --- Typography ---
 
 @mixin heading($size: $font-size-xl) {
-  font-family: $font-family-heading;
+  font-family: var(--font-heading);
   font-size: $size;
   font-weight: $font-weight-semibold;
   color: var(--text-color);
 }
 
 @mixin body-text {
-  font-family: $font-family-body;
+  font-family: var(--font-body);
   font-size: $font-size-body;
   font-weight: $font-weight-regular;
   line-height: 1.6;
@@ -94,7 +94,7 @@
 }
 
 @mixin meta-text {
-  font-family: $font-family-body;
+  font-family: var(--font-body);
   font-size: $font-size-sm;
   line-height: 1.45;
   color: var(--text-color-muted);
@@ -122,7 +122,7 @@
   align-items: center;
   justify-content: center;
   gap: $spacing-sm;
-  font-family: $font-family-body;
+  font-family: var(--font-body);
   font-size: $font-size-base;
   font-weight: $font-weight-semibold;
   line-height: 1;

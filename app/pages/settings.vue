@@ -26,24 +26,111 @@
 
         <div class="settings__group">
           <h4 class="settings__group-label">Theme</h4>
-          <div class="settings__theme-options">
+          <div class="settings__theme-cards">
             <button
               v-for="option in themeOptions"
               :key="option.value"
-              class="settings__theme-btn"
-              :class="{ 'settings__theme-btn--active': currentTheme === option.value }"
+              class="settings__theme-card"
+              :class="{ 'settings__theme-card--active': currentTheme === option.value }"
+              :aria-pressed="currentTheme === option.value"
               @click="setTheme(option.value)"
             >
-              <component :is="option.icon" :size="18" />
-              <span>{{ option.label }}</span>
+              <!-- System: split light/dark preview -->
+              <div v-if="option.value === 'system'" class="settings__theme-preview settings__theme-preview--split">
+                <div class="settings__theme-preview-half" :style="option.preview.light">
+                  <div class="settings__theme-preview-bar" />
+                  <div class="settings__theme-preview-line settings__theme-preview-line--long" />
+                  <div class="settings__theme-preview-accent" />
+                </div>
+                <div class="settings__theme-preview-half" :style="option.preview.dark">
+                  <div class="settings__theme-preview-bar" />
+                  <div class="settings__theme-preview-line settings__theme-preview-line--long" />
+                  <div class="settings__theme-preview-accent" />
+                </div>
+              </div>
+              <!-- Normal single-theme preview -->
+              <div v-else class="settings__theme-preview" :style="option.preview">
+                <div class="settings__theme-preview-bar" />
+                <div class="settings__theme-preview-lines">
+                  <div class="settings__theme-preview-line settings__theme-preview-line--long" />
+                  <div class="settings__theme-preview-line settings__theme-preview-line--short" />
+                </div>
+                <div class="settings__theme-preview-accent" />
+              </div>
+              <span class="settings__theme-card-label">{{ option.label }}</span>
             </button>
           </div>
         </div>
 
         <div class="settings__group">
-          <h4 class="settings__group-label">Reading comfort</h4>
-          <p class="settings__group-hint">Font size and display density settings coming soon.</p>
+          <h4 class="settings__group-label">Accent color</h4>
+          <p class="settings__group-hint">Choose the highlight color used for buttons, links, and focus states.</p>
+          <div class="settings__accent-options">
+            <button
+              v-for="accent in accentOptions"
+              :key="accent.value"
+              class="settings__accent-swatch"
+              :class="{ 'settings__accent-swatch--active': appearanceAccent === accent.value }"
+              :style="{ '--swatch-color': accent.color }"
+              :aria-label="accent.label"
+              :aria-pressed="appearanceAccent === accent.value"
+              @click="handleSetAccent(accent.value)"
+            >
+              <span class="settings__accent-dot" />
+              <span class="settings__accent-label">{{ accent.label }}</span>
+            </button>
+          </div>
         </div>
+
+        <div class="settings__group">
+          <h4 class="settings__group-label">Font</h4>
+          <p class="settings__group-hint">Change the typeface used across the app.</p>
+          <div class="settings__font-options">
+            <button
+              v-for="font in fontOptions"
+              :key="font.value"
+              class="settings__font-card"
+              :class="{ 'settings__font-card--active': appearanceFont === font.value }"
+              :aria-pressed="appearanceFont === font.value"
+              @click="handleSetFont(font.value)"
+            >
+              <span class="settings__font-sample" :style="{ fontFamily: font.family }">Aa</span>
+              <span class="settings__font-name">{{ font.label }}</span>
+              <span class="settings__font-desc">{{ font.desc }}</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="settings__group">
+          <h4 class="settings__group-label">Accessibility</h4>
+          <div class="settings__toggle-row">
+            <label class="settings__toggle">
+              <input
+                type="checkbox"
+                :checked="appearanceComfort"
+                @change="handleSetComfort(($event.target as HTMLInputElement).checked)"
+              >
+              <span class="settings__toggle-slider" />
+              <span class="settings__toggle-label">Reading comfort</span>
+            </label>
+          </div>
+          <p class="settings__group-hint">Increases letter spacing and line height for easier reading.</p>
+
+          <div class="settings__toggle-row">
+            <label class="settings__toggle">
+              <input
+                type="checkbox"
+                :checked="appearanceSimpleShelf"
+                @change="handleSetSimpleShelf(($event.target as HTMLInputElement).checked)"
+              >
+              <span class="settings__toggle-slider" />
+              <span class="settings__toggle-label">Simplified shelf view</span>
+            </label>
+          </div>
+          <p class="settings__group-hint">Disables 3D book animations for a cleaner, flatter layout.</p>
+        </div>
+
+        <p v-if="appearanceSaved" class="settings__save-note">Saved</p>
       </section>
 
       <!-- Account -->
@@ -476,10 +563,10 @@
 
 <script setup lang="ts">
 import {
-  Monitor, Sun, Moon, Smartphone,
   Palette, UserCircle, BookMarked, Bell, Shield, Database, AlertTriangle,
 } from 'lucide-vue-next'
 import type { Theme } from '~/composables/useTheme'
+import type { FontFamily, AccentColor } from '~/composables/useAppearance'
 import { useLibraryStore } from '~/stores/library'
 
 definePageMeta({ layout: 'default' })
@@ -488,6 +575,13 @@ useHead({ title: 'Settings — Bookshelf' })
 
 const { user, changePassword, deleteUser, signOut, updateProfile } = useAuth()
 const { currentTheme, setTheme } = useTheme()
+const {
+  fontFamily: appearanceFont,
+  accentColor: appearanceAccent,
+  readingComfort: appearanceComfort,
+  simpleShelfView: appearanceSimpleShelf,
+  setFont, setAccent, setReadingComfort, setSimpleShelfView,
+} = useAppearance()
 const libraryStore = useLibraryStore()
 
 const activeSection = ref('appearance')
@@ -522,12 +616,70 @@ onMounted(() => {
   readHash()
 })
 
-const themeOptions: { value: Theme; label: string; icon: typeof Sun }[] = [
-  { value: 'system', label: 'System', icon: Monitor },
-  { value: 'light', label: 'Light', icon: Sun },
-  { value: 'dark', label: 'Dark', icon: Moon },
-  { value: 'oled', label: 'OLED', icon: Smartphone },
+const themeOptions: { value: Theme; label: string; preview: Record<string, any> }[] = [
+  {
+    value: 'system', label: 'System',
+    preview: {
+      light: { '--p-bg': '#f4ebdb', '--p-text': '#302318', '--p-accent': '#a0592a' },
+      dark: { '--p-bg': '#141110', '--p-text': '#e8e1d8', '--p-accent': '#c8844a' },
+    },
+  },
+  { value: 'light', label: 'Light', preview: { '--p-bg': '#f4ebdb', '--p-surface': '#ebe1cf', '--p-text': '#302318', '--p-accent': '#a0592a' } },
+  { value: 'dark', label: 'Dark', preview: { '--p-bg': '#141110', '--p-surface': '#1b1816', '--p-text': '#e8e1d8', '--p-accent': '#c8844a' } },
+  { value: 'oled', label: 'OLED', preview: { '--p-bg': '#000000', '--p-surface': '#0c0a09', '--p-text': '#f0ece6', '--p-accent': '#d4964a' } },
 ]
+
+const accentOptions: { value: AccentColor; label: string; color: string }[] = [
+  { value: 'copper', label: 'Copper', color: '#a0592a' },
+  { value: 'teal', label: 'Teal', color: '#2a8f8f' },
+  { value: 'plum', label: 'Plum', color: '#8b4a8b' },
+  { value: 'slate', label: 'Slate', color: '#5a6f7a' },
+  { value: 'forest', label: 'Forest', color: '#4a7c59' },
+]
+
+const fontOptions: { value: FontFamily; label: string; family: string; desc: string }[] = [
+  { value: 'default', label: 'Default', family: "'Lora', Georgia, serif", desc: 'Lora headings + Inter body' },
+  { value: 'sans', label: 'Sans-serif', family: "'Inter', system-ui, sans-serif", desc: 'Inter everywhere' },
+  { value: 'atkinson', label: 'Atkinson Hyperlegible', family: "'Atkinson Hyperlegible Next', sans-serif", desc: 'Designed for readability' },
+]
+
+const appearanceSaved = ref(false)
+
+function saveAppearanceToServer() {
+  appearanceSaved.value = false
+  $fetch('/api/preferences', {
+    method: 'PATCH',
+    body: {
+      fontFamily: appearanceFont.value,
+      accentColor: appearanceAccent.value,
+      readingComfort: appearanceComfort.value,
+      simpleShelfView: appearanceSimpleShelf.value,
+    },
+  }).then(() => {
+    appearanceSaved.value = true
+    setTimeout(() => { appearanceSaved.value = false }, 2000)
+  }).catch(() => {})
+}
+
+function handleSetFont(font: FontFamily) {
+  setFont(font)
+  if (user.value) saveAppearanceToServer()
+}
+
+function handleSetAccent(accent: AccentColor) {
+  setAccent(accent)
+  if (user.value) saveAppearanceToServer()
+}
+
+function handleSetComfort(on: boolean) {
+  setReadingComfort(on)
+  if (user.value) saveAppearanceToServer()
+}
+
+function handleSetSimpleShelf(on: boolean) {
+  setSimpleShelfView(on)
+  if (user.value) saveAppearanceToServer()
+}
 
 const memberSince = computed(() => {
   if (!user.value?.createdAt) return '—'
@@ -1070,25 +1222,175 @@ async function handleDeleteAccount() {
     font-weight: $font-weight-medium;
   }
 
-  // Theme buttons
-  &__theme-options {
+  // Theme preview cards
+  &__theme-cards {
     display: flex;
     flex-wrap: wrap;
     gap: $spacing-sm;
     margin-top: $spacing-xs;
   }
 
-  &__theme-btn {
-    @include button-tertiary;
-    gap: $spacing-sm;
-    padding: $spacing-sm $spacing-md;
-    font-size: $font-size-sm;
+  &__theme-card {
+    position: relative;
+    width: 120px;
+    border: 2px solid var(--border-color);
+    border-radius: $radius-md;
+    cursor: pointer;
+    overflow: hidden;
+    background: none;
+    transition: border-color 0.15s;
 
     &--active {
       border-color: var(--highlight-color);
-      color: var(--highlight-color);
-      background-color: var(--highlight-color-subtle);
     }
+  }
+
+  &__theme-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: $spacing-sm;
+    background: var(--p-bg);
+
+    &--split {
+      flex-direction: row;
+      padding: 0;
+      gap: 0;
+      background: none;
+    }
+
+    &-half {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: $spacing-sm;
+      background: var(--p-bg);
+    }
+
+    &-bar {
+      height: 6px;
+      border-radius: 3px;
+      width: 60%;
+      background: var(--p-text);
+    }
+
+    &-lines {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    &-line {
+      height: 4px;
+      border-radius: 2px;
+      background: var(--p-text);
+      opacity: 0.35;
+
+      &--long { width: 85%; }
+      &--short { width: 55%; }
+    }
+
+    &-accent {
+      height: 6px;
+      border-radius: 3px;
+      width: 40%;
+      margin-top: 2px;
+      background: var(--p-accent);
+    }
+  }
+
+  &__theme-card-label {
+    display: block;
+    text-align: center;
+    padding: $spacing-xs;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+    border-top: 1px solid var(--border-color);
+  }
+
+  // Accent colour swatches
+  &__accent-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+    margin-top: $spacing-xs;
+  }
+
+  &__accent-swatch {
+    @include flex-center;
+    flex-direction: column;
+    gap: $spacing-xs;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: $spacing-xs;
+  }
+
+  &__accent-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--swatch-color);
+    border: 3px solid transparent;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+
+  &__accent-swatch--active &__accent-dot {
+    border-color: var(--text-color);
+    transform: scale(1.15);
+  }
+
+  &__accent-label {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+  }
+
+  // Font family cards
+  &__font-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+    margin-top: $spacing-xs;
+  }
+
+  &__font-card {
+    flex: 1;
+    min-width: 140px;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    padding: $spacing-md;
+    border: 2px solid var(--border-color);
+    border-radius: $radius-md;
+    cursor: pointer;
+    background: none;
+    color: var(--text-color);
+    text-align: left;
+    transition: border-color 0.15s;
+
+    &--active {
+      border-color: var(--highlight-color);
+    }
+  }
+
+  &__font-sample {
+    display: block;
+    font-size: $font-size-xl;
+    line-height: 1.2;
+  }
+
+  &__font-name {
+    display: block;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: var(--text-color);
+  }
+
+  &__font-desc {
+    display: block;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
   }
 
   // Forms

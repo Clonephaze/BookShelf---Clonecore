@@ -1,0 +1,84 @@
+// ============================================
+// Appearance Overrides — Bookshelf
+// ============================================
+// Font family, accent color, and reading comfort
+// classes applied to :root by useAppearance composable.
+// ============================================
+
+@use "variables" as *;
+
+// --- Font Family Overrides ---
+// All headings/body text use var(--font-heading) and var(--font-body),
+// so overriding these two custom properties is sufficient.
+
+:root.font-sans {
+  --font-heading: #{$font-family-body};
+  --font-body: #{$font-family-body};
+}
+
+:root.font-atkinson {
+  --font-heading: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+  --font-body: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+}
+
+// --- Accent Color Overrides ---
+
+:root.accent-teal {
+  --highlight-color: #2a8f8f;
+  --highlight-color-hover: #237878;
+  --highlight-color-subtle: #e0f2f1;
+
+  &.dark-mode, &.oled-mode {
+    --highlight-color: #4db8b8;
+    --highlight-color-hover: #66c7c7;
+    --highlight-color-subtle: #142626;
+  }
+}
+
+:root.accent-plum {
+  --highlight-color: #8b4a8b;
+  --highlight-color-hover: #753e75;
+  --highlight-color-subtle: #f3e5f5;
+
+  &.dark-mode, &.oled-mode {
+    --highlight-color: #b874b8;
+    --highlight-color-hover: #c98ac9;
+    --highlight-color-subtle: #241424;
+  }
+}
+
+:root.accent-slate {
+  --highlight-color: #5a6f7a;
+  --highlight-color-hover: #4a5d66;
+  --highlight-color-subtle: #e8eef0;
+
+  &.dark-mode, &.oled-mode {
+    --highlight-color: #8aaab8;
+    --highlight-color-hover: #9dbbc7;
+    --highlight-color-subtle: #141c20;
+  }
+}
+
+:root.accent-forest {
+  --highlight-color: #4a7c59;
+  --highlight-color-hover: #3d6849;
+  --highlight-color-subtle: #e8f2ec;
+
+  &.dark-mode, &.oled-mode {
+    --highlight-color: #6aaf7e;
+    --highlight-color-hover: #7ec092;
+    --highlight-color-subtle: #142018;
+  }
+}
+
+// --- Reading Comfort ---
+
+:root.reading-comfort {
+  letter-spacing: 0.02em;
+  line-height: 1.7;
+
+  p, li, span, label, td, th, dd, dt {
+    letter-spacing: 0.02em;
+    line-height: 1.7;
+  }
+}

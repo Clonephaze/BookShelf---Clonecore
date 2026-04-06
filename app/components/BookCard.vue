@@ -18,9 +18,15 @@ const emit = defineEmits<{
 // Use small cover for cards, fall back to full cover
 const coverSrc = computed(() => props.coverUrl || props.coverUrlSmall || undefined)
 
+const { simpleShelfView } = useAppearance()
+
 const isOpening = ref(false)
 
 function handleClick() {
+  if (simpleShelfView.value) {
+    emit('open', props.userBookId)
+    return
+  }
   isOpening.value = true
   // Let the animation play, then navigate
   setTimeout(() => {
@@ -32,7 +38,7 @@ function handleClick() {
 <template>
   <button
     class="book-card"
-    :class="{ 'book-card--opening': isOpening }"
+    :class="{ 'book-card--opening': isOpening, 'book-card--simple': simpleShelfView }"
     type="button"
     :aria-label="`Open ${title} by ${author}`"
     @click="handleClick"
@@ -183,6 +189,25 @@ function handleClick() {
     transform: translateY(-4px);
   }
 
+  // --- Simple mode (no 3D) ---
+  &--simple &__cover-wrapper {
+    perspective: none;
+  }
+
+  &--simple &__spine,
+  &--simple &__pages {
+    display: none;
+  }
+
+  &--simple &__front {
+    transform: none !important;
+    transition: box-shadow 0.2s ease;
+  }
+
+  &--simple#{&}--opening &__front {
+    transform: none !important;
+  }
+
   &__info {
     display: flex;
     flex-direction: column;
@@ -191,7 +216,7 @@ function handleClick() {
   }
 
   &__title {
-    font-family: $font-family-heading;
+    font-family: var(--font-heading);
     font-size: $font-size-sm;
     font-weight: $font-weight-semibold;
     color: var(--text-color);

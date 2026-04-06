@@ -19,6 +19,8 @@ const emit = defineEmits<{
   openBook: [userBookId: string, el: HTMLElement]
 }>()
 
+const { simpleShelfView } = useAppearance()
+
 const trackEl = ref<HTMLElement>()
 const canScrollLeft = ref(false)
 const canScrollRight = ref(false)
@@ -57,6 +59,15 @@ function scrollBy(direction: 'left' | 'right') {
 function updateBookTurns() {
   const el = trackEl.value
   if (!el) return
+
+  // In simple mode, all books stay flat (turn = 0)
+  if (simpleShelfView.value) {
+    const bookEls = el.querySelectorAll<HTMLElement>('[data-book-id]')
+    for (const bookEl of bookEls) {
+      bookEl.style.setProperty('--turn', '0')
+    }
+    return
+  }
 
   const trackRect = el.getBoundingClientRect()
   const trackRight = trackRect.right
@@ -180,6 +191,15 @@ onUnmounted(() => {
 
 // Re-calculate when books change
 watch(() => props.books.length, () => {
+  nextTick(() => {
+    updateEndPadding()
+    updateBookTurns()
+    updateScrollState()
+  })
+})
+
+// Re-calculate when simple shelf view changes
+watch(simpleShelfView, () => {
   nextTick(() => {
     updateEndPadding()
     updateBookTurns()

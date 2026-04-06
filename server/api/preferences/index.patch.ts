@@ -33,6 +33,31 @@ export default defineEventHandler(async (event) => {
     updates.booksPerRow = body.booksPerRow === null ? null : val
   }
 
+  // Appearance
+  const VALID_FONTS = ['default', 'sans', 'atkinson']
+  if (body.fontFamily !== undefined) {
+    if (!VALID_FONTS.includes(body.fontFamily)) {
+      throw createError({ statusCode: 400, statusMessage: 'Invalid font family.' })
+    }
+    updates.fontFamily = body.fontFamily
+  }
+
+  const VALID_ACCENTS = ['copper', 'teal', 'plum', 'slate', 'forest']
+  if (body.accentColor !== undefined) {
+    if (!VALID_ACCENTS.includes(body.accentColor)) {
+      throw createError({ statusCode: 400, statusMessage: 'Invalid accent color.' })
+    }
+    updates.accentColor = body.accentColor
+  }
+
+  if (body.readingComfort !== undefined) {
+    updates.readingComfort = Boolean(body.readingComfort)
+  }
+
+  if (body.simpleShelfView !== undefined) {
+    updates.simpleShelfView = Boolean(body.simpleShelfView)
+  }
+
   // Privacy toggles
   const privacyFields = ['showShelves', 'showProgress', 'showRatings', 'showGoals', 'showActivity'] as const
   for (const field of privacyFields) {

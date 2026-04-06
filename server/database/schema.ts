@@ -64,6 +64,11 @@ export const userPreferences = pgTable('user_preferences', {
   theme: text('theme').notNull().default('system'),
   defaultShelfId: uuid('default_shelf_id'),
   booksPerRow: integer('books_per_row'),
+  // Appearance
+  fontFamily: text('font_family').notNull().default('default'),
+  accentColor: text('accent_color').notNull().default('copper'),
+  readingComfort: boolean('reading_comfort').notNull().default(false),
+  simpleShelfView: boolean('simple_shelf_view').notNull().default(false),
   // Privacy: what friends can see
   showShelves: boolean('show_shelves').notNull().default(true),
   showProgress: boolean('show_progress').notNull().default(true),
