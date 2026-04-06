@@ -350,6 +350,10 @@
                 <span class="stats__pace-value">{{ pace.pagesPerDay }}</span>
                 <span class="stats__pace-label">pages / day</span>
               </div>
+              <div v-if="sessionStats?.pagesPerHour" class="stats__pace-metric">
+                <span class="stats__pace-value">{{ sessionStats.pagesPerHour }}</span>
+                <span class="stats__pace-label">pages / hour</span>
+              </div>
               <div class="stats__pace-metric">
                 <span class="stats__pace-value stats__pace-value--trend">
                   <svg v-if="pace.trend === 'up'" class="stats__pace-trend-icon stats__pace-trend-icon--up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
@@ -360,6 +364,9 @@
                 <span class="stats__pace-label">3-month trend</span>
               </div>
             </div>
+            <p v-if="sessionStats && sessionStats.totalDurationSeconds > 0" class="stats__pace-session-note">
+              Based on {{ formatSessionTime(sessionStats.totalDurationSeconds) }} of tracked reading across {{ sessionStats.totalSessions }} session{{ sessionStats.totalSessions === 1 ? '' : 's' }}
+            </p>
             <p v-if="paceProjection" class="stats__pace-projection">
               At this rate, you'll finish ~<strong>{{ paceProjection }}</strong> books by December.
             </p>
@@ -367,6 +374,47 @@
           <div v-else class="stats__chart-empty">
             <p>Finish books to track your reading pace</p>
           </div>
+        </section>
+
+        <!-- Reading Sessions -->
+        <section v-if="sessionStats && sessionStats.totalSessions > 0" class="stats__chart-card">
+          <h2 class="stats__chart-title">
+            Reading Sessions
+            <span class="stats__chart-year">{{ selectedYear }}</span>
+          </h2>
+          <div class="stats__session-metrics">
+            <div class="stats__session-metric">
+              <span class="stats__session-value">{{ sessionStats.totalSessions }}</span>
+              <span class="stats__session-label">sessions</span>
+            </div>
+            <div class="stats__session-metric">
+              <span class="stats__session-value">{{ formatSessionTime(sessionStats.totalDurationSeconds) }}</span>
+              <span class="stats__session-label">total time</span>
+            </div>
+            <div v-if="sessionStats.pagesPerHour" class="stats__session-metric">
+              <span class="stats__session-value">{{ sessionStats.pagesPerHour }}</span>
+              <span class="stats__session-label">pages / hour</span>
+            </div>
+            <div v-if="sessionStats.avgDurationSeconds" class="stats__session-metric">
+              <span class="stats__session-value">{{ Math.round(sessionStats.avgDurationSeconds / 60) }}m</span>
+              <span class="stats__session-label">avg. session</span>
+            </div>
+            <div v-if="sessionStats.currentStreak > 0" class="stats__session-metric stats__session-metric--streak">
+              <span class="stats__session-value">{{ sessionStats.currentStreak }} 🔥</span>
+              <span class="stats__session-label">day streak</span>
+            </div>
+            <div v-if="sessionStats.longestStreak > 1" class="stats__session-metric">
+              <span class="stats__session-value">{{ sessionStats.longestStreak }}</span>
+              <span class="stats__session-label">best streak</span>
+            </div>
+            <div v-if="sessionStats.sessionsPerWeek > 0" class="stats__session-metric">
+              <span class="stats__session-value">{{ sessionStats.sessionsPerWeek }}</span>
+              <span class="stats__session-label">per week</span>
+            </div>
+          </div>
+          <NuxtLink to="/sessions" class="stats__session-link">
+            View all sessions →
+          </NuxtLink>
         </section>
 
         <!-- Year-in-review link -->
@@ -430,6 +478,18 @@ interface Pace {
   trend: 'up' | 'down' | 'steady'
 }
 
+interface SessionStatsData {
+  totalSessions: number
+  totalDurationSeconds: number
+  totalPagesRead: number
+  avgDurationSeconds: number | null
+  avgPagesPerSession: number | null
+  pagesPerHour: number | null
+  sessionsPerWeek: number
+  currentStreak: number
+  longestStreak: number
+}
+
 // --- Year filter ---
 const currentYear = new Date().getFullYear()
 const availableYears = computed(() => {
@@ -449,6 +509,7 @@ const pages = ref<Pages | null>(null)
 const heatmap = ref<HeatmapData | null>(null)
 const genres = ref<Genres | null>(null)
 const pace = ref<Pace | null>(null)
+const sessionStats = ref<SessionStatsData | null>(null)
 
 const hoveredBar = ref<TimelineEntry | null>(null)
 const hoveredGenre = ref<string | null>(null)
@@ -459,7 +520,7 @@ async function fetchStats() {
     const { isGuest } = useGuest()
     const base = isGuest.value ? '/api/guest/stats' : '/api/stats'
     const yearQ = `?year=${selectedYear.value}`
-    const [o, t, r, a, p, h, g, pc] = await Promise.all([
+    const [o, t, r, a, p, h, g, pc, ss] = await Promise.all([
       $fetch<Overview>(`${base}/overview${yearQ}`),
       $fetch<Timeline>(`${base}/timeline${yearQ}`),
       $fetch<Ratings>(`${base}/ratings${yearQ}`),
@@ -468,6 +529,7 @@ async function fetchStats() {
       $fetch<HeatmapData>(`${base}/heatmap${yearQ}`),
       $fetch<Genres>(`${base}/genres${yearQ}`).catch(() => null),
       $fetch<Pace>(`${base}/pace${yearQ}`).catch(() => null),
+      $fetch<SessionStatsData>(`/api/sessions/stats${yearQ}`).catch(() => null),
     ])
     overview.value = o
     timeline.value = t
@@ -477,6 +539,7 @@ async function fetchStats() {
     heatmap.value = h
     genres.value = g
     pace.value = pc
+    sessionStats.value = ss
   }
   catch {
     // Graceful fallback — show empty state
@@ -575,6 +638,13 @@ function pageBucketWidth(count: number): string {
 function formatNumber(n: number): string {
   if (n >= 10000) return `${(n / 1000).toFixed(1)}k`
   return n.toLocaleString()
+}
+
+function formatSessionTime(seconds: number): string {
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  if (h > 0) return `${h}h ${m}m`
+  return `${m}m`
 }
 
 // --- Monthly activity grid ---
@@ -1578,6 +1648,56 @@ fetchStats()
     strong {
       color: var(--progress-color);
       font-weight: $font-weight-semibold;
+    }
+  }
+
+  &__pace-session-note {
+    font-size: $font-size-xs;
+    color: var(--text-color-muted);
+    line-height: 1.4;
+  }
+
+  // --- Session stats ---
+  &__session-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(5rem, 1fr));
+    gap: $spacing-md;
+    margin-bottom: $spacing-md;
+  }
+
+  &__session-metric {
+    @include flex-column;
+    gap: 2px;
+
+    &--streak {
+      .stats__session-value {
+        color: var(--progress-color);
+      }
+    }
+  }
+
+  &__session-value {
+    font-family: $font-family-heading;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: var(--text-color);
+  }
+
+  &__session-label {
+    font-family: $font-family-body;
+    font-size: $font-size-xs;
+    color: var(--text-color-muted);
+  }
+
+  &__session-link {
+    font-family: $font-family-body;
+    font-size: $font-size-sm;
+    color: var(--highlight-color);
+    text-decoration: none;
+    font-weight: $font-weight-medium;
+
+    &:hover {
+      text-decoration: underline;
     }
   }
 

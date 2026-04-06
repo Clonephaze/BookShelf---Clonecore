@@ -74,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { Search, Library, Target, BarChart3, Settings, Users } from 'lucide-vue-next'
+import { Search, Library, Target, BarChart3, Settings, Users, Timer } from 'lucide-vue-next'
 
 const route = useRoute()
 const router = useRouter()
@@ -103,6 +103,7 @@ watch(() => route.path, () => {
 })
 const tabs = [
   { to: '/library', label: 'Library', icon: Library },
+  { to: '/sessions', label: 'Sessions', icon: Timer },
   { to: '/goals', label: 'Goals', icon: Target },
   { to: '/stats', label: 'Statistics', icon: BarChart3 },
   { to: '/friends', label: 'Friends', icon: Users },

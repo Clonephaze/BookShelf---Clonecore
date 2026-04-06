@@ -15,6 +15,13 @@
       "when": 1775332612925,
       "tag": "0001_add-username-avatar",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1775463423242,
+      "tag": "0002_nervous_ink",
+      "breakpoints": true
     }
   ]
 }

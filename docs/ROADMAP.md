@@ -212,18 +212,18 @@ _Note: Book detail page layout was built in Phase 3 with placeholder sections. P
 
 ---
 
-## Phase 11 — Reading Sessions
+## Phase 11 — Reading Sessions ✅
 **Goal:** Timed reading sessions that feed pace analytics.
 
-- [ ] Start a reading session: pick a book, set a timer duration (or open-ended)
-- [ ] Timer UI (countdown, pause/resume, ambient mode option)
-- [ ] Session end prompt: enter new page number
-- [ ] Calculate pages read per session
-- [ ] Session history log (`reading_sessions` table: book, start time, duration, pages read)
-- [ ] Stats derived from sessions: pages per hour, average session length
-- [ ] Weekly / monthly / yearly session summaries
-- [ ] Session streaks (consecutive days with a session)
-- [ ] Integrate session data into Phase 9 stats dashboard
+- [x] Start a reading session: pick a book, set a timer duration (or open-ended)
+- [x] Timer UI (countdown, pause/resume, ambient mode option)
+- [x] Session end prompt: enter new page number
+- [x] Calculate pages read per session
+- [x] Session history log (`reading_sessions` table: book, start time, duration, pages read)
+- [x] Stats derived from sessions: pages per hour, average session length
+- [x] Weekly / monthly / yearly session summaries
+- [x] Session streaks (consecutive days with a session)
+- [x] Integrate session data into Phase 9 stats dashboard
 
 **Deliverable:** Timed reading sessions with pace tracking and historical data.
 

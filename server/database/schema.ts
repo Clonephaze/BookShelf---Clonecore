@@ -167,3 +167,29 @@ export const readingGoals = pgTable('reading_goals', {
   unique('reading_goals_user_period_unique').on(table.userId, table.periodType, table.year, table.periodValue),
   index('reading_goals_user_id_idx').on(table.userId),
 ])
+
+// ============================================
+// Reading Sessions
+// ============================================
+
+export const readingSessions = pgTable('reading_sessions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  userBookId: uuid('user_book_id').notNull().references(() => userBooks.id, { onDelete: 'cascade' }),
+  startedAt: timestamp('started_at').notNull().defaultNow(),
+  endedAt: timestamp('ended_at'),
+  durationSeconds: integer('duration_seconds').notNull().default(0),
+  timerMode: text('timer_mode').notNull().default('open'), // 'countdown' | 'open'
+  timerDurationSeconds: integer('timer_duration_seconds'), // for countdown mode
+  startPage: integer('start_page'),
+  endPage: integer('end_page'),
+  pagesRead: integer('pages_read'),
+  status: text('status').notNull().default('active'), // 'active' | 'paused' | 'completed' | 'abandoned'
+  notes: text('notes'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => [
+  index('reading_sessions_user_id_idx').on(table.userId),
+  index('reading_sessions_user_book_idx').on(table.userBookId),
+  index('reading_sessions_user_active_idx').on(table.userId, table.status),
+])

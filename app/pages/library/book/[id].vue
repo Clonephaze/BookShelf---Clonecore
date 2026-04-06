@@ -347,6 +347,40 @@
         </div>
       </section>
 
+      <!-- Reading Session (only for currently reading books) -->
+      <section v-if="showProgressControls" class="book-detail__section">
+        <div class="book-detail__session-row">
+          <button
+            v-if="!sessionStore.active"
+            class="book-detail__session-btn"
+            @click="showSessionModal = true"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Start Reading Session
+          </button>
+          <NuxtLink
+            v-else
+            to="/sessions"
+            class="book-detail__session-btn book-detail__session-btn--active"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Active session in progress →
+          </NuxtLink>
+        </div>
+      </section>
+
+      <SessionStartModal
+        :open="showSessionModal"
+        :user-book-id="userBookId"
+        :book-title="book.title"
+        :book-author="book.author"
+        :book-cover="book.coverUrl"
+        :book-page-count="book.pageCount ?? null"
+        :current-page="book.currentPage ?? null"
+        @close="showSessionModal = false"
+        @started="onSessionStarted"
+      />
+
       <!-- Rating (interactive) -->
       <section class="book-detail__section">
         <h3 class="book-detail__section-title">Your Rating</h3>
@@ -502,11 +536,20 @@ const minutesInputDebounce = ref<ReturnType<typeof setTimeout> | null>(null)
 const showTimePrompt = ref(false)
 const showStartReadingPrompt = ref(false)
 
+// Phase 11: reading sessions
+const sessionStore = useSessionStore()
+const showSessionModal = ref(false)
+
+function onSessionStarted() {
+  showSessionModal.value = false
+  navigateTo('/sessions')
+}
+
 // Shelf awareness — only show progress controls on currently-reading or custom shelves
 const currentShelfSlug = computed(() => {
   const shelves = book.value?.shelves
   if (!shelves?.length) return null
-  return shelvesStore.shelves.find(s => s.id === shelves[0].shelfId)?.slug ?? null
+  return shelvesStore.shelves.find(s => s.id === shelves[0]!.shelfId)?.slug ?? null
 })
 const isOnWantToRead = computed(() => currentShelfSlug.value === 'want-to-read')
 const isOnReadShelf = computed(() => currentShelfSlug.value === 'read')
@@ -548,11 +591,11 @@ function parseTimeInput(raw: string): number | null {
   raw = raw.trim().toLowerCase()
   if (!raw) return null
   const colonMatch = raw.match(/^(\d+):(\d+)$/)
-  if (colonMatch) return parseInt(colonMatch[1]) * 60 + parseInt(colonMatch[2])
+  if (colonMatch) return parseInt(colonMatch[1]!) * 60 + parseInt(colonMatch[2]!)
   const hmMatch = raw.match(/^(\d+)\s*h\s*(?:(\d+)\s*m?)?$/)
-  if (hmMatch) return parseInt(hmMatch[1]) * 60 + (parseInt(hmMatch[2] || '0'))
+  if (hmMatch) return parseInt(hmMatch[1]!) * 60 + (parseInt(hmMatch[2] || '0'))
   const mMatch = raw.match(/^(\d+)\s*m$/)
-  if (mMatch) return parseInt(mMatch[1])
+  if (mMatch) return parseInt(mMatch[1]!)
   const num = parseInt(raw)
   if (!isNaN(num) && num >= 0) return num
   return null
@@ -1374,9 +1417,11 @@ onMounted(() => {
     border: 1px solid var(--border-color);
     border-radius: $radius-md;
     text-align: center;
+    appearance: textfield;
     -moz-appearance: textfield;
     &::-webkit-inner-spin-button,
     &::-webkit-outer-spin-button {
+      appearance: none;
       -webkit-appearance: none;
     }
     &:focus {
@@ -1406,9 +1451,11 @@ onMounted(() => {
     border: 1px solid var(--border-color);
     border-radius: $radius-md;
     text-align: center;
+    appearance: textfield;
     -moz-appearance: textfield;
     &::-webkit-inner-spin-button,
     &::-webkit-outer-spin-button {
+      appearance: none;
       -webkit-appearance: none;
     }
     &:focus {
@@ -1519,6 +1566,44 @@ onMounted(() => {
     border: none;
     cursor: pointer;
     &:hover { color: var(--text-color); }
+  }
+
+  // --- Session ---
+  &__session-row {
+    display: flex;
+    align-items: center;
+  }
+
+  &__session-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-xs;
+    padding: $spacing-sm $spacing-md;
+    font-family: $font-family-body;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    color: var(--accent-color);
+    background: none;
+    border: 1px solid var(--accent-color);
+    border-radius: $radius-md;
+    cursor: pointer;
+    transition: background $transition-fast, color $transition-fast;
+    text-decoration: none;
+
+    &:hover {
+      background: var(--accent-color);
+      color: var(--surface-color);
+    }
+
+    &--active {
+      border-color: var(--success-color, #4caf50);
+      color: var(--success-color, #4caf50);
+
+      &:hover {
+        background: var(--success-color, #4caf50);
+        color: var(--surface-color);
+      }
+    }
   }
 
   // --- Rating ---
