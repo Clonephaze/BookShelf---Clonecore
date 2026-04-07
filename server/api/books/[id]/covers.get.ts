@@ -14,8 +14,8 @@ export default defineEventHandler(async (event) => {
   const db = useDB()
   const userBookId = getRouterParam(event, 'id')
 
-  if (!userBookId) {
-    throw createError({ statusCode: 400, statusMessage: 'Missing book ID' })
+  if (!userBookId || userBookId.length > 50) {
+    throw createError({ statusCode: 400, statusMessage: 'Invalid book ID' })
   }
 
   // Verify ownership and get book identifiers

@@ -641,6 +641,7 @@ useSeoMeta({
 })
 
 const { user, changePassword, deleteUser, signOut, updateProfile } = useAuth()
+const { isGuest } = useGuest()
 const { currentTheme, setTheme } = useTheme()
 const {
   fontFamily: appearanceFont,
@@ -930,8 +931,10 @@ async function loadPreferences() {
   shelvesLoading.value = true
   try {
     await libraryStore.fetch()
-    const prefs = await $fetch<{ defaultShelfId: string | null }>('/api/preferences')
-    selectedShelfId.value = prefs.defaultShelfId
+    if (!isGuest.value) {
+      const prefs = await $fetch<{ defaultShelfId: string | null }>('/api/preferences')
+      selectedShelfId.value = prefs.defaultShelfId
+    }
   }
   catch {
     // Graceful fallback
@@ -942,6 +945,7 @@ async function loadPreferences() {
 }
 
 async function saveDefaultShelf() {
+  if (isGuest.value) return
   shelfSaveSuccess.value = false
   try {
     await $fetch('/api/preferences', {
@@ -978,7 +982,7 @@ const privacySaved = ref(false)
 const privacyLoaded = ref(false)
 
 async function loadPrivacy() {
-  if (privacyLoaded.value) return
+  if (privacyLoaded.value || isGuest.value) return
   try {
     const prefs = await $fetch<{
       showShelves: boolean
@@ -998,6 +1002,7 @@ async function loadPrivacy() {
 }
 
 async function savePrivacy() {
+  if (isGuest.value) return
   privacySaved.value = false
   try {
     await $fetch('/api/preferences', {

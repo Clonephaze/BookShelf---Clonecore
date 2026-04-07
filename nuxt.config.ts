@@ -31,6 +31,7 @@ export default defineNuxtConfig({
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'description', content: 'Every book tells a story. Yours starts here.' },
         { name: 'theme-color', content: '#302318' },
+        { name: 'mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
         // Open Graph defaults (pages override with useSeoMeta)
@@ -147,6 +148,31 @@ export default defineNuxtConfig({
     },
     devOptions: {
       enabled: false,
+    },
+  },
+
+  nitro: {
+    routeRules: {
+      '/**': {
+        headers: {
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'DENY',
+          'X-XSS-Protection': '0',
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+          'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()',
+          'Content-Security-Policy': [
+            "default-src 'self'",
+            "script-src 'self' 'unsafe-inline'",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+            "font-src 'self' https://fonts.gstatic.com",
+            "img-src 'self' data: https://covers.openlibrary.org https://books.google.com https://books.googleusercontent.com",
+            "connect-src 'self' https://openlibrary.org https://www.googleapis.com",
+            "frame-ancestors 'none'",
+            "base-uri 'self'",
+            "form-action 'self'",
+          ].join('; '),
+        },
+      },
     },
   },
 })

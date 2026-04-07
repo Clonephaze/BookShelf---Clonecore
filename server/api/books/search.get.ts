@@ -11,11 +11,26 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  if (q.length > 200) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Search query is too long',
+    })
+  }
+
   const limit = Math.min(Math.max(Number(query.limit) || 20, 1), 40)
   const sort = (query.sort as string) === 'relevance' ? 'relevance' : 'best-match'
   const config = useRuntimeConfig()
 
-  const results = await searchBooks(q, limit, config.googleBooksApiKey, sort)
-
-  return results
+  try {
+    const results = await searchBooks(q, limit, config.googleBooksApiKey, sort)
+    return results
+  }
+  catch (err) {
+    console.error('[BookSearch] Upstream error:', err)
+    throw createError({
+      statusCode: 502,
+      statusMessage: 'Book search is temporarily unavailable',
+    })
+  }
 })
