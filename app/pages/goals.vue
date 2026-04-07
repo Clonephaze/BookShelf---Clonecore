@@ -198,6 +198,7 @@
 
 <script setup lang="ts">
 import type { Goal, PeriodType } from '~/composables/useGoals'
+import type { ShelfBook } from '~/stores/library'
 
 definePageMeta({ layout: 'default' })
 useHead({ title: 'Goals — Bookshelf' })
@@ -235,7 +236,6 @@ const newMonthlyTarget = ref<number | null>(null)
 const newWeeklyTarget = ref<number | null>(null)
 
 // Books popover state — matches ShelfBook shape for ShelfRow
-import type { ShelfBook } from '~/stores/library'
 type GoalBook = ShelfBook
 const popoverGoal = ref<Goal | null>(null)
 const popoverBooks = ref<GoalBook[]>([])
