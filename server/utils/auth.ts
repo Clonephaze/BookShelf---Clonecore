@@ -16,9 +16,15 @@ export function useAuth() {
     const baseURL = process.env.BETTER_AUTH_URL
       || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 'http://localhost:3000')
 
+    // Also trust the current deployment URL (Vercel preview/branch URLs)
+    const trustedOrigins = [baseURL]
+    if (process.env.VERCEL_URL) {
+      trustedOrigins.push(`https://${process.env.VERCEL_URL}`)
+    }
+
     _auth = betterAuth({
       baseURL,
-      trustedOrigins: [baseURL],
+      trustedOrigins,
       secret: process.env.BETTER_AUTH_SECRET,
       database: drizzleAdapter(useDB(), {
         provider: 'pg',

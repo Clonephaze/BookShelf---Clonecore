@@ -151,6 +151,7 @@ export default defineNuxtConfig({
             "frame-ancestors 'none'",
             "base-uri 'self'",
             "form-action 'self'",
+            "media-src 'self' data: blob:",
           ].join('; '),
         },
       },
