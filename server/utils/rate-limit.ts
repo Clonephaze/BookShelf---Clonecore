@@ -1,4 +1,5 @@
 import type { H3Event } from 'h3'
+import { getHeader, setHeader, createError } from 'h3'
 
 interface RateLimitEntry {
   count: number
