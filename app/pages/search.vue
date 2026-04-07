@@ -10,7 +10,6 @@ useSeoMeta({
   ogDescription: 'Search millions of books by title, author, or ISBN.',
 })
 
-const { isAuthenticated } = useAuth()
 const { isGuest } = useGuest()
 
 const searchStore = useSearchStore()

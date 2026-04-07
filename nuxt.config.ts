@@ -147,7 +147,7 @@ export default defineNuxtConfig({
             "script-src 'self' 'unsafe-inline'",
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
             "font-src 'self' https://fonts.gstatic.com",
-            "img-src 'self' data: blob: https://covers.openlibrary.org https://*.google.com https://*.googleusercontent.com",
+            "img-src 'self' data: blob: https://covers.openlibrary.org https://archive.org https://*.archive.org https://*.google.com https://*.googleusercontent.com",
             "connect-src 'self'",
             "frame-ancestors 'none'",
             "base-uri 'self'",
