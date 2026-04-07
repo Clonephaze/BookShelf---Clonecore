@@ -17,7 +17,10 @@ export default defineNuxtConfig({
   vite: {
     css: {
       preprocessorOptions: {
-        scss: {},
+        scss: {
+          // @ts-expect-error — valid Vite option, not yet in Nuxt's SassPreprocessorOptions types
+          api: 'modern-compiler',
+        },
       },
     },
   },
@@ -152,27 +155,6 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    routeRules: {
-      '/**': {
-        headers: {
-          'X-Content-Type-Options': 'nosniff',
-          'X-Frame-Options': 'DENY',
-          'X-XSS-Protection': '0',
-          'Referrer-Policy': 'strict-origin-when-cross-origin',
-          'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()',
-          'Content-Security-Policy': [
-            "default-src 'self'",
-            "script-src 'self' 'unsafe-inline'",
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-            "font-src 'self' https://fonts.gstatic.com",
-            "img-src 'self' data: https://covers.openlibrary.org https://books.google.com https://books.googleusercontent.com",
-            "connect-src 'self' https://openlibrary.org https://www.googleapis.com",
-            "frame-ancestors 'none'",
-            "base-uri 'self'",
-            "form-action 'self'",
-          ].join('; '),
-        },
-      },
-    },
+    plugins: ['~/server/plugins/security-headers.ts'],
   },
 })
