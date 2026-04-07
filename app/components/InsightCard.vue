@@ -61,9 +61,14 @@ defineEmits<{
   dismiss: [id: string]
 }>()
 
-/** Render **bold** markdown in body text */
+/** Render **bold** markdown in body text (with HTML escaping for safety) */
 const renderedBody = computed(() => {
-  return props.insight.body.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+  const escaped = props.insight.body
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+  return escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
 })
 </script>
 

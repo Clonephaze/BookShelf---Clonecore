@@ -18,6 +18,7 @@ const {
   hoverRating,
   trackingMode,
   progressWidth,
+  progressScale,
   progressLastUpdated,
   showProgressControls,
   isOnWantToRead,
@@ -156,7 +157,7 @@ function handleClearTimeTracking() {
     <div v-if="showProgressControls" class="bdc__progress">
       <span class="bdc__section-label">Reading progress</span>
       <div class="bdc__progress-bar">
-        <div class="bdc__progress-fill" :style="{ width: progressWidth }" />
+        <div class="bdc__progress-fill" :style="{ transform: `scaleX(${progressScale})` }" />
       </div>
       <div class="bdc__progress-controls">
         <template v-if="trackingMode === 'minutes'">
@@ -592,10 +593,12 @@ function handleClearTimeTracking() {
   }
 
   &__progress-fill {
+    width: 100%;
     height: 100%;
     background: var(--progress-color);
     border-radius: $radius-full;
-    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: left;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   &__progress-controls {

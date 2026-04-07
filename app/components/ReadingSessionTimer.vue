@@ -409,7 +409,7 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
     font-family: $font-family-body;
     font-size: $font-size-sm;
     font-weight: $font-weight-medium;
-    transition: all 0.15s ease;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, filter 0.15s ease;
     border: 1px solid transparent;
 
     &--primary {

@@ -128,7 +128,7 @@
               <div
                 class="stats__bar"
                 :class="{ 'stats__bar--empty': bar.count === 0 }"
-                :style="{ height: barHeight(bar.count) }"
+                :style="{ transform: `scaleY(${barScale(bar.count)})` }"
               >
                 <span v-if="bar.count === 0" class="stats__bar-dot" />
               </div>
@@ -145,7 +145,7 @@
               <div v-for="b in pages.distribution" :key="b.bucket" class="stats__pages-row">
                 <span class="stats__pages-bucket">{{ b.bucket }}</span>
                 <div class="stats__pages-bar-track">
-                  <div class="stats__pages-bar-fill" :style="{ width: pageBucketWidth(b.count) }" />
+                  <div class="stats__pages-bar-fill" :style="{ transform: `scaleX(${pageBucketScale(b.count)})` }" />
                 </div>
                 <span class="stats__pages-count">{{ b.count }}</span>
               </div>
@@ -230,7 +230,7 @@
                 <div
                   class="stats__rating-bar-fill"
                   :class="{ 'stats__rating-bar-fill--zero': row.count === 0 }"
-                  :style="{ width: ratingBarWidth(row.count) }"
+                  :style="{ transform: `scaleX(${ratingBarScale(row.count)})` }"
                 />
               </div>
               <span class="stats__rating-count">{{ row.count }}</span>
@@ -494,7 +494,7 @@
               <div v-for="bucket in velocity.distribution" :key="bucket.label" class="stats__velocity-bar-row">
                 <span class="stats__velocity-bar-label">{{ bucket.label }}</span>
                 <div class="stats__velocity-bar-track">
-                  <div class="stats__velocity-bar-fill" :style="{ width: `${velocityBarWidth(bucket.count)}%` }" />
+                  <div class="stats__velocity-bar-fill" :style="{ transform: `scaleX(${velocityBarScale(bucket.count)})` }" />
                 </div>
                 <span class="stats__velocity-bar-count">{{ bucket.count }}</span>
               </div>
@@ -811,9 +811,9 @@ const timelineMax = computed(() => {
   return Math.max(...timeline.value.timeline.map(t => t.count), 1)
 })
 
-function barHeight(count: number): string {
-  if (count === 0) return '4px'
-  return `${Math.max(8, (count / timelineMax.value) * 100)}%`
+function barScale(count: number): number {
+  if (count === 0) return 0
+  return Math.max(0.08, count / timelineMax.value)
 }
 
 const ratingMax = computed(() => {
@@ -821,9 +821,9 @@ const ratingMax = computed(() => {
   return Math.max(...ratings.value.distribution.map(d => d.count), 1)
 })
 
-function ratingBarWidth(count: number): string {
-  if (count === 0) return '0%'
-  return `${(count / ratingMax.value) * 100}%`
+function ratingBarScale(count: number): number {
+  if (count === 0) return 0
+  return count / ratingMax.value
 }
 
 const pageBucketMax = computed(() => {
@@ -831,9 +831,9 @@ const pageBucketMax = computed(() => {
   return Math.max(...pages.value.distribution.map(d => d.count), 1)
 })
 
-function pageBucketWidth(count: number): string {
-  if (count === 0) return '0%'
-  return `${(count / pageBucketMax.value) * 100}%`
+function pageBucketScale(count: number): number {
+  if (count === 0) return 0
+  return count / pageBucketMax.value
 }
 
 function formatNumber(n: number): string {
@@ -848,10 +848,10 @@ function formatSessionTime(seconds: number): string {
   return `${m}m`
 }
 
-function velocityBarWidth(count: number): number {
+function velocityBarScale(count: number): number {
   if (!velocity.value) return 0
   const max = Math.max(...velocity.value.distribution.map(b => b.count), 1)
-  return Math.round((count / max) * 100)
+  return count / max
 }
 
 // --- Monthly activity grid ---
@@ -1264,16 +1264,16 @@ fetchInsights()
   &__bar {
     width: 100%;
     max-width: 2rem;
+    height: 100%;
     border-radius: $radius-sm $radius-sm 0 0;
     background: var(--progress-color);
-    transition: height 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    min-height: 2px;
+    transform-origin: bottom;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
 
     &--empty {
       background: transparent;
-      min-height: 0;
-      height: 0 !important;
+      transform: scaleY(0) !important;
     }
   }
 
@@ -1433,14 +1433,15 @@ fetchInsights()
   }
 
   &__rating-bar-fill {
+    width: 100%;
     height: 100%;
     background: var(--rating-color);
     border-radius: $radius-full;
-    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    min-width: 0;
+    transform-origin: left;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 
     &--zero {
-      width: 0 !important;
+      transform: scaleX(0) !important;
     }
   }
 
@@ -1606,10 +1607,12 @@ fetchInsights()
   }
 
   &__pages-bar-fill {
+    width: 100%;
     height: 100%;
     background: var(--progress-color);
     border-radius: $radius-full;
-    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: left;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   &__pages-count {
@@ -1959,7 +1962,7 @@ fetchInsights()
     border: 1px solid var(--highlight-color);
     border-radius: $radius-md;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease;
 
     &:hover {
       background: var(--highlight-color);
@@ -1979,7 +1982,7 @@ fetchInsights()
       gap: $spacing-md;
       padding: $spacing-lg $spacing-xl;
     }
-    transition: all 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 
     &:hover {
       transform: translateY(-2px);
@@ -2124,10 +2127,12 @@ fetchInsights()
   }
 
   &__velocity-bar-fill {
+    width: 100%;
     height: 100%;
     background: var(--highlight-color);
     border-radius: $radius-full;
-    transition: width 0.5s ease;
+    transform-origin: left;
+    transition: transform 0.5s ease;
   }
 
   &__velocity-bar-count {

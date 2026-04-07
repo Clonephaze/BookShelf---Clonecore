@@ -41,7 +41,7 @@
               <span class="profile__book-author">{{ book.author }}</span>
               <div v-if="book.progressPercent" class="profile__book-progress">
                 <div class="profile__book-bar">
-                  <div class="profile__book-bar-fill" :style="{ width: `${parseFloat(book.progressPercent)}%` }" />
+                  <div class="profile__book-bar-fill" :style="{ transform: `scaleX(${parseFloat(book.progressPercent) / 100})` }" />
                 </div>
                 <span class="profile__book-pct">{{ Math.round(parseFloat(book.progressPercent)) }}%</span>
               </div>
@@ -66,7 +66,7 @@
         <h2 class="profile__section-title">{{ profile.goal.year }} Reading Goal</h2>
         <div class="profile__goal">
           <div class="profile__goal-bar">
-            <div class="profile__goal-fill" :style="{ width: `${Math.min(100, (profile.goal.completed / profile.goal.target) * 100)}%` }" />
+            <div class="profile__goal-fill" :style="{ transform: `scaleX(${Math.min(1, profile.goal.completed / profile.goal.target)})` }" />
           </div>
           <span class="profile__goal-text">{{ profile.goal.completed }} / {{ profile.goal.target }} books</span>
         </div>
@@ -414,8 +414,11 @@ watch(username, () => {
 
   &__book-bar-fill {
     height: 100%;
+    width: 100%;
     background: var(--progress-color);
     border-radius: 2px;
+    transform-origin: left;
+    transition: transform 0.3s ease;
   }
 
   &__book-pct {
@@ -467,10 +470,12 @@ watch(username, () => {
   }
 
   &__goal-fill {
+    width: 100%;
     height: 100%;
     background: var(--progress-color);
     border-radius: 4px;
-    transition: width 0.3s ease;
+    transform-origin: left;
+    transition: transform 0.3s ease;
   }
 
   &__goal-text {

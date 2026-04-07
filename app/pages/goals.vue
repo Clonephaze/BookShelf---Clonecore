@@ -82,7 +82,7 @@
                 <div
                   class="goals__subgoal-bar-fill"
                   :class="{ 'goals__subgoal-bar-fill--complete': goalPaceStatus(monthlyGoal) === 'complete' }"
-                  :style="{ width: `${goalProgress(monthlyGoal) * 100}%` }"
+                  :style="{ transform: `scaleX(${goalProgress(monthlyGoal)})` }"
                 />
               </div>
               <span class="goals__subgoal-count">{{ monthlyGoal.booksCompleted }} / {{ monthlyGoal.targetBooks }}</span>
@@ -118,7 +118,7 @@
                 <div
                   class="goals__subgoal-bar-fill"
                   :class="{ 'goals__subgoal-bar-fill--complete': goalPaceStatus(weeklyGoal) === 'complete' }"
-                  :style="{ width: `${goalProgress(weeklyGoal) * 100}%` }"
+                  :style="{ transform: `scaleX(${goalProgress(weeklyGoal)})` }"
                 />
               </div>
               <span class="goals__subgoal-count">{{ weeklyGoal.booksCompleted }} / {{ weeklyGoal.targetBooks }}</span>
@@ -662,10 +662,12 @@ fetchGoals()
   }
 
   &__subgoal-bar-fill {
+    width: 100%;
     height: 100%;
     background: var(--progress-color);
     border-radius: $radius-full;
-    transition: width 0.6s ease;
+    transform-origin: left;
+    transition: transform 0.6s ease;
 
     &--complete {
       background: var(--success-color);

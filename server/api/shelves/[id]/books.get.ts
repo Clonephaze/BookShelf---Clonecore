@@ -1,10 +1,10 @@
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { useDB } from '../../../database'
 import { books, userBooks, userBookShelves, shelves } from '../../../database/schema'
 import { requireServerSession } from '../../../utils/session'
 
 export default defineEventHandler(async (event) => {
-  await requireServerSession(event)
+  const session = await requireServerSession(event)
   const db = useDB()
   const shelfId = getRouterParam(event, 'id')
 
@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
   const [shelf] = await db
     .select({ id: shelves.id, name: shelves.name, slug: shelves.slug })
     .from(shelves)
-    .where(eq(shelves.id, shelfId))
+    .where(and(eq(shelves.id, shelfId), eq(shelves.userId, session.user.id)))
     .limit(1)
 
   if (!shelf) {

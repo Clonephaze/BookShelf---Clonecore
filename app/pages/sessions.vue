@@ -388,7 +388,7 @@ onMounted(async () => {
     border: 1px solid transparent;
     text-align: left;
     width: 100%;
-    transition: all 0.15s ease;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
 
     &:hover {
       border-color: var(--highlight-color);

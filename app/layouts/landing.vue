@@ -1,6 +1,8 @@
 <template>
   <div class="layout-landing">
-    <slot />
+    <main>
+      <slot />
+    </main>
   </div>
 </template>
 

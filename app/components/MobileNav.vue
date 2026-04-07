@@ -141,7 +141,7 @@ function isActive(path: string) {
     align-items: flex-end;
     justify-content: space-around;
     padding: $spacing-sm 0;
-    padding-bottom: calc(#{$spacing-sm} + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc($spacing-sm + env(safe-area-inset-bottom, 0px));
     z-index: 1;
   }
 

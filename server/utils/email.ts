@@ -14,6 +14,16 @@ function getResend(): Resend {
 const FROM_ADDRESS = 'Bookshelf <noreply@clonecore.net>'
 const SITE_URL = 'https://bookshelf-clonecore.vercel.app'
 
+/** Escape user-supplied strings before injecting into HTML email templates */
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 // ── Shared email layout ──────────────────────────────────────────────
 
 function emailLayout(content: string): string {
@@ -74,7 +84,7 @@ export async function sendWelcomeEmail(to: string, name: string): Promise<void> 
     to,
     subject: 'Welcome to Bookshelf!',
     html: emailLayout(`
-      <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:24px;color:#302318;margin:0 0 8px;">Welcome, ${firstName}!</h1>
+      <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:24px;color:#302318;margin:0 0 8px;">Welcome, ${escapeHtml(firstName)}!</h1>
       <p style="color:#5c4a38;font-size:15px;line-height:1.6;margin:0 0 24px;">
         Your Bookshelf is ready. Here's how to get started:
       </p>
@@ -143,15 +153,15 @@ export async function sendFriendRequestEmail(to: string, fromName: string, fromU
   await resend.emails.send({
     from: FROM_ADDRESS,
     to,
-    subject: `${fromName} wants to be your friend on Bookshelf`,
+    subject: `${escapeHtml(fromName)} wants to be your friend on Bookshelf`,
     html: emailLayout(`
       <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:24px;color:#302318;margin:0 0 8px;">New friend request</h1>
       <div style="background:#faf5eb;border-radius:8px;padding:16px;margin:0 0 24px;">
-        <p style="color:#302318;font-size:16px;font-weight:600;margin:0 0 4px;">${fromName}</p>
-        <p style="color:#8a7a66;font-size:14px;margin:0;">@${fromUsername}</p>
+        <p style="color:#302318;font-size:16px;font-weight:600;margin:0 0 4px;">${escapeHtml(fromName)}</p>
+        <p style="color:#8a7a66;font-size:14px;margin:0;">@${escapeHtml(fromUsername)}</p>
       </div>
       <p style="color:#5c4a38;font-size:15px;line-height:1.6;margin:0 0 24px;">
-        ${fromName} would like to connect with you on Bookshelf. Accept their request to share your reading activity.
+        ${escapeHtml(fromName)} would like to connect with you on Bookshelf. Accept their request to share your reading activity.
       </p>
       <div style="text-align:center;margin-bottom:8px;">
         ${emailButton(SITE_URL + '/friends', 'View request')}

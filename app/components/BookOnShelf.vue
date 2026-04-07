@@ -80,7 +80,7 @@ const { simpleShelfView } = useAppearance()
         />
         <!-- Progress indicator -->
         <div v-if="progressPct > 0 && progressPct < 100" class="book-on-shelf__progress">
-          <div class="book-on-shelf__progress-fill" :style="{ width: `${progressPct}%` }" />
+          <div class="book-on-shelf__progress-fill" :style="{ transform: `scaleX(${progressPct / 100})` }" />
         </div>
       </div>
       <!-- 3D box face: spine -->
@@ -233,9 +233,11 @@ $spine-w: 2.25rem;
   }
 
   &__progress-fill {
+    width: 100%;
     height: 100%;
     background: var(--progress-color, #a0592a);
-    transition: width 0.3s ease;
+    transform-origin: left;
+    transition: transform 0.3s ease;
   }
 
   // --- Left face: spine ---

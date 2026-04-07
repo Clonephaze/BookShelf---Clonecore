@@ -115,7 +115,7 @@
             <div class="steps__icon-wrap">
               <Search :size="28" />
             </div>
-            <h3 class="steps__title">Search</h3>
+            <h2 class="steps__title">Search</h2>
             <p class="steps__text">Find any book instantly with dual-API search across millions of titles.</p>
           </div>
           <div class="steps__connector" data-reveal aria-hidden="true">
@@ -126,7 +126,7 @@
             <div class="steps__icon-wrap">
               <Library :size="28" />
             </div>
-            <h3 class="steps__title">Organize</h3>
+            <h2 class="steps__title">Organize</h2>
             <p class="steps__text">Add books to shelves, build custom collections, and curate your library.</p>
           </div>
           <div class="steps__connector" data-reveal aria-hidden="true">
@@ -137,7 +137,7 @@
             <div class="steps__icon-wrap">
               <TrendingUp :size="28" />
             </div>
-            <h3 class="steps__title">Track</h3>
+            <h2 class="steps__title">Track</h2>
             <p class="steps__text">Log progress, set goals, and watch your reading story unfold.</p>
           </div>
         </div>
@@ -150,7 +150,7 @@
             <div class="features__icon-wrap">
               <BookOpen :size="24" />
             </div>
-            <h3 class="features__card-title">Track Your Progress</h3>
+            <h2 class="features__card-title">Track Your Progress</h2>
             <p class="features__card-text">
               Update your page count, hit milestones, and watch your progress bar grow. Every page counts.
             </p>
@@ -160,7 +160,7 @@
             <div class="features__icon-wrap">
               <Target :size="24" />
             </div>
-            <h3 class="features__card-title">Set Reading Goals</h3>
+            <h2 class="features__card-title">Set Reading Goals</h2>
             <p class="features__card-text">
               Yearly targets with pace tracking — see if you're ahead, on track, or need to pick up a book.
             </p>
@@ -170,7 +170,7 @@
             <div class="features__icon-wrap">
               <BarChart3 :size="24" />
             </div>
-            <h3 class="features__card-title">Discover Patterns</h3>
+            <h2 class="features__card-title">Discover Patterns</h2>
             <p class="features__card-text">
               Pages per month, favorite authors, rating distribution — your reading life in beautiful detail.
             </p>
@@ -180,7 +180,7 @@
             <div class="features__icon-wrap">
               <Palette :size="24" />
             </div>
-            <h3 class="features__card-title">Three Warm Themes</h3>
+            <h2 class="features__card-title">Three Warm Themes</h2>
             <p class="features__card-text">
               Sepia-warm light, espresso dark, and true-black OLED — read your way, day or night.
             </p>
@@ -209,7 +209,7 @@
                   v-for="h in miniChartData"
                   :key="h.m"
                   class="preview__mini-bar"
-                  :style="{ '--bar-height': h.h }"
+                  :style="{ '--bar-scale': h.h }"
                   :class="{ 'preview__mini-bar--animate': statsVisible }"
                 />
               </div>
@@ -249,7 +249,7 @@
               height="150"
             >
           </div>
-          <h2 class="cta__title">Start your reading journey</h2>
+          <h3 class="cta__title">Start your reading journey</h3>
           <p class="cta__subtitle">
             Join readers who track their books with intention, not algorithms.
           </p>
@@ -372,18 +372,18 @@ const ctaBooks = [
 ]
 
 const miniChartData = [
-  { m: 1, h: '30%' },
-  { m: 2, h: '50%' },
-  { m: 3, h: '40%' },
-  { m: 4, h: '70%' },
-  { m: 5, h: '60%' },
-  { m: 6, h: '90%' },
-  { m: 7, h: '45%' },
-  { m: 8, h: '80%' },
-  { m: 9, h: '65%' },
-  { m: 10, h: '100%' },
-  { m: 11, h: '55%' },
-  { m: 12, h: '35%' },
+  { m: 1, h: 0.3 },
+  { m: 2, h: 0.5 },
+  { m: 3, h: 0.4 },
+  { m: 4, h: 0.7 },
+  { m: 5, h: 0.6 },
+  { m: 6, h: 0.9 },
+  { m: 7, h: 0.45 },
+  { m: 8, h: 0.8 },
+  { m: 9, h: 0.65 },
+  { m: 10, h: 1 },
+  { m: 11, h: 0.55 },
+  { m: 12, h: 0.35 },
 ]
 
 // ---- Stat count-up animation ----
@@ -976,12 +976,13 @@ $marquee-duration: 30s;
     background: var(--progress-color);
     border-radius: 2px 2px 0 0;
     opacity: 0.7;
-    min-height: 3px;
-    height: 3px;
-    transition: height 1s cubic-bezier(0.16, 1, 0.3, 1);
+    height: 100%;
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1);
 
     &--animate {
-      height: var(--bar-height);
+      transform: scaleY(var(--bar-scale));
     }
 
     &:last-child { opacity: 0.35; }

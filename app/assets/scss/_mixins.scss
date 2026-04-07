@@ -106,7 +106,7 @@
   background: var(--surface-color);
   border: 1px solid var(--border-color);
   border-radius: $radius-lg;
-  transition: all $transition-base;
+  transition: background-color $transition-base, border-color $transition-base, box-shadow $transition-base, transform $transition-base;
 }
 
 @mixin card-hover {
@@ -128,7 +128,7 @@
   line-height: 1;
   text-decoration: none;
   border-radius: $radius-md;
-  transition: all $transition-base;
+  transition: background-color $transition-base, color $transition-base, border-color $transition-base, box-shadow $transition-base, opacity $transition-base;
   cursor: pointer;
   @include focus-visible-highlight;
 

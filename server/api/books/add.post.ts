@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
   const [shelf] = await db
     .select({ id: shelves.id })
     .from(shelves)
-    .where(eq(shelves.id, shelfId))
+    .where(and(eq(shelves.id, shelfId), eq(shelves.userId, session.user.id)))
     .limit(1)
 
   if (!shelf) {

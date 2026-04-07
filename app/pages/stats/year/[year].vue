@@ -81,7 +81,7 @@
               'review__month-pip--best': data.bestMonth && m.month === data.bestMonth.month,
             }"
           >
-            <div class="review__month-pip-bar" :style="{ height: monthBarHeight(m.count) }" />
+            <div class="review__month-pip-bar" :style="{ transform: `scaleY(${monthBarScale(m.count)})` }" />
             <span v-if="m.count > 0" class="review__month-pip-count">{{ m.count }}</span>
             <span class="review__month-pip-name">{{ monthNames[m.month - 1] }}</span>
           </div>
@@ -340,9 +340,9 @@ const monthMax = computed(() => {
   return Math.max(...data.value.months.map(m => m.count), 1)
 })
 
-function monthBarHeight(count: number): string {
-  if (count === 0) return '0'
-  return `${Math.max(12, (count / monthMax.value) * 100)}%`
+function monthBarScale(count: number): number {
+  if (count === 0) return 0
+  return Math.max(0.12, count / monthMax.value)
 }
 
 fetchData()
@@ -466,7 +466,7 @@ fetchData()
     background: var(--sub-bg-color);
     color: var(--text-color-muted);
     text-decoration: none;
-    transition: all 0.15s ease;
+    transition: background-color 0.15s ease, color 0.15s ease;
 
     svg {
       width: 1.25rem;
@@ -582,10 +582,11 @@ fetchData()
 
   &__month-pip-bar {
     width: 100%;
+    height: 100%;
     border-radius: $radius-sm $radius-sm 0 0;
     background: var(--sub-bg-color);
-    transition: height 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-    min-height: 0;
+    transform-origin: bottom;
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 
     .review__month-pip--active & {
       background: var(--progress-color);

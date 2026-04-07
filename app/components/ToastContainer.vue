@@ -63,11 +63,11 @@ const { toasts } = useToast()
 }
 
 .toast-enter-active {
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .toast-leave-active {
-  transition: all 0.2s ease-in;
+  transition: opacity 0.2s ease-in, transform 0.2s ease-in;
 }
 
 .toast-enter-from {

@@ -497,7 +497,7 @@
             <div class="settings__import-progress-bar">
               <div
                 class="settings__import-progress-fill"
-                :style="{ width: `${importStore.estimatedProgress}%` }"
+                :style="{ transform: `scaleX(${importStore.estimatedProgress / 100})` }"
               />
             </div>
             <div class="settings__import-progress-info">
@@ -545,7 +545,7 @@
 
               <div v-if="importSuccessRate < 100" class="settings__import-rate">
                 <div class="settings__import-rate-bar">
-                  <div class="settings__import-rate-fill" :style="{ width: `${importSuccessRate}%` }" />
+                  <div class="settings__import-rate-fill" :style="{ transform: `scaleX(${importSuccessRate / 100})` }" />
                 </div>
                 <span class="settings__import-rate-label">{{ importSuccessRate }}% success rate</span>
               </div>
@@ -1162,7 +1162,7 @@ async function handleDeleteAccount() {
     white-space: nowrap;
     font-size: $font-size-sm;
     font-weight: $font-weight-medium;
-    transition: all 0.15s;
+    transition: color 0.15s, background-color 0.15s;
 
     &:hover {
       color: var(--text-color);
@@ -1744,7 +1744,7 @@ async function handleDeleteAccount() {
     background: transparent;
     color: var(--text-color-secondary);
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: background-color 0.15s ease, color 0.15s ease;
     white-space: nowrap;
 
     &:not(:last-child) {
@@ -1970,10 +1970,12 @@ async function handleDeleteAccount() {
   }
 
   &__import-progress-fill {
+    width: 100%;
     height: 100%;
     background: var(--highlight-color);
     border-radius: $radius-full;
-    transition: width 0.3s ease;
+    transform-origin: left;
+    transition: transform 0.3s ease;
   }
 
   &__import-progress-info {
@@ -2039,10 +2041,12 @@ async function handleDeleteAccount() {
   }
 
   &__import-rate-fill {
+    width: 100%;
     height: 100%;
     background: var(--success-color);
     border-radius: $radius-full;
-    transition: width 0.5s ease;
+    transform-origin: left;
+    transition: transform 0.5s ease;
   }
 
   &__import-rate-label {

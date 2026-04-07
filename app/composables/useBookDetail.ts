@@ -93,6 +93,17 @@ export function useBookDetail(userBookId: Ref<string> | ComputedRef<string>) {
     return '0%'
   })
 
+  const progressScale = computed(() => {
+    if (book.value?.progressPercent) return parseFloat(book.value.progressPercent) / 100
+    if (book.value?.currentMinutes && book.value?.totalMinutes) {
+      return Math.min(1, book.value.currentMinutes / book.value.totalMinutes)
+    }
+    if (book.value?.currentPage && book.value?.pageCount) {
+      return Math.min(1, book.value.currentPage / book.value.pageCount)
+    }
+    return 0
+  })
+
   const progressLastUpdated = computed(() => formatRelativeTime(book.value?.updatedAt))
 
   // --- Formatting helpers ---
@@ -519,6 +530,7 @@ export function useBookDetail(userBookId: Ref<string> | ComputedRef<string>) {
     showProgressControls,
     trackingMode,
     progressWidth,
+    progressScale,
     progressLastUpdated,
 
     // Methods

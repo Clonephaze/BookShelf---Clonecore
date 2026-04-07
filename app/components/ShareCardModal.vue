@@ -245,7 +245,7 @@ async function handleShare() {
     background: transparent;
     color: var(--text-color-secondary);
     cursor: pointer;
-    transition: all 0.15s;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
 
     &:hover {
       background: var(--sub-bg-color);
@@ -292,7 +292,7 @@ async function handleShare() {
     font-family: $font-family-body;
     font-size: $font-size-sm;
     font-weight: $font-weight-medium;
-    transition: all 0.15s;
+    transition: background-color 0.15s, color 0.15s;
 
     &--primary {
       background: var(--highlight-color);

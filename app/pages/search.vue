@@ -488,8 +488,7 @@ onMounted(() => {
   border: 1px solid var(--border-color);
   border-radius: $radius-full;
   cursor: pointer;
-  transition: all 0.15s ease;
-  white-space: nowrap;
+    transition: background-color 0.15s ease, color 0.15s ease;
 
   &:hover {
     border-color: var(--highlight-color);

@@ -6,7 +6,6 @@
     viewBox="0 0 512 512"
     class="bookshelf-logo"
     aria-hidden="true"
-    role="img"
   >
     <rect v-if="!noBg" width="512" height="512" :rx="rounded ? 96 : 0" :fill="bg" />
     <g transform="translate(256,256)">

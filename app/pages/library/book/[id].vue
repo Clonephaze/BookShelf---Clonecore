@@ -232,7 +232,7 @@
           <div class="book-detail__progress-bar">
             <div
               class="book-detail__progress-fill"
-              :style="{ width: progressWidth }"
+              :style="{ transform: `scaleX(${progressScale})` }"
             />
           </div>
           <div class="book-detail__progress-controls">
@@ -694,17 +694,17 @@ const userBookId = computed(() => route.params.id as string)
 const bookInsights = forBook(userBookId.value)
 const shelvesStore = useShelvesStore()
 
-const progressWidth = computed(() => {
+const progressScale = computed(() => {
   if (book.value?.progressPercent) {
-    return `${parseFloat(book.value.progressPercent)}%`
+    return parseFloat(book.value.progressPercent) / 100
   }
   if (book.value?.currentMinutes && book.value?.totalMinutes) {
-    return `${Math.round((book.value.currentMinutes / book.value.totalMinutes) * 100)}%`
+    return Math.round((book.value.currentMinutes / book.value.totalMinutes) * 100) / 100
   }
   if (book.value?.currentPage && book.value?.pageCount) {
-    return `${Math.round((book.value.currentPage / book.value.pageCount) * 100)}%`
+    return Math.round((book.value.currentPage / book.value.pageCount) * 100) / 100
   }
-  return '0%'
+  return 0
 })
 
 function computePercent(): number {
@@ -1427,11 +1427,12 @@ onMounted(() => {
   }
 
   &__progress-fill {
+    width: 100%;
     height: 100%;
     background: var(--progress-color);
     border-radius: $radius-full;
-    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    min-width: 0;
+    transform-origin: left;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   &__progress-controls {
@@ -1829,7 +1830,7 @@ onMounted(() => {
     border: 1px solid var(--highlight-color);
     border-radius: $radius-md;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease;
 
     &:hover {
       background: var(--highlight-color);
