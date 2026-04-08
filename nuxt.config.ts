@@ -90,45 +90,6 @@ export default defineNuxtConfig({
       globPatterns: ['**/*.{js,css,html,svg,ico,woff2}'],
       runtimeCaching: [
         {
-          urlPattern: /^https:\/\/covers\.openlibrary\.org\/.*/i,
-          handler: 'NetworkFirst',
-          options: {
-            cacheName: 'book-covers',
-            expiration: {
-              maxEntries: 200,
-              maxAgeSeconds: 60 * 60 * 24 * 7,
-            },
-            cacheableResponse: { statuses: [0, 200] },
-            networkTimeoutSeconds: 5,
-          },
-        },
-        {
-          urlPattern: /^https:\/\/books\.google\.com\/books\/content.*/i,
-          handler: 'NetworkFirst',
-          options: {
-            cacheName: 'google-covers',
-            expiration: {
-              maxEntries: 200,
-              maxAgeSeconds: 60 * 60 * 24 * 7,
-            },
-            cacheableResponse: { statuses: [0, 200] },
-            networkTimeoutSeconds: 5,
-          },
-        },
-        {
-          urlPattern: /^https:\/\/production-img\.hardcover\.app\/.*/i,
-          handler: 'NetworkFirst',
-          options: {
-            cacheName: 'hardcover-covers',
-            expiration: {
-              maxEntries: 200,
-              maxAgeSeconds: 60 * 60 * 24 * 7,
-            },
-            cacheableResponse: { statuses: [0, 200] },
-            networkTimeoutSeconds: 5,
-          },
-        },
-        {
           urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
           handler: 'CacheFirst',
           options: {
