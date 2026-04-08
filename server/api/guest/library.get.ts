@@ -10,5 +10,6 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 500, statusMessage: 'Guest data not available' })
   }
 
+  setResponseHeader(event, 'Cache-Control', 's-maxage=3600, stale-while-revalidate=7200')
   return data.library
 })

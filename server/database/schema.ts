@@ -110,6 +110,12 @@ export const books = pgTable('books', {
   publisher: text('publisher'),
   openLibraryKey: text('open_library_key'),
   googleBooksId: text('google_books_id'),
+  hardcoverSlug: text('hardcover_slug'),
+  hardcoverId: integer('hardcover_id'),
+  audioSeconds: integer('audio_seconds'),
+  hasAudiobook: boolean('has_audiobook').notNull().default(false),
+  contentWarnings: text('content_warnings').array(),
+  moods: text('moods').array(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 }, (table) => [
@@ -117,6 +123,31 @@ export const books = pgTable('books', {
   index('books_isbn10_idx').on(table.isbn10),
   index('books_open_library_key_idx').on(table.openLibraryKey),
   index('books_google_books_id_idx').on(table.googleBooksId),
+  index('books_hardcover_id_idx').on(table.hardcoverId),
+])
+
+export const series = pgTable('series', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull(),
+  hardcoverSlug: text('hardcover_slug'),
+  authorName: text('author_name'),
+  booksCount: integer('books_count'),
+  fetchedAt: timestamp('fetched_at').notNull().defaultNow(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => [
+  index('series_hardcover_slug_idx').on(table.hardcoverSlug),
+])
+
+export const seriesBooks = pgTable('series_books', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  seriesId: uuid('series_id').notNull().references(() => series.id, { onDelete: 'cascade' }),
+  bookId: uuid('book_id').references(() => books.id, { onDelete: 'set null' }),
+  position: numeric('position', { precision: 5, scale: 1 }),
+  title: text('title').notNull(),
+  hardcoverSlug: text('hardcover_slug'),
+  coverUrl: text('cover_url'),
+}, (table) => [
+  index('series_books_series_idx').on(table.seriesId, table.position),
 ])
 
 export const userBooks = pgTable('user_books', {

@@ -1,5 +1,13 @@
 <script setup lang="ts">
+import { ExternalLink, Headphones, AlertTriangle } from 'lucide-vue-next'
 import type { BookSearchResult } from '~~/server/services/book-api/types'
+
+function formatAudioDuration(seconds: number): string {
+  const hours = Math.floor(seconds / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  if (hours === 0) return `${minutes} min`
+  return minutes > 0 ? `${hours} hr ${minutes} min` : `${hours} hr`
+}
 
 const props = defineProps<{
   book: BookSearchResult
@@ -147,12 +155,57 @@ onUnmounted(() => {
               {{ book.description }}
             </p>
 
+            <!-- Series info -->
+            <div v-if="book.seriesName" class="book-modal__series">
+              {{ book.seriesPosition ? `Book ${book.seriesPosition} of ` : '' }}{{ book.seriesName }}
+            </div>
+
+            <!-- Audiobook info -->
+            <div v-if="book.audioSeconds || book.hasAudiobook" class="book-modal__audiobook">
+              <Headphones :size="16" />
+              <span v-if="book.audioSeconds">Audiobook: {{ formatAudioDuration(book.audioSeconds) }}</span>
+              <span v-else>Audiobook available</span>
+            </div>
+
+            <!-- Moods -->
+            <div v-if="book.moods?.length" class="book-modal__moods">
+              <span
+                v-for="mood in book.moods"
+                :key="mood"
+                class="book-modal__mood-tag"
+              >{{ mood }}</span>
+            </div>
+
+            <!-- Content warnings -->
+            <details v-if="book.contentWarnings?.length" class="book-modal__warnings">
+              <summary class="book-modal__warnings-summary">
+                <AlertTriangle :size="14" />
+                Content Warnings ({{ book.contentWarnings.length }})
+              </summary>
+              <div class="book-modal__warnings-tags">
+                <span
+                  v-for="warning in book.contentWarnings"
+                  :key="warning"
+                  class="book-modal__warning-tag"
+                >{{ warning }}</span>
+              </div>
+            </details>
+
             <!-- Source links -->
             <div
-              v-if="book.openLibraryKey || book.googleBooksId || book.isbn13"
+              v-if="book.hardcoverSlug || book.openLibraryKey || book.googleBooksId || book.isbn13"
               class="book-modal__sources"
             >
               <span class="book-modal__sources-label">Find this book:</span>
+              <a
+                v-if="book.hardcoverSlug"
+                :href="`https://hardcover.app/books/${book.hardcoverSlug}`"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="book-modal__source-link"
+              >
+                Hardcover <ExternalLink :size="12" />
+              </a>
               <a
                 v-if="book.openLibraryKey"
                 :href="`https://openlibrary.org${book.openLibraryKey}`"
@@ -160,18 +213,16 @@ onUnmounted(() => {
                 rel="noopener noreferrer"
                 class="book-modal__source-link"
               >
-                Open Library
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                Open Library <ExternalLink :size="12" />
               </a>
               <a
                 v-if="book.googleBooksId"
-                :href="`https://books.google.com/books?id=${book.googleBooksId}`"
+                :href="`https://books.google.com/books?id=${encodeURIComponent(book.googleBooksId)}`"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="book-modal__source-link"
               >
-                Google Books
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                Google Books <ExternalLink :size="12" />
               </a>
               <a
                 v-if="book.isbn13"
@@ -180,8 +231,7 @@ onUnmounted(() => {
                 rel="noopener noreferrer"
                 class="book-modal__source-link"
               >
-                WorldCat
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                WorldCat <ExternalLink :size="12" />
               </a>
               <a
                 v-if="book.isbn13 || book.isbn10"
@@ -190,8 +240,7 @@ onUnmounted(() => {
                 rel="noopener noreferrer"
                 class="book-modal__source-link"
               >
-                Goodreads
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                Goodreads <ExternalLink :size="12" />
               </a>
             </div>
 
@@ -410,6 +459,67 @@ onUnmounted(() => {
     color: var(--text-color-secondary);
     max-height: 12rem;
     overflow-y: auto;
+  }
+
+  &__series {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--highlight-color);
+  }
+
+  &__audiobook {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    font-size: $font-size-sm;
+    color: var(--text-color-secondary);
+  }
+
+  &__moods {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+  }
+
+  &__mood-tag {
+    padding: 2px $spacing-sm;
+    font-size: $font-size-xs;
+    color: var(--highlight-color);
+    background: var(--highlight-color-subtle);
+    border-radius: $radius-full;
+  }
+
+  &__warnings {
+    font-size: $font-size-sm;
+
+    &-summary {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      color: var(--text-color-muted);
+      cursor: pointer;
+      user-select: none;
+
+      &:hover {
+        color: var(--text-color);
+      }
+    }
+
+    &-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: $spacing-xs;
+      margin-top: $spacing-sm;
+    }
+  }
+
+  &__warning-tag {
+    padding: 2px $spacing-sm;
+    font-size: $font-size-xs;
+    color: var(--warning-color, var(--text-color-muted));
+    background: var(--sub-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: $radius-full;
   }
 
   &__sources {

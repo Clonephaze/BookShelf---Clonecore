@@ -4,6 +4,36 @@ Log of significant decisions. Newest first.
 
 ---
 
+## ADR-011: Hardcover as Third Book API Source
+
+**Status:** Accepted  
+**Date:** 2026-04-07
+
+**Context:** Open Library and Google Books serve as primary/enrichment book data sources, but lack community-curated data (moods, content warnings), series tracking, audiobook metadata, and social signals (trending, ratings from a reader community).
+
+**Decision:** Add Hardcover (hardcover.app) as a third API source with enrichment priority. Hardcover's GraphQL API provides community-curated genres/moods/content warnings, series data, audiobook duration, and community ratings. It runs in parallel with OL + Google during search and provides on-demand enrichment for book details.
+
+**Constraints:**
+- API rate limited to 60 req/min (self-limited to 40 for safety)
+- Server-side only (already our pattern)
+- API token required (annual renewal)
+- Beta API — may change without notice
+
+**Caching strategy:**
+- CDN caching (Vercel Edge) via Cache-Control headers for all public endpoints
+- DB persistence for Hardcover slugs, series data, audiobook metadata
+- Series data cached in DB with 7-day TTL
+
+**New infrastructure:**
+- `hardcover.ts` adapter in book-api service
+- Outbound token-bucket rate limiter (40/min)
+- `series` and `series_books` DB tables
+- `HARDCOVER_API_TOKEN` environment variable
+
+**Consequences:** Richer search results with series context and audiobook flags. Book detail pages show content warnings, moods, and "Find this book on" links. Full series browsing with ownership tracking. Trending books on discover page. All Hardcover features degrade gracefully if API is unavailable.
+
+---
+
 ## ADR-010: Non-Blocking Fetch Pattern for Page Performance
 
 **Date:** 2026-04-05

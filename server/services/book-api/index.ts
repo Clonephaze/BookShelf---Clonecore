@@ -8,10 +8,12 @@
 import type { BookSearchResult, BookSearchResponse } from './types'
 import { searchOpenLibrary } from './open-library'
 import { searchGoogleBooks } from './google-books'
+import { searchHardcover } from './hardcover'
 
 /**
  * Merge two results for the same book, preferring the richer value for each field.
- * Primary (Open Library) wins for ties except description (Google is usually better).
+ * Primary wins for ties; description always picks the longer version.
+ * Hardcover is treated as primary when available (richer metadata).
  */
 function mergeResults(primary: BookSearchResult, secondary: BookSearchResult): BookSearchResult {
   return {
@@ -34,6 +36,17 @@ function mergeResults(primary: BookSearchResult, secondary: BookSearchResult): B
     publisher: primary.publisher || secondary.publisher,
     openLibraryKey: primary.openLibraryKey || secondary.openLibraryKey,
     googleBooksId: primary.googleBooksId || secondary.googleBooksId,
+    hardcoverSlug: primary.hardcoverSlug || secondary.hardcoverSlug,
+    hardcoverId: primary.hardcoverId || secondary.hardcoverId,
+    audioSeconds: primary.audioSeconds || secondary.audioSeconds,
+    hasAudiobook: primary.hasAudiobook || secondary.hasAudiobook,
+    contentWarnings: primary.contentWarnings?.length ? primary.contentWarnings : secondary.contentWarnings,
+    moods: primary.moods?.length ? primary.moods : secondary.moods,
+    seriesName: primary.seriesName || secondary.seriesName,
+    seriesPosition: primary.seriesPosition ?? secondary.seriesPosition,
+    seriesSlug: primary.seriesSlug || secondary.seriesSlug,
+    hardcoverRating: primary.hardcoverRating ?? secondary.hardcoverRating,
+    hardcoverRatingsCount: primary.hardcoverRatingsCount ?? secondary.hardcoverRatingsCount,
   }
 }
 
@@ -44,7 +57,52 @@ function mergeResults(primary: BookSearchResult, secondary: BookSearchResult): B
 function dedupKey(result: BookSearchResult): string {
   if (result.isbn13) return `isbn13:${result.isbn13}`
   if (result.isbn10) return `isbn10:${result.isbn10}`
-  return `title:${result.title.toLowerCase().trim()}|${result.author.toLowerCase().trim()}`
+  return titleKey(result)
+}
+
+/** Normalize title+author into a fuzzy match key */
+function titleKey(result: BookSearchResult): string {
+  return `title:${result.title.toLowerCase().replace(/[^a-z0-9]/g, '')}|${result.author.toLowerCase().replace(/[^a-z0-9]/g, '')}`
+}
+
+/**
+ * Find an existing entry in the merged map by ISBN, hardcoverId, or title+author.
+ * Returns the map key if found, null otherwise.
+ */
+function findExisting(
+  merged: Map<string, BookSearchResult>,
+  result: BookSearchResult,
+): string | null {
+  // Exact key match (ISBN or title)
+  const key = dedupKey(result)
+  if (merged.has(key)) return key
+
+  // Cross-match: result has ISBN but existing entry was keyed by title (or vice versa)
+  // Try title-based lookup for ISBN-keyed entries
+  if (result.isbn13 || result.isbn10) {
+    const tk = titleKey(result)
+    if (merged.has(tk)) return tk
+  }
+
+  // Try ISBN, hardcoverId, or title lookup against all existing entries
+  for (const [existingKey, existing] of merged) {
+    // Match by Hardcover book ID (same canonical book, different editions/ISBNs)
+    if (result.hardcoverId && existing.hardcoverId && result.hardcoverId === existing.hardcoverId) {
+      return existingKey
+    }
+
+    if (existingKey.startsWith('title:')) {
+      // Check if ISBNs match
+      if (result.isbn13 && existing.isbn13 && result.isbn13 === existing.isbn13) return existingKey
+      if (result.isbn10 && existing.isbn10 && result.isbn10 === existing.isbn10) return existingKey
+    }
+    // Check if a title-keyed result matches an ISBN-keyed one by title
+    if (existingKey.startsWith('isbn')) {
+      if (titleKey(result) === titleKey(existing)) return existingKey
+    }
+  }
+
+  return null
 }
 
 /**
@@ -62,6 +120,10 @@ function completenessScore(result: BookSearchResult): number {
   if (result.publisher) score += 1
   if (result.openLibraryKey) score += 1
   if (result.googleBooksId) score += 1
+  if (result.hardcoverSlug) score += 1
+  if (result.hasAudiobook) score += 1
+  if (result.seriesName) score += 1
+  if (result.moods?.length) score += 1
   return score
 }
 
@@ -75,7 +137,7 @@ export async function searchBooks(
   sort: 'best-match' | 'relevance' = 'best-match',
 ): Promise<BookSearchResponse> {
   // Fire both APIs in parallel — if one fails, use results from the other
-  const [olResults, gbResults] = await Promise.all([
+  const [olResults, gbResults, hcResults] = await Promise.all([
     searchOpenLibrary(query, limit).catch((err) => {
       console.warn('[BookService] Open Library search failed:', err.message)
       return [] as BookSearchResult[]
@@ -84,31 +146,70 @@ export async function searchBooks(
       console.warn('[BookService] Google Books search failed:', err.message)
       return [] as BookSearchResult[]
     }),
+    searchHardcover(query, limit).catch((err) => {
+      console.warn('[BookService] Hardcover search failed:', err.message)
+      return [] as BookSearchResult[]
+    }),
   ])
 
   // Merge and deduplicate
   const merged = new Map<string, BookSearchResult>()
+  // Track the best (lowest) source position per entry for relevance ranking
+  const bestRank = new Map<string, number>()
 
-  // OL results first (primary source)
-  for (const result of olResults) {
+  function trackRank(key: string, position: number) {
+    bestRank.set(key, Math.min(bestRank.get(key) ?? Infinity, position))
+  }
+
+  // OL results first
+  for (let i = 0; i < olResults.length; i++) {
+    const result = olResults[i]
     const key = dedupKey(result)
     merged.set(key, result)
+    trackRank(key, i)
   }
 
   // Google Books results — merge with OL if duplicate, add if new
-  for (const result of gbResults) {
-    const key = dedupKey(result)
-    const existing = merged.get(key)
-    if (existing) {
-      merged.set(key, mergeResults(existing, result))
+  for (let i = 0; i < gbResults.length; i++) {
+    const result = gbResults[i]
+    const existingKey = findExisting(merged, result)
+    if (existingKey) {
+      merged.set(existingKey, mergeResults(merged.get(existingKey)!, result))
+      trackRank(existingKey, i)
     } else {
+      const key = dedupKey(result)
       merged.set(key, result)
+      trackRank(key, i)
     }
   }
 
-  // Rank by completeness (best-match) or preserve merge order (relevance)
+  // Hardcover results — HC is primary (richer metadata: series, moods, ratings, covers)
+  for (let i = 0; i < hcResults.length; i++) {
+    const result = hcResults[i]
+    const existingKey = findExisting(merged, result)
+    if (existingKey) {
+      merged.set(existingKey, mergeResults(result, merged.get(existingKey)!))
+      // HC top results get extra relevance weight (rank halved)
+      trackRank(existingKey, Math.floor(i / 2))
+    } else {
+      const key = dedupKey(result)
+      merged.set(key, result)
+      trackRank(key, Math.floor(i / 2))
+    }
+  }
+
+  // Rank by completeness + source relevance, or preserve merge order
   const ranked = sort === 'best-match'
-    ? [...merged.values()].sort((a, b) => completenessScore(b) - completenessScore(a))
+    ? [...merged.entries()]
+        .sort(([keyA, a], [keyB, b]) => {
+          const cA = completenessScore(a)
+          const cB = completenessScore(b)
+          // Relevance bonus: position 0 → +10, position 1 → +8, ..., position 5+ → 0
+          const rA = Math.max(0, 10 - (bestRank.get(keyA) ?? 99) * 2)
+          const rB = Math.max(0, 10 - (bestRank.get(keyB) ?? 99) * 2)
+          return (cB + rB) - (cA + rA)
+        })
+        .map(([, r]) => r)
     : [...merged.values()]
 
   const results = ranked.slice(0, limit)

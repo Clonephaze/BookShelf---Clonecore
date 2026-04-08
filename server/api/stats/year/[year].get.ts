@@ -133,6 +133,7 @@ export default defineEventHandler(async (event) => {
   // Best month
   const bestMonth = months.length ? months.reduce((best, m) => m.count > best.count ? m : best, months[0]!) : null
 
+  setResponseHeader(event, 'Cache-Control', 'private, max-age=300')
   return {
     year,
     isCurrentYear: year === now.getFullYear(),

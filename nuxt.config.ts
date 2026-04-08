@@ -7,6 +7,7 @@ export default defineNuxtConfig({
   modules: [
     '@nuxt/eslint',
     '@pinia/nuxt',
+    '@vite-pwa/nuxt',
   ],
 
   css: [
@@ -31,8 +32,13 @@ export default defineNuxtConfig({
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'description', content: 'Your reading life, beautifully organized.' },
+        { name: 'theme-color', content: '#302318' },
+        { name: 'apple-mobile-web-app-capable', content: 'yes' },
+        { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
       ],
       link: [
+        { rel: 'manifest', href: '/manifest.webmanifest' },
+        { rel: 'apple-touch-icon', href: '/pwa-192x192.svg' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap' },
@@ -45,6 +51,7 @@ export default defineNuxtConfig({
     betterAuthSecret: process.env.BETTER_AUTH_SECRET,
     googleBooksApiKey: process.env.GOOGLE_BOOKS_API_KEY,
     resendApiKey: process.env.RESEND_API_KEY,
+    hardcoverApiToken: process.env.HARDCOVER_API_TOKEN,
     public: {
       // Used as SSR fallback only — browser uses window.location.origin automatically.
       // Set BETTER_AUTH_URL in Vercel env vars for correct reset-password email links.
@@ -88,8 +95,8 @@ export default defineNuxtConfig({
           options: {
             cacheName: 'book-covers',
             expiration: {
-              maxEntries: 500,
-              maxAgeSeconds: 60 * 60 * 24 * 30,
+              maxEntries: 200,
+              maxAgeSeconds: 60 * 60 * 24 * 7,
             },
             cacheableResponse: { statuses: [0, 200] },
           },
@@ -100,8 +107,20 @@ export default defineNuxtConfig({
           options: {
             cacheName: 'google-covers',
             expiration: {
-              maxEntries: 500,
-              maxAgeSeconds: 60 * 60 * 24 * 30,
+              maxEntries: 200,
+              maxAgeSeconds: 60 * 60 * 24 * 7,
+            },
+            cacheableResponse: { statuses: [0, 200] },
+          },
+        },
+        {
+          urlPattern: /^https:\/\/production-img\.hardcover\.app\/.*/i,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'hardcover-covers',
+            expiration: {
+              maxEntries: 200,
+              maxAgeSeconds: 60 * 60 * 24 * 7,
             },
             cacheableResponse: { statuses: [0, 200] },
           },
@@ -129,7 +148,7 @@ export default defineNuxtConfig({
       installPrompt: true,
     },
     devOptions: {
-      enabled: false,
+      enabled: true,
     },
   },
 
@@ -145,9 +164,10 @@ export default defineNuxtConfig({
           'Content-Security-Policy': [
             "default-src 'self'",
             "script-src 'self' 'unsafe-inline'",
+            "worker-src 'self' blob:",
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
             "font-src 'self' https://fonts.gstatic.com",
-            "img-src 'self' data: blob: https://covers.openlibrary.org https://archive.org https://*.archive.org https://*.google.com https://*.googleusercontent.com",
+            "img-src 'self' data: blob: https://covers.openlibrary.org https://archive.org https://*.archive.org https://*.google.com https://*.googleusercontent.com https://production-img.hardcover.app https://assets.hardcover.app",
             "connect-src 'self'",
             "frame-ancestors 'none'",
             "base-uri 'self'",

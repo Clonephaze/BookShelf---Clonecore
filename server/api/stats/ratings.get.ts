@@ -68,6 +68,7 @@ export default defineEventHandler(async (event) => {
 
   const topAuthor = topRatedAuthor[0] ?? null
 
+  setResponseHeader(event, 'Cache-Control', 'private, max-age=300')
   return {
     distribution: [1, 2, 3, 4, 5].map(star => ({
       rating: star,

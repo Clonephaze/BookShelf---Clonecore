@@ -39,6 +39,7 @@ export default defineEventHandler(async (event) => {
   if (book.isbn10) conditions.push(eq(books.isbn10, book.isbn10))
   if (book.openLibraryKey) conditions.push(eq(books.openLibraryKey, book.openLibraryKey))
   if (book.googleBooksId) conditions.push(eq(books.googleBooksId, book.googleBooksId))
+  if (book.hardcoverId) conditions.push(eq(books.hardcoverId, book.hardcoverId))
 
   let bookId: string
 
@@ -67,6 +68,12 @@ export default defineEventHandler(async (event) => {
         publisher: book.publisher,
         openLibraryKey: book.openLibraryKey,
         googleBooksId: book.googleBooksId,
+        hardcoverSlug: book.hardcoverSlug,
+        hardcoverId: book.hardcoverId,
+        audioSeconds: book.audioSeconds,
+        hasAudiobook: book.hasAudiobook ?? false,
+        contentWarnings: book.contentWarnings,
+        moods: book.moods,
       }).returning({ id: books.id })
       if (!inserted) throw createError({ statusCode: 500, statusMessage: 'Failed to insert book' })
       bookId = inserted.id
@@ -84,6 +91,10 @@ export default defineEventHandler(async (event) => {
       genres: book.genres,
       description: book.description,
       publisher: book.publisher,
+      audioSeconds: book.audioSeconds,
+      hasAudiobook: book.hasAudiobook ?? false,
+      contentWarnings: book.contentWarnings,
+      moods: book.moods,
     }).returning({ id: books.id })
     if (!inserted) throw createError({ statusCode: 500, statusMessage: 'Failed to insert book' })
     bookId = inserted.id

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Headphones } from 'lucide-vue-next'
 import type { BookSearchResult } from '~~/server/services/book-api/types'
 
 const props = defineProps<{
@@ -29,12 +30,17 @@ function onAdd(shelfId: string) {
       :aria-label="`View details for ${book.title}`"
       @click="$emit('view', book)"
     >
-      <BookCover
-        :src="book.coverUrl"
-        :title="book.title"
-        :author="book.author"
-        width="6rem"
-      />
+      <div class="result-card__cover-wrapper">
+        <BookCover
+          :src="book.coverUrl"
+          :title="book.title"
+          :author="book.author"
+          width="6rem"
+        />
+        <span v-if="book.hasAudiobook" class="result-card__audio-badge" title="Audiobook available">
+          <Headphones :size="12" />
+        </span>
+      </div>
 
       <div class="result-card__info">
         <h3 class="result-card__title">
@@ -48,6 +54,9 @@ function onAdd(shelfId: string) {
             </span>
           </template>
         </p>
+        <span v-if="book.seriesName" class="result-card__series">
+          {{ book.seriesPosition ? `Book ${book.seriesPosition} of ` : '' }}{{ book.seriesName }}
+        </span>
         <div class="result-card__meta">
           <span v-if="book.publishedDate">{{ book.publishedDate }}</span>
           <span v-if="book.pageCount">{{ book.pageCount }} pages</span>
@@ -59,6 +68,9 @@ function onAdd(shelfId: string) {
         >
           {{ book.description }}
         </p>
+        <div v-if="book.moods?.length" class="result-card__moods">
+          <span v-for="mood in book.moods.slice(0, 3)" :key="mood" class="result-card__mood-tag">{{ mood }}</span>
+        </div>
       </div>
     </button>
 
@@ -187,12 +199,54 @@ function onAdd(shelfId: string) {
     }
   }
 
+  &__cover-wrapper {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  &__audio-badge {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px $spacing-xs;
+    border-radius: $radius-sm;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+  }
+
+  &__series {
+    font-size: $font-size-xs;
+    color: var(--highlight-color);
+    margin-top: 2px;
+  }
+
   &__description {
     font-size: $font-size-sm;
     color: var(--text-color-secondary);
     line-height: 1.5;
     @include truncate(2);
     margin-top: $spacing-xs;
+  }
+
+  &__moods {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin-top: $spacing-xs;
+  }
+
+  &__mood-tag {
+    font-size: 10px;
+    color: var(--highlight-color);
+    background-color: color-mix(in srgb, var(--highlight-color) 10%, transparent);
+    padding: 1px $spacing-xs;
+    border-radius: $radius-full;
+    white-space: nowrap;
   }
 
   &__actions {

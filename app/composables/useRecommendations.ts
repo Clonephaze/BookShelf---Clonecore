@@ -20,6 +20,17 @@ export interface Recommendation {
   isbn10?: string
   openLibraryKey?: string
   googleBooksId?: string
+  hardcoverSlug?: string
+  hardcoverId?: number
+  audioSeconds?: number
+  hasAudiobook?: boolean
+  moods?: string[] | null
+  contentWarnings?: string[] | null
+  seriesName?: string
+  seriesPosition?: number
+  seriesSlug?: string
+  hardcoverRating?: number
+  hardcoverRatingsCount?: number
   score: number
   reasons: RecommendationReason[]
 }

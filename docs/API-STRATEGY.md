@@ -40,36 +40,65 @@ Bookshelf uses **Open Library** as the primary API and **Google Books** as an en
 - Search by ISBN: `GET /volumes?q=isbn:{isbn}&key={key}`
 - Volume details: `GET /volumes/{id}?key={key}`
 
+### Hardcover
+
+| Attribute | Details |
+|-----------|---------|
+| **Base URL** | `https://api.hardcover.app/v1/graphql` |
+| **Auth** | Bearer token via `authorization` header |
+| **Rate limit** | 60 req/min (self-limited to 40) |
+| **Search** | Typesense-backed via GraphQL `search` query |
+| **Strengths** | Community-curated moods/tags/content warnings, series data, audiobook metadata, reader community ratings |
+| **Weaknesses** | Lower rate limit, beta API (may break), token expires annually |
+
+**Key queries:**
+- Search: `search(query, query_type: "Book", per_page, page)`
+- Book by ISBN: `editions(where: { isbn_13: { _eq: $isbn } })` → `books(where: { id: { _eq: $id } })`
+- Series: `series(where: { slug: { _eq: $slug } })` with `book_series` subquery
+- Trending: `books(order_by: { users_read_count: desc })`
+
 ## Unified Interface
 
-Both APIs are normalized to a common `BookSearchResult` type:
+All three APIs are normalized to a common `BookSearchResult` type:
 
 ```typescript
 interface BookSearchResult {
   title: string
-  authors: string[]
-  isbn13: string | null
-  isbn10: string | null
-  coverUrl: string | null
-  coverUrlSmall: string | null
-  pageCount: number | null
-  publishedDate: string | null
-  genres: string[]
-  description: string | null
-  publisher: string | null
-  openLibraryKey: string | null
-  googleBooksId: string | null
+  author: string
+  additionalAuthors?: string[]
+  isbn13?: string
+  isbn10?: string
+  coverUrl?: string
+  coverUrlSmall?: string
+  pageCount?: number
+  publishedDate?: string
+  genres?: string[]
+  description?: string
+  publisher?: string
+  openLibraryKey?: string
+  googleBooksId?: string
+  hardcoverSlug?: string
+  hardcoverId?: number
+  audioSeconds?: number
+  hasAudiobook?: boolean
+  contentWarnings?: string[]
+  moods?: string[]
+  seriesName?: string
+  seriesPosition?: number
+  hardcoverRating?: number
+  hardcoverRatingsCount?: number
 }
 ```
 
 ## Search Strategy
 
 ### For user-initiated search:
-1. **Fire both APIs in parallel** (Open Library + Google Books)
+1. **Fire all three APIs in parallel** (Open Library + Google Books + Hardcover)
 2. **Merge & deduplicate** results by ISBN match (ISBN-13 preferred, fall back to ISBN-10)
-3. **Prefer the richer record** — for each matched pair, take the better cover, longer description, more complete metadata from whichever API provides it
+3. **Prefer the richer record** — for each matched pair, take the better cover, longer description, more complete metadata from whichever API provides it. Hardcover contributes series context, moods, audiobook flags, and community ratings.
 4. **Rank results** — exact matches first, then relevance, then API source (Google Books results rank slightly higher for metadata quality)
 5. **Return unified results** to the client
+6. **Graceful degradation** — if Hardcover is unavailable or rate-limited, results from OL + Google are returned without delay
 
 ### For ISBN lookup (e.g., adding from Goodreads import):
 1. Try Open Library ISBN endpoint first (no rate limit concern for single requests)

@@ -47,6 +47,7 @@ export default defineEventHandler(async (event) => {
   const totalBooks = counts?.totalBooks ?? 0
   const repeatAuthors = topAuthors.filter(a => a.bookCount > 1).length
 
+  setResponseHeader(event, 'Cache-Control', 'private, max-age=300')
   return {
     uniqueAuthors,
     totalBooks,

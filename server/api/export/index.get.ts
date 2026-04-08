@@ -5,6 +5,7 @@ import { requireServerSession } from '../../utils/session'
 
 export default defineEventHandler(async (event) => {
   const session = await requireServerSession(event)
+  setResponseHeader(event, 'Cache-Control', 'no-store')
   const db = useDB()
   const userId = session.user.id
 

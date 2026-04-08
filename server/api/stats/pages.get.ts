@@ -102,6 +102,7 @@ export default defineEventHandler(async (event) => {
     count: buckets.find(r => r.bucket === b.bucket)?.count ?? 0,
   }))
 
+  setResponseHeader(event, 'Cache-Control', 'private, max-age=300')
   return {
     distribution,
     shortest: shortest[0] ?? null,

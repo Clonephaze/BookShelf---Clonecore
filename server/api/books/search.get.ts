@@ -24,6 +24,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     const results = await searchBooks(q, limit, config.googleBooksApiKey, sort)
+    setResponseHeader(event, 'Cache-Control', 's-maxage=3600, stale-while-revalidate=7200')
     return results
   }
   catch (err) {

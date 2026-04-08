@@ -33,6 +33,17 @@ export interface Recommendation {
   isbn10?: string
   openLibraryKey?: string
   googleBooksId?: string
+  hardcoverSlug?: string
+  hardcoverId?: number
+  audioSeconds?: number
+  hasAudiobook?: boolean
+  moods?: string[] | null
+  contentWarnings?: string[] | null
+  seriesName?: string
+  seriesPosition?: number
+  seriesSlug?: string
+  hardcoverRating?: number
+  hardcoverRatingsCount?: number
   score: number
   reasons: RecommendationReason[]
 }
@@ -131,6 +142,12 @@ export async function getRecommendations(userId: string, limit = 20): Promise<Re
         isbn10: book.isbn10 ?? undefined,
         openLibraryKey: book.openLibraryKey ?? undefined,
         googleBooksId: book.googleBooksId ?? undefined,
+        hardcoverSlug: book.hardcoverSlug ?? undefined,
+        hardcoverId: book.hardcoverId ?? undefined,
+        audioSeconds: book.audioSeconds ?? undefined,
+        hasAudiobook: book.hasAudiobook || undefined,
+        moods: book.moods,
+        contentWarnings: book.contentWarnings,
         score: rec.score,
         reasons: rec.reasons,
       })

@@ -38,5 +38,6 @@ export default defineEventHandler(async (event) => {
     percentage: totalBooks > 0 ? Math.round((r.count / totalBooks) * 100) : 0,
   }))
 
+  setResponseHeader(event, 'Cache-Control', 'private, max-age=300')
   return { genres, totalBooks }
 })

@@ -2,7 +2,7 @@
 // Book API Types — Bookshelf
 // ============================================
 // Shared interfaces for Open Library, Google Books,
-// and the unified BookService.
+// Hardcover, and the unified BookService.
 // ============================================
 
 /** Normalized search result from any book API */
@@ -21,6 +21,17 @@ export interface BookSearchResult {
   publisher?: string
   openLibraryKey?: string
   googleBooksId?: string
+  hardcoverSlug?: string
+  hardcoverId?: number
+  audioSeconds?: number
+  hasAudiobook?: boolean
+  contentWarnings?: string[]
+  moods?: string[]
+  seriesName?: string
+  seriesPosition?: number
+  seriesSlug?: string
+  hardcoverRating?: number
+  hardcoverRatingsCount?: number
 }
 
 /** Query parameters for book search */

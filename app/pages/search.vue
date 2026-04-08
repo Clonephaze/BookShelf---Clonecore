@@ -14,6 +14,7 @@ const { isGuest } = useGuest()
 
 const searchStore = useSearchStore()
 const shelvesStore = useShelvesStore()
+const libraryStore = useLibraryStore()
 const toast = useToast()
 
 // Track which books are currently being added (UI-only, ephemeral)
@@ -37,6 +38,7 @@ async function addBook(book: BookSearchResult, shelfId: string) {
       body: { book, shelfId },
     })
     searchStore.markInLibrary(bookKey)
+    libraryStore.invalidate()
   }
   catch (err: unknown) {
     searchStore.errorMessage = err instanceof Error ? err.message : 'Failed to add book'
@@ -58,12 +60,22 @@ async function onSortChange(sort: string) {
   // title / author / newest are handled client-side in the store computed
 }
 
+const route = useRoute()
+
 onMounted(() => {
   shelvesStore.fetch()
 
   // If navigated with ?q= param (e.g. from header search), run the search
-  const q = useRoute().query.q
+  const q = route.query.q
   if (typeof q === 'string' && q.trim().length >= 2) {
+    searchStore.doSearch(q.trim())
+  }
+})
+
+// React to ?q= changes while already on the search page (e.g. series panel clicks)
+watch(() => route.query.q, (q) => {
+  if (typeof q === 'string' && q.trim().length >= 2) {
+    selectedBook.value = null
     searchStore.doSearch(q.trim())
   }
 })
@@ -278,10 +290,10 @@ onMounted(() => {
       </p>
     </div>
 
-    <!-- Book detail modal -->
-    <BookDetailModal
+    <!-- Book detail panel -->
+    <BookDetailPanel
       v-if="selectedBook"
-      :book="selectedBook"
+      :preview-book="selectedBook"
       :shelves="shelvesStore.shelves"
       :in-library="searchStore.isInLibrary(selectedBook)"
       :adding="isAdding(selectedBook)"

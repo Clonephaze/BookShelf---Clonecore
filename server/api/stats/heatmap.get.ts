@@ -32,5 +32,6 @@ export default defineEventHandler(async (event) => {
     if (row.date) days[row.date] = row.count
   }
 
+  setResponseHeader(event, 'Cache-Control', 'private, max-age=300')
   return { year, days }
 })

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Sparkles, RefreshCw } from 'lucide-vue-next'
+import { Sparkles, RefreshCw, TrendingUp, BookOpen, Star } from 'lucide-vue-next'
 import type { BookSearchResult } from '~~/server/services/book-api/types'
 import type { Recommendation } from '~/composables/useRecommendations'
 
@@ -15,13 +15,34 @@ const { recommendations, loading, fetchRecommendations, dismiss } = useRecommend
 const shelvesStore = useShelvesStore()
 const toast = useToast()
 
+// Trending
+const trending = ref<BookSearchResult[]>([])
+const trendingLoading = ref(true)
+
 // Shelf data for add-to-shelf
 onMounted(async () => {
   await Promise.all([
     fetchRecommendations(),
     shelvesStore.fetch(),
+    fetchTrending(),
   ])
 })
+
+async function fetchTrending() {
+  trendingLoading.value = true
+  try {
+    const data = await $fetch<{ results: BookSearchResult[] }>('/api/discover/trending', {
+      query: { limit: 15 },
+    })
+    trending.value = data.results
+  }
+  catch {
+    // Trending is optional — fail silently
+  }
+  finally {
+    trendingLoading.value = false
+  }
+}
 
 // Detail modal
 const selectedBook = ref<BookSearchResult | null>(null)
@@ -31,6 +52,10 @@ function viewRecommendation(bookId: string) {
   const rec = recommendations.value.find(r => r.bookId === bookId)
   if (!rec) return
   selectedBook.value = recToSearchResult(rec)
+}
+
+function viewTrendingBook(book: BookSearchResult) {
+  selectedBook.value = book
 }
 
 function recToSearchResult(rec: Recommendation): BookSearchResult {
@@ -47,6 +72,17 @@ function recToSearchResult(rec: Recommendation): BookSearchResult {
     isbn10: rec.isbn10,
     openLibraryKey: rec.openLibraryKey,
     googleBooksId: rec.googleBooksId,
+    hardcoverSlug: rec.hardcoverSlug,
+    hardcoverId: rec.hardcoverId,
+    hardcoverRating: rec.hardcoverRating,
+    hardcoverRatingsCount: rec.hardcoverRatingsCount,
+    seriesName: rec.seriesName,
+    seriesPosition: rec.seriesPosition,
+    seriesSlug: rec.seriesSlug,
+    moods: rec.moods ?? undefined,
+    contentWarnings: rec.contentWarnings ?? undefined,
+    audioSeconds: rec.audioSeconds,
+    hasAudiobook: rec.hasAudiobook,
   }
 }
 
@@ -67,6 +103,7 @@ async function addBook(book: BookSearchResult, shelfId: string) {
     const rec = recommendations.value.find(r => r.title === book.title)
     if (rec) dismiss(rec.bookId)
     selectedBook.value = null
+    useLibraryStore().invalidate()
   } catch {
     toast.error('Failed to add book')
   } finally {
@@ -108,6 +145,44 @@ async function refresh() {
       </button>
     </header>
 
+    <!-- Trending section -->
+    <section v-if="trending.length > 0 || trendingLoading" class="discover__trending">
+      <h2 class="discover__section-title">
+        <TrendingUp :size="20" />
+        Trending on Hardcover
+      </h2>
+      <div v-if="trendingLoading" class="discover__trending-loading">
+        <div v-for="i in 6" :key="i" class="discover__trending-skeleton" />
+      </div>
+      <div v-else class="discover__trending-scroll">
+        <button
+          v-for="book in trending"
+          :key="book.hardcoverSlug || book.title"
+          class="discover__trending-card"
+          @click="viewTrendingBook(book)"
+        >
+          <img
+            v-if="book.coverUrl"
+            :src="book.coverUrl"
+            :alt="book.title"
+            class="discover__trending-cover"
+            loading="lazy"
+          />
+          <div v-else class="discover__trending-cover discover__trending-cover--placeholder">
+            <BookOpen :size="20" />
+          </div>
+          <div class="discover__trending-info">
+            <span class="discover__trending-title">{{ book.title }}</span>
+            <span class="discover__trending-author">{{ book.author }}</span>
+            <div v-if="book.hardcoverRating" class="discover__trending-rating">
+              <Star :size="12" />
+              {{ book.hardcoverRating.toFixed(1) }}
+            </div>
+          </div>
+        </button>
+      </div>
+    </section>
+
     <!-- Loading -->
     <div v-if="loading && recommendations.length === 0" class="discover__loading">
       <div v-for="i in 6" :key="i" class="discover__skeleton" />
@@ -138,10 +213,10 @@ async function refresh() {
       />
     </div>
 
-    <!-- Detail modal (reuse search modal) -->
-    <BookDetailModal
+    <!-- Detail panel (unified) -->
+    <BookDetailPanel
       v-if="selectedBook"
-      :book="selectedBook"
+      :preview-book="selectedBook"
       :shelves="shelvesStore.shelves"
       :in-library="false"
       :adding="isAdding(selectedBook)"
@@ -248,6 +323,131 @@ async function refresh() {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: $spacing-md;
+  }
+
+  &__trending {
+    margin-bottom: $spacing-2xl;
+  }
+
+  &__section-title {
+    @include heading;
+    font-size: $font-size-lg;
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-md;
+    color: var(--text-color);
+  }
+
+  &__trending-loading {
+    display: flex;
+    gap: $spacing-md;
+    overflow: hidden;
+  }
+
+  &__trending-skeleton {
+    width: 140px;
+    height: 260px;
+    border-radius: $radius-md;
+    background: var(--border-color);
+    animation: pulse 1.5s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  &__trending-scroll {
+    display: flex;
+    gap: $spacing-md;
+    overflow-x: auto;
+    padding-bottom: $spacing-sm;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 2px;
+    }
+  }
+
+  &__trending-card {
+    display: flex;
+    flex-direction: column;
+    width: 140px;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+    transition: transform 0.15s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  &__trending-cover {
+    width: 140px;
+    height: 210px;
+    object-fit: cover;
+    border-radius: $radius-md;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+    &--placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+    }
+  }
+
+  &__trending-info {
+    margin-top: $spacing-sm;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__trending-title {
+    @include body-text;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: var(--text-color);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.3;
+  }
+
+  &__trending-author {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__trending-rating {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: $font-size-xs;
+    color: var(--highlight-color);
+    margin-top: 2px;
   }
 }
 

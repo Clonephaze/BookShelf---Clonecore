@@ -101,6 +101,7 @@ export default defineEventHandler(async (event) => {
   const totalPagesPerDay = extremeRows.reduce((sum, r) => sum + (r.pagesPerDay ?? 0), 0)
   const avgPagesPerDay = extremeRows.length > 0 ? Math.round((totalPagesPerDay / extremeRows.length) * 10) / 10 : null
 
+  setResponseHeader(event, 'Cache-Control', 'private, max-age=300')
   return {
     year,
     totalTracked: extremeRows.length,

@@ -31,6 +31,12 @@ export default defineEventHandler(async (event) => {
       publisher: books.publisher,
       openLibraryKey: books.openLibraryKey,
       googleBooksId: books.googleBooksId,
+      hardcoverSlug: books.hardcoverSlug,
+      hardcoverId: books.hardcoverId,
+      audioSeconds: books.audioSeconds,
+      hasAudiobook: books.hasAudiobook,
+      contentWarnings: books.contentWarnings,
+      moods: books.moods,
       rating: userBooks.rating,
       notes: userBooks.notes,
       currentPage: userBooks.currentPage,
@@ -63,5 +69,6 @@ export default defineEventHandler(async (event) => {
     .innerJoin(shelves, eq(userBookShelves.shelfId, shelves.id))
     .where(eq(userBookShelves.userBookId, userBookId))
 
+  setResponseHeader(event, 'Cache-Control', 'private, max-age=120')
   return { ...row, shelves: bookShelves }
 })

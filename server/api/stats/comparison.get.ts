@@ -62,6 +62,7 @@ export default defineEventHandler(async (event) => {
     return Math.round(((curr - prev) / prev) * 100)
   }
 
+  setResponseHeader(event, 'Cache-Control', 'private, max-age=300')
   return {
     year,
     previousYear: prevYear,

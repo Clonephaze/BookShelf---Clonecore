@@ -225,6 +225,14 @@
         <p class="book-detail__description">{{ book.description }}</p>
       </section>
 
+      <!-- Series -->
+      <BookSeriesPanel
+        v-if="book.hardcoverSlug"
+        :hardcover-slug="book.hardcoverSlug"
+        :current-book-title="book.title"
+        class="book-detail__series"
+      />
+
       <!-- Reading Progress (only on Currently Reading / custom shelves) -->
       <section v-if="showProgressControls" class="book-detail__section">
         <h3 class="book-detail__section-title">Reading Progress</h3>
@@ -518,6 +526,7 @@ interface BookDetail {
   updatedAt?: string | Date | null
   openLibraryKey?: string | null
   googleBooksId?: string | null
+  hardcoverSlug?: string | null
   shelves?: Array<{ shelfId: string; shelfName: string }>
 }
 

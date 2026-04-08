@@ -87,6 +87,7 @@ export default defineEventHandler(async (event) => {
     else if (recent < previous) trend = 'down'
   }
 
+  setResponseHeader(event, 'Cache-Control', 'private, max-age=300')
   return {
     year,
     totalBooks,

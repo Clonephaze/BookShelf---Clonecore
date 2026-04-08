@@ -22,6 +22,17 @@ export interface BookDetail {
   updatedAt?: string | Date | null
   openLibraryKey?: string | null
   googleBooksId?: string | null
+  hardcoverSlug?: string | null
+  hardcoverId?: number | null
+  audioSeconds?: number | null
+  hasAudiobook?: boolean | null
+  moods?: string[] | null
+  contentWarnings?: string[] | null
+  seriesName?: string | null
+  seriesPosition?: number | null
+  seriesSlug?: string | null
+  hardcoverRating?: number | null
+  hardcoverRatingsCount?: number | null
   shelves?: Array<{ shelfId: string; shelfName: string }>
 }
 
@@ -171,12 +182,58 @@ export function useBookDetail(userBookId: Ref<string> | ComputedRef<string>) {
         ? `/api/guest/book/${userBookId.value}`
         : `/api/books/${userBookId.value}`
       book.value = await $fetch<BookDetail>(url)
+
+      // Auto-enrich from Hardcover if the book has an ISBN but missing HC data
+      if (!isGuest.value && book.value?.isbn13 && (!book.value.hardcoverSlug || book.value.audioSeconds == null)) {
+        enrichFromHardcover()
+      }
     }
     catch {
       error.value = true
     }
     finally {
       loading.value = false
+    }
+  }
+
+  /** Background-enrich from Hardcover, merging new fields into the current book */
+  async function enrichFromHardcover() {
+    try {
+      const result = await $fetch<{
+        enriched: boolean
+        data?: {
+          hardcoverSlug?: string
+          hardcoverId?: number
+          audioSeconds?: number
+          hasAudiobook?: boolean
+          moods?: string[]
+          contentWarnings?: string[]
+          seriesName?: string
+          seriesPosition?: number
+          seriesSlug?: string
+          hardcoverRating?: number
+          hardcoverRatingsCount?: number
+          description?: string
+        }
+      }>(`/api/books/${userBookId.value}/enrich`, { method: 'POST' })
+
+      if (result.enriched && result.data && book.value) {
+        book.value.hardcoverSlug = result.data.hardcoverSlug ?? book.value.hardcoverSlug
+        book.value.hardcoverId = result.data.hardcoverId ?? book.value.hardcoverId
+        book.value.audioSeconds = result.data.audioSeconds ?? book.value.audioSeconds
+        book.value.hasAudiobook = result.data.hasAudiobook ?? book.value.hasAudiobook
+        book.value.moods = result.data.moods ?? book.value.moods
+        book.value.contentWarnings = result.data.contentWarnings ?? book.value.contentWarnings
+        book.value.seriesName = result.data.seriesName ?? book.value.seriesName
+        book.value.seriesPosition = result.data.seriesPosition ?? book.value.seriesPosition
+        book.value.seriesSlug = result.data.seriesSlug ?? book.value.seriesSlug
+        book.value.hardcoverRating = result.data.hardcoverRating ?? book.value.hardcoverRating
+        book.value.hardcoverRatingsCount = result.data.hardcoverRatingsCount ?? book.value.hardcoverRatingsCount
+        book.value.description = result.data.description ?? book.value.description
+      }
+    }
+    catch {
+      // Non-critical — silently fail
     }
   }
 

@@ -90,6 +90,7 @@ export default defineEventHandler(async (event) => {
     sparkline.push(found?.count ?? 0)
   }
 
+  setResponseHeader(event, 'Cache-Control', 'private, max-age=300')
   return {
     totalBooks: totals?.totalBooks ?? 0,
     totalPages: totals?.totalPages ?? 0,
