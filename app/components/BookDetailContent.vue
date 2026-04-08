@@ -29,25 +29,31 @@ const isOnWantToRead = computed(() => props.detail?.isOnWantToRead.value ?? fals
 const showCompletionPrompt = computed(() => props.detail?.showCompletionPrompt.value ?? false)
 const showStartReadingPrompt = computed(() => props.detail?.showStartReadingPrompt.value ?? false)
 const showTimePrompt = computed(() => props.detail?.showTimePrompt.value ?? false)
+// Extract mutable refs from the composable so writes don't go through props
+const _showShelfPicker = props.detail?.showShelfPicker
 const showShelfPicker = computed({
-  get: () => props.detail?.showShelfPicker.value ?? false,
-  set: (v: boolean) => { if (props.detail) props.detail.showShelfPicker.value = v },
+  get: () => _showShelfPicker?.value ?? false,
+  set: (v: boolean) => { if (_showShelfPicker) _showShelfPicker.value = v },
 })
+const _movingShelf = props.detail?.movingShelf
 const movingShelf = computed({
-  get: () => props.detail?.movingShelf.value ?? false,
-  set: (v: boolean) => { if (props.detail) props.detail.movingShelf.value = v },
+  get: () => _movingShelf?.value ?? false,
+  set: (v: boolean) => { if (_movingShelf) _movingShelf.value = v },
 })
+const _confirmingRemove = props.detail?.confirmingRemove
 const confirmingRemove = computed({
-  get: () => props.detail?.confirmingRemove.value ?? false,
-  set: (v: boolean) => { if (props.detail) props.detail.confirmingRemove.value = v },
+  get: () => _confirmingRemove?.value ?? false,
+  set: (v: boolean) => { if (_confirmingRemove) _confirmingRemove.value = v },
 })
+const _removing = props.detail?.removing
 const removing = computed({
-  get: () => props.detail?.removing.value ?? false,
-  set: (v: boolean) => { if (props.detail) props.detail.removing.value = v },
+  get: () => _removing?.value ?? false,
+  set: (v: boolean) => { if (_removing) _removing.value = v },
 })
+const _showCoverPicker = props.detail?.showCoverPicker
 const showCoverPicker = computed({
-  get: () => props.detail?.showCoverPicker.value ?? false,
-  set: (v: boolean) => { if (props.detail) props.detail.showCoverPicker.value = v },
+  get: () => _showCoverPicker?.value ?? false,
+  set: (v: boolean) => { if (_showCoverPicker) _showCoverPicker.value = v },
 })
 const shelvesStore = props.detail?.shelvesStore ?? { shelves: [] }
 
@@ -70,8 +76,9 @@ function toDateInput(date: string | Date | null | undefined) { return props.deta
 function formatDate(date: string | Date | null | undefined) { return props.detail?.formatDate(date) ?? '—' }
 
 // Writable refs need special handling in preview mode
-watch(() => props.detail?.hoverRating.value, (v) => { if (v !== undefined) hoverRating.value = v })
-watch(hoverRating, (v) => { if (props.detail) props.detail.hoverRating.value = v })
+const _hoverRating = props.detail?.hoverRating
+watch(() => _hoverRating?.value, (v) => { if (v !== undefined) hoverRating.value = v })
+watch(hoverRating, (v) => { if (_hoverRating) _hoverRating.value = v })
 
 async function handleRemove() {
   if (!props.detail) return
@@ -115,7 +122,7 @@ function formatAudioDuration(seconds: number): string {
             </button>
           </div>
           <CoverPicker
-            v-if="showCoverPicker"
+            v-if="showCoverPicker && userBookId"
             :user-book-id="userBookId"
             @updated="onCoverUpdated"
             @close="showCoverPicker = false"
