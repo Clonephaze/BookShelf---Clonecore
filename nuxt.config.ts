@@ -91,7 +91,7 @@ export default defineNuxtConfig({
       runtimeCaching: [
         {
           urlPattern: /^https:\/\/covers\.openlibrary\.org\/.*/i,
-          handler: 'CacheFirst',
+          handler: 'NetworkFirst',
           options: {
             cacheName: 'book-covers',
             expiration: {
@@ -99,11 +99,12 @@ export default defineNuxtConfig({
               maxAgeSeconds: 60 * 60 * 24 * 7,
             },
             cacheableResponse: { statuses: [0, 200] },
+            networkTimeoutSeconds: 5,
           },
         },
         {
           urlPattern: /^https:\/\/books\.google\.com\/books\/content.*/i,
-          handler: 'CacheFirst',
+          handler: 'NetworkFirst',
           options: {
             cacheName: 'google-covers',
             expiration: {
@@ -111,11 +112,12 @@ export default defineNuxtConfig({
               maxAgeSeconds: 60 * 60 * 24 * 7,
             },
             cacheableResponse: { statuses: [0, 200] },
+            networkTimeoutSeconds: 5,
           },
         },
         {
           urlPattern: /^https:\/\/production-img\.hardcover\.app\/.*/i,
-          handler: 'CacheFirst',
+          handler: 'NetworkFirst',
           options: {
             cacheName: 'hardcover-covers',
             expiration: {
@@ -123,6 +125,7 @@ export default defineNuxtConfig({
               maxAgeSeconds: 60 * 60 * 24 * 7,
             },
             cacheableResponse: { statuses: [0, 200] },
+            networkTimeoutSeconds: 5,
           },
         },
         {
